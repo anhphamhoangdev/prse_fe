@@ -16,8 +16,8 @@ export function Header(){
             <div className="mx-auto px-4 py-4 flex items-center justify-between">
                 {/*Logo*/}
                 <div className="flex flex-col items-start">
-                    <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600">EASY EDU</div>
-                    <span className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600">Study Smart, Not Hard!</span>
+                    <div className="text-xl sm:text-2xl md:text-2xl lg:text-2xl font-bold text-blue-600">EASY EDU</div>
+                    <span className="text-xs sm:text-sm md:text-sm lg:text-sm text-gray-600">Study Smart, Not Hard!</span>
                 </div>
                 {/*Search*/}
                 <div className="flex-1 max-w-xl mx-4">
