@@ -32,7 +32,7 @@ export function Carousel({carousel}: CarouselProps) {
     };
 
     return (
-        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[25rem]">
+        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[25rem] 2xl:h-[30rem]">
             <div
                 className="flex transition-transform duration-500 ease-in-out h-full"
                 style={{transform: `translateX(-${currentIndex * 100}%)`}}
