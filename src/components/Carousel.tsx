@@ -32,7 +32,7 @@ export function Carousel({carousel}: CarouselProps) {
     };
 
     return (
-        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6 h-[25rem]">
+        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[25rem]">
             <div
                 className="flex transition-transform duration-500 ease-in-out h-full"
                 style={{transform: `translateX(-${currentIndex * 100}%)`}}
@@ -52,25 +52,25 @@ export function Carousel({carousel}: CarouselProps) {
             </div>
 
             <button
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-black p-2 rounded-full transition-all duration-300"
+                className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-black p-1 sm:p-2 rounded-full transition-all duration-300"
                 onClick={() => changeSlide(-1)}
                 aria-label="Previous slide"
             >
-                <FaChevronLeft size={24}/>
+                <FaChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
             <button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-black p-2 rounded-full transition-all duration-300"
+                className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-black p-1 sm:p-2 rounded-full transition-all duration-300"
                 onClick={() => changeSlide(1)}
                 aria-label="Next slide"
             >
-                <FaChevronRight size={24}/>
+                <FaChevronRight  className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
 
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2">
                 {carousel.map((_, index) => (
                     <button
                         key={index}
-                        className={`w-3 h-3 rounded-full ${index === currentIndex ? "bg-white" : "bg-gray-400"}`}
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${index === currentIndex ? "bg-white" : "bg-gray-400"}`}
                         onClick={() => setCurrentIndex(index)}
                         aria-label={`Go to slide ${index + 1}`}
                     ></button>

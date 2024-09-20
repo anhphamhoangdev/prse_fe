@@ -5,8 +5,9 @@ import {Content} from "../components/Content";
 
 export function Home() {
 
+    // onContextMenu={event => event.preventDefault()}
     return (
-        <div onContextMenu={event => event.preventDefault()}>
+        <div >
             <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
                 <Header />
             </header>
