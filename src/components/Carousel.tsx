@@ -32,7 +32,8 @@ export function Carousel({carousel}: CarouselProps) {
     };
 
     return (
-        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6" style={{ aspectRatio: '1353 / 400' }}>
+        <div className="relative overflow-hidden rounded-lg shadow-lg mb-6 h-48 sm:h-auto md:h-auto lg:h-auto xl:h-auto"
+             style={{aspectRatio: '1353 / 400'}}>
             <div
                 className="flex transition-transform duration-500 ease-in-out h-full"
                 style={{transform: `translateX(-${currentIndex * 100}%)`}}
