@@ -1,5 +1,5 @@
 
-const BASE_URL = `http://${process.env.REACT_APP_BASE_IP}:8080/api`;
+const BASE_URL = `https://${process.env.REACT_APP_BASE_IP}:8443/api`;
 
 
 export async function request<T>(endpoint: string): Promise<T> {
