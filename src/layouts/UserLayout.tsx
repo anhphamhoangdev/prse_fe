@@ -17,11 +17,6 @@ export function SearchHeaderAndFooterLayout({ children }: UserLayoutProps) {
         <div className="w-full min-h-screen flex flex-col">
             <Header />
             <div className="flex-grow">
-                {!isHomePage && (
-                    <div className="container mx-auto px-4 py-2">
-                        <BackButton />
-                    </div>
-                )}
                 {children}
             </div>
             <Footer />
