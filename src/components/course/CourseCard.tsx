@@ -1,6 +1,7 @@
 import React from 'react';
 import "./style.css";
 import { Course } from "../../models/Course";
+import {formatCurrency} from "../../utils/formatCurrency";
 
 interface CourseCardProps {
     course: Course;
@@ -35,20 +36,21 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 </div>
                 <span className="ml-2">{course.averageRating.toFixed(1)}</span>
             </div>
-            <div className="text-xl font-bold mb-2 flex justify-between items-center">
+            <div className="font-bold mb-2 flex justify-between items-center">
                 <div>
                     {course.isDiscount ? (
                         <>
-                        <span className="line-through text-gray-500 mr-2">
-                            {course.originalPrice} đ
-                        </span>
+                            <span className="line-through text-gray-500 mr-1">
+                                {formatCurrency(course.originalPrice)}
+                            </span>
                             <span className="text-red-600 font-bold">
-                            {course.originalPrice} đ
-                        </span>
+                                {formatCurrency(course.discountPrice)}
+                            </span>
                         </>
                     ) : (
-                        <span>{course.originalPrice > 0 ? course.originalPrice + "VND" : "Free"}</span>
-                    )}
+                        <span className={course.originalPrice <= 0 ? "text-orange-600" : ""}>
+                            {formatCurrency(course.originalPrice)}
+                        </span>)}
                 </div>
 
                 <div className="flex space-x-2">

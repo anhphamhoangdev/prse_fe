@@ -2,7 +2,8 @@ export const ENDPOINTS = {
     HOME: {
         BANNERS: '/home/banners',
         CATEGORIES: '/home/categories',
-        FREE_COURSES: '/home/free-courses'
+        FREE_COURSES: '/home/free-courses',
+        DISCOUNT_COURSES: '/home/discount-courses'
     },
     // USER: {
     //     PROFILE: '/user/profile',

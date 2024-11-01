@@ -191,7 +191,7 @@ export const Header = () => {
                                 <polyline points="10 17 15 12 10 7" />
                                 <line x1="15" y1="12" x2="3" y2="12" />
                             </svg>
-                            Login
+                            Đăng nhập
                         </Link>
                         <Link
                             to="/signup"
@@ -203,7 +203,7 @@ export const Header = () => {
                                 <line x1="20" y1="8" x2="20" y2="14" />
                                 <line x1="23" y1="11" x2="17" y2="11" />
                             </svg>
-                            Sign Up
+                            Đăng ký
                         </Link>
                     </div>
                 )}

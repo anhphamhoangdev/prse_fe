@@ -9,10 +9,9 @@ import {CategoryList} from "../components/category/CategoryList";
 import {Category} from "../models/Category";
 import {getCategories} from "../services/categoryService";
 import {CourseHomeSection} from "../components/course/CourseHomeSection";
-import {getHomeFreeCourses} from "../services/courseService";
+import {getHomeDiscountCourse, getHomeFreeCourses} from "../services/courseService";
 
 
-const discountedCourses: Course[] = [];
 const vipCourses: Course[] = [];
 
 const courses: Course[] = [];
@@ -21,8 +20,13 @@ const courses: Course[] = [];
 const coursesPerPage = 8;
 
 export function Home() {
-    const [categories, setCategories] = useState<Category[]>([]);
+    // courses
     const [freeCourses, setFreeCourses] = useState<Course[]>([]);
+    const [discountedCourses, setDiscountedCourses] = useState<Course[]>([]);
+
+
+    //
+    const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string|null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -47,6 +51,26 @@ export function Home() {
         };
 
         fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        const fetchDiscountCourses = async () => {
+            console.log('[Home][fetchDiscountCourses] Starting to fetch discount courses...');
+
+            try {
+                const data = await getHomeDiscountCourse();
+                setDiscountedCourses(data);
+                console.log(`[Home][fetchDiscountCourses] Received ${data.length} discount courses`);
+            } catch (err) {
+                console.error('[Home][fetchDiscountCourses] Error in component while fetching discount courses:', err);
+                setError('Failed to load discount courses. Please try again later.');
+            } finally {
+                setLoading(false);
+                console.log('[Home][fetchDiscountCourses] Finished discount course fetching process');
+            }
+        };
+
+        fetchDiscountCourses();
     }, []);
 
     useEffect(() => {
@@ -139,11 +163,11 @@ export function Home() {
                                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                                 />
                             </svg>
-                            <span className="font-semibold">Home</span>
+                            <span className="font-semibold">Trang chủ</span>
                         </div>
                     </div>
 
-                    <h2 className="text-xl font-bold mb-4">Categories</h2>
+                    <h2 className="text-xl font-bold mb-4">Thể loại</h2>
                     {categories.map((category, index) => (
                         <CategoryList
                             key={category.id}
@@ -157,19 +181,30 @@ export function Home() {
                     {!selectedCategory && <BannerCarousel/>}
                     {!selectedCategory ? (
                         <>
-                            <CourseHomeSection
+                            {discountedCourses.length > 0 ? (
+                                <CourseHomeSection
                                 title="Khóa học đang được discount"
                                 courses={discountedCourses}
                                 showHotLabel={true}
-                            />
-                            <CourseHomeSection
-                                title="Khóa học VIP"
-                                courses={vipCourses}
-                            />
-                            <CourseHomeSection
-                                title="Khóa học Free"
-                                courses={freeCourses}
-                            />
+                                />
+                                ) : null
+                            }
+
+                            {vipCourses.length > 0 ? (
+                                <CourseHomeSection
+                                    title="Khóa học VIP"
+                                    courses={vipCourses}
+                                />
+                                ): null
+                            }
+
+                            {freeCourses.length ? (
+                                <CourseHomeSection
+                                    title="Khóa học Free"
+                                    courses={freeCourses}
+                                />
+                                ) : null
+                            }
                         </>
                     ) : (
                         // <CourseHomeSection
