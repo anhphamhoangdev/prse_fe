@@ -34,7 +34,8 @@ export async function getHomeFreeCourses(): Promise<Course[]> {
                 course.isHot,
                 course.isDiscount,
                 course.createdAt,
-                course.updatedAt
+                course.updatedAt,
+                course.originalPrice
             ));
             console.log(`[CourseService] Successfully fetched ${freeCourses.length} free courses`);
             return freeCourses;
@@ -84,6 +85,9 @@ export async function getHomeDiscountCourse(): Promise<Course[]> {
         return [];
     }
 }
+
+
+
 
 
 

@@ -7,7 +7,7 @@ export class Course {
     imageUrl: string;
     language: string;
     originalPrice: number;
-    discountPrice?: number;
+    discountPrice: number;
     averageRating: number;
     totalStudents: number;
     totalViews: number;
@@ -35,7 +35,7 @@ export class Course {
         isDiscount: boolean,
         createdAt: string,
         updatedAt: string,
-        discountPrice?: number // Add optional parameter
+        discountPrice: number // Add optional parameter
     ) {
         this.id = id;
         this.instructorId = instructorId;

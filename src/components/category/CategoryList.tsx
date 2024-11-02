@@ -3,7 +3,7 @@ import {Category} from "../../models/Category";
 
 interface CategoryListProps {
     category: Category;
-    onSelectSubCategory: (subCategory: string) => void;
+    onSelectSubCategory: (subCategoryId: number, subCategoryName: string) => void;
     selectedCategory: string | null;
 }
 
@@ -27,7 +27,7 @@ export const CategoryList: React.FC<CategoryListProps> = (props) => {
                     {category.subCategories.map((subCategory) => (
                         <li key={subCategory.id} className="py-1">
                             <button
-                                onClick={() => onSelectSubCategory(subCategory.name)}
+                                onClick={() => onSelectSubCategory(subCategory.id ,subCategory.name)}
                                 className={`hover:text-blue-500 ${
                                     selectedCategory === subCategory.name ? 'text-blue-600 font-bold' : ''
                                 }`}

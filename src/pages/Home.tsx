@@ -1,120 +1,58 @@
-import React, {useEffect} from "react";
-import {useState} from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Course } from "../models/Course";
+import { BannerCarousel } from "../components/banner/BannerCarousel";
+import { SearchHeaderAndFooterLayout } from "../layouts/UserLayout";
+import { CourseHomeSection } from "../components/course/CourseHomeSection";
+import { getHomeDiscountCourse, getHomeFreeCourses } from "../services/courseService";
+import { MainLayout } from "../layouts/MainLayout";
+import {searchCourses} from "../services/searchService";
+import {CourseResult} from "../types/course";
 import {Pagination} from "../components/common/Pagination";
-import {Course} from "../models/Course";
-import {CourseCard} from "../components/course/CourseCard";
-import {BannerCarousel} from "../components/banner/BannerCarousel";
-import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
-import {CategoryList} from "../components/category/CategoryList";
-import {Category} from "../models/Category";
-import {getCategories} from "../services/categoryService";
-import {CourseHomeSection} from "../components/course/CourseHomeSection";
-import {getHomeDiscountCourse, getHomeFreeCourses} from "../services/courseService";
-
-
-const vipCourses: Course[] = [];
-
-const courses: Course[] = [];
-
-
-const coursesPerPage = 8;
 
 export function Home() {
-    // courses
+
     const [freeCourses, setFreeCourses] = useState<Course[]>([]);
     const [discountedCourses, setDiscountedCourses] = useState<Course[]>([]);
-
-
-    //
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string|null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1); // Đổi thành 1 vì Pagination component bắt đầu từ 1
 
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            console.log('[Home][fetchCategories] Starting to fetch categories...');
-
-            try {
-                setLoading(true);
-                const data = await getCategories();
-                setCategories(data);
-                console.log(`[Home][fetchCategories] Received ${data.length} categories`);
-            } catch (err) {
-                console.error('[Home][fetchCategories] Error in component while fetching categories:', err);
-            } finally {
-                setLoading(false);
-                console.log('[Home][fetchCategories] Finished category fetching process');
-            }
-        };
-
-        fetchCategories();
-    }, []);
-
+    // Fetch discount courses
     useEffect(() => {
         const fetchDiscountCourses = async () => {
-            console.log('[Home][fetchDiscountCourses] Starting to fetch discount courses...');
-
             try {
                 const data = await getHomeDiscountCourse();
                 setDiscountedCourses(data);
-                console.log(`[Home][fetchDiscountCourses] Received ${data.length} discount courses`);
             } catch (err) {
-                console.error('[Home][fetchDiscountCourses] Error in component while fetching discount courses:', err);
+                console.error('Error fetching discount courses:', err);
                 setError('Failed to load discount courses. Please try again later.');
             } finally {
                 setLoading(false);
-                console.log('[Home][fetchDiscountCourses] Finished discount course fetching process');
             }
         };
-
         fetchDiscountCourses();
     }, []);
 
+    // Fetch free courses
     useEffect(() => {
         const fetchFreeCourses = async () => {
-            console.log('[Home][fetchFreeCourses] Starting to fetch free courses...');
 
             try {
                 const data = await getHomeFreeCourses();
                 setFreeCourses(data);
-                console.log(`[Home][fetchFreeCourses] Received ${data.length} free courses`);
             } catch (err) {
-                console.error('[Home][fetchFreeCourses] Error in component while fetching free courses:', err);
+                console.error('Error fetching free courses:', err);
                 setError('Failed to load free courses. Please try again later.');
             } finally {
                 setLoading(false);
-                console.log('[Home][fetchFreeCourses] Finished free course fetching process');
             }
         };
 
         fetchFreeCourses();
     }, []);
 
-    // const filteredCourses = selectedCategory
-    //     ? courses.filter((course) => course.category === selectedCategory || selectedCategory === "All")
-    //     : courses;
-
-    // const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-    // const displayedCourses = filteredCourses.slice(
-    //     (currentPage - 1) * coursesPerPage,
-    //     currentPage * coursesPerPage
-    // );
-
-    const handleSelectSubCategory = (subCategory: string) => {
-        setSelectedCategory(subCategory === "All" ? null : subCategory);
-        setCurrentPage(1);
-    };
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
-
-    const handleHomeClick = () => {
-        setSelectedCategory(null);
-        setCurrentPage(1);
-    };
 
     if (loading) {
         return (
@@ -137,88 +75,27 @@ export function Home() {
     }
 
     return (
-        <SearchHeaderAndFooterLayout>
-            <main className="flex">
-                <aside className="w-1/5 p-4">
-                    {/* Thay đổi heading Home thành button */}
-                    <div
-                        onClick={handleHomeClick}
-                        className={`cursor-pointer mb-6 p-3 rounded-lg transition-all duration-200 
-                            ${selectedCategory === null
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'hover:bg-gray-100'
-                        }`}
-                    >
-                        <div className="flex items-center gap-2">
-                            <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                                />
-                            </svg>
-                            <span className="font-semibold">Trang chủ</span>
-                        </div>
-                    </div>
+        <MainLayout>
+            <BannerCarousel />
 
-                    <h2 className="text-xl font-bold mb-4">Thể loại</h2>
-                    {categories.map((category, index) => (
-                        <CategoryList
-                            key={category.id}
-                            category={category}
-                            onSelectSubCategory={handleSelectSubCategory}
-                            selectedCategory={selectedCategory}
+                <>
+                    {discountedCourses.length > 0 && (
+                        <CourseHomeSection
+                            title="Khóa học đang được discount"
+                            courses={discountedCourses}
+                            showHotLabel={true}
+                            displayType='home'
                         />
-                    ))}
-                </aside>
-                <div className="w-4/5 p-4">
-                    {!selectedCategory && <BannerCarousel/>}
-                    {!selectedCategory ? (
-                        <>
-                            {discountedCourses.length > 0 ? (
-                                <CourseHomeSection
-                                title="Khóa học đang được discount"
-                                courses={discountedCourses}
-                                showHotLabel={true}
-                                />
-                                ) : null
-                            }
-
-                            {vipCourses.length > 0 ? (
-                                <CourseHomeSection
-                                    title="Khóa học VIP"
-                                    courses={vipCourses}
-                                />
-                                ): null
-                            }
-
-                            {freeCourses.length ? (
-                                <CourseHomeSection
-                                    title="Khóa học Free"
-                                    courses={freeCourses}
-                                />
-                                ) : null
-                            }
-                        </>
-                    ) : (
-                        // <CourseHomeSection
-                        //     title={`Khóa học: ${selectedCategory}`}
-                        //     courses={courses.filter(
-                        //         course => course.category === selectedCategory ||
-                        //             selectedCategory === "All"
-                        //     )}
-                        //     initialDisplayCount={8}
-                        // />
-                        <></>
                     )}
-                </div>
-            </main>
-        </SearchHeaderAndFooterLayout>
+                    {freeCourses.length > 0 && (
+                        <CourseHomeSection
+                            title="Khóa học Free"
+                            courses={freeCourses}
+                            displayType='home'
+                        />
+                    )}
+                </>
+
+        </MainLayout>
     );
 }
