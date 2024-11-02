@@ -126,44 +126,74 @@ export function Category() {
         });
     };
 
+    const handleGoHome = () => {
+        navigate('/')
+        return;
+    }
+
     return (
         <MainLayout>
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Filter Section */}
-                <div className="sticky top-0 z-10 bg-white mb-6">
-                    <div className="py-4">
-                        <FilterSection
-                            filters={filters}
-                            onFilterChange={handleFilterChange}
-                            onClearFilters={handleClearFilters}
-                            totalCourses={courseData.totalSize}
-                        />
-                    </div>
-                </div>
-
-                {/* Course List Section */}
-                <div className="lg:w-3/4">
-                    {/*{loading ? (*/}
-                    {/*    <LoadingSpinner />*/}
-                    {/*) : error ? (*/}
-                    {/*    <ErrorMessage message={error} />*/}
-                    {/*) : */}
-
-                    <>
-                        <CourseHomeSection
-                            title={`Danh sách khóa học ${filters.q ? `- Tìm kiếm "${filters.q}"` : ''}`}
-                            courses={courseData.courses}
-                            displayType='category'
-                        />
-                        {courseData.totalPages > 1 && (
-                            <Pagination
-                                currentPage={filters.page || 1}
-                                totalPages={courseData.totalPages}
-                                onPageChange={handlePageChange}
+            <div className="container mx-auto px-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Filter Section - Always show even when loading/error */}
+                    <div className="lg:w-1/4 order-1 lg:order-1">
+                        <div className="sticky top-4 z-10">
+                            <FilterSection
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onClearFilters={handleClearFilters}
+                                totalCourses={courseData.totalSize}
                             />
-                        )}
-                    </>
+                        </div>
+                    </div>
 
+                    {/* Course List Section with Loading/Error States */}
+                    <div className="w-full lg:w-3/4 order-2 lg:order-2">
+                        {loading ? (
+                            <div className="flex justify-center items-center min-h-[400px]">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+                                <div className="text-red-500 text-xl font-medium text-center">
+                                    {error}
+                                </div>
+                                <button
+                                    onClick={handleGoHome}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Về lại trang chủ
+                                </button>
+                            </div>
+                        ) : courseData.courses.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+                                <div className="text-gray-500 text-xl font-medium text-center">
+                                    Không tìm thấy khóa học nào phù hợp
+                                </div>
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Xóa bộ lọc
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <CourseHomeSection
+                                    title={`Danh sách khóa học ${filters.q ? `- Tìm kiếm "${filters.q}"` : ''}`}
+                                    courses={courseData.courses}
+                                    displayType='category'
+                                />
+                                {courseData.totalPages > 1 && (
+                                    <Pagination
+                                        currentPage={filters.page || 1}
+                                        totalPages={courseData.totalPages}
+                                        onPageChange={handlePageChange}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </MainLayout>

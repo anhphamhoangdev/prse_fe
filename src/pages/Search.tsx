@@ -106,21 +106,22 @@ export function Search() {
 
     return (
         <MainLayout>
-            <div className="flex flex-col lg:flex-row gap-6">
-                 {/* Filter Section */}
-                <div className="sticky top-0 z-10 bg-white mb-6">
-                    <div className="py-4">
-                    <FilterSection
+            <div className="container mx-auto px-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Filter Section */}
+                    <div className="lg:w-1/4 order-1 lg:order-1">
+                        <div className="sticky top-4 z-10">
+                            <FilterSection
                                 filters={filters}
                                 onFilterChange={handleFilterChange}
                                 onClearFilters={handleClearFilters}
                                 totalCourses={searchResults.totalSize}
                             />
                         </div>
-                </div>
+                    </div>
 
                     {/* Course List Section */}
-                    <div className="lg:w-3/4">
+                    <div className="w-full lg:w-3/4 order-2 lg:order-2">
                         <CourseHomeSection
                             title={`Danh sách khóa học ${filters.q ? `- Tìm kiếm "${filters.q}"` : ''}`}
                             courses={searchResults.courses}
@@ -135,8 +136,8 @@ export function Search() {
                             />
                         )}
                     </div>
+                </div>
             </div>
         </MainLayout>
-
     );
 }
