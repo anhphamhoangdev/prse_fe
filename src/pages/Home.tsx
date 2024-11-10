@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Course } from "../models/Course";
 import { BannerCarousel } from "../components/banner/BannerCarousel";
 import { SearchHeaderAndFooterLayout } from "../layouts/UserLayout";
 import { CourseHomeSection } from "../components/course/CourseHomeSection";
 import { getHomeDiscountCourse, getHomeFreeCourses } from "../services/courseService";
 import { MainLayout } from "../layouts/MainLayout";
-import {searchCourses} from "../services/searchService";
-import {CourseResult} from "../types/course";
-import {Pagination} from "../components/common/Pagination";
+
 
 export function Home() {
 
@@ -16,8 +13,6 @@ export function Home() {
     const [discountedCourses, setDiscountedCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1); // Đổi thành 1 vì Pagination component bắt đầu từ 1
-
 
     // Fetch discount courses
     useEffect(() => {
@@ -77,24 +72,23 @@ export function Home() {
     return (
         <MainLayout>
             <BannerCarousel />
-
-                <>
-                    {discountedCourses.length > 0 && (
-                        <CourseHomeSection
-                            title="Khóa học đang được discount"
-                            courses={discountedCourses}
-                            showHotLabel={true}
-                            displayType='home'
-                        />
-                    )}
-                    {freeCourses.length > 0 && (
-                        <CourseHomeSection
-                            title="Khóa học Free"
-                            courses={freeCourses}
-                            displayType='home'
-                        />
-                    )}
-                </>
+            <>
+                {discountedCourses.length > 0 && (
+                    <CourseHomeSection
+                        title="Khóa học đang được discount"
+                        courses={discountedCourses}
+                        showHotLabel={true}
+                        displayType='home'
+                    />
+                )}
+                {freeCourses.length > 0 && (
+                    <CourseHomeSection
+                        title="Khóa học Free"
+                        courses={freeCourses}
+                        displayType='home'
+                    />
+                )}
+            </>
 
         </MainLayout>
     );

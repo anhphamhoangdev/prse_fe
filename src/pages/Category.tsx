@@ -55,6 +55,35 @@ export function Category() {
         setSearchParams(params);
     };
 
+    // Xử lý thay đổi page
+    const handlePageChange = (page: number) => {
+        updateFilters({ page });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Xử lý thay đổi các filter khác
+    const handleFilterChange = (filterChanges: Partial<CourseFilters>) => {
+        // Reset về page 1 khi thay đổi filter
+        updateFilters({ ...filterChanges, page: 1 });
+    };
+
+    // Xử lý clear tất cả filter
+    const handleClearFilters = () => {
+        updateFilters({
+            q: '',
+            price: 'all',
+            rating: undefined,
+            level: 'all',
+            sortBy: 'newest',
+            page: 1
+        });
+    };
+
+    const handleGoHome = () => {
+        navigate('/')
+        return;
+    }
+
     // Fetch courses với filters
     useEffect(() => {
         const fetchCourses = async () => {
@@ -101,35 +130,6 @@ export function Category() {
             fetchCourses();
         }
     }, [categoryId, searchParams]);
-
-    // Xử lý thay đổi page
-    const handlePageChange = (page: number) => {
-        updateFilters({ page });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Xử lý thay đổi các filter khác
-    const handleFilterChange = (filterChanges: Partial<CourseFilters>) => {
-        // Reset về page 1 khi thay đổi filter
-        updateFilters({ ...filterChanges, page: 1 });
-    };
-
-    // Xử lý clear tất cả filter
-    const handleClearFilters = () => {
-        updateFilters({
-            q: '',
-            price: 'all',
-            rating: undefined,
-            level: 'all',
-            sortBy: 'newest',
-            page: 1
-        });
-    };
-
-    const handleGoHome = () => {
-        navigate('/')
-        return;
-    }
 
     return (
         <MainLayout>

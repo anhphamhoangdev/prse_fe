@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Category} from "../../models/Category";
 
 interface CategoryListProps {
@@ -12,6 +12,17 @@ export const CategoryList: React.FC<CategoryListProps> = (props) => {
     const {category, onSelectSubCategory, selectedCategory} = props;
 
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (selectedCategory) {
+            const hasSelectedSubCategory = category.subCategories.some(
+                subCategory => subCategory.name === selectedCategory
+            );
+            if (hasSelectedSubCategory) {
+                setIsOpen(true);
+            }
+        }
+    }, [selectedCategory, category.subCategories]);
 
     return (
         <div className="mb-2">

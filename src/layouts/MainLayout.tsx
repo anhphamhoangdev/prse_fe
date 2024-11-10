@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import {useNavigate, useLocation, useParams} from 'react-router-dom';
 import { CategoryList } from '../components/category/CategoryList';
 import { Category } from '../models/Category';
 import { getCategories } from '../services/categoryService';
@@ -16,12 +16,25 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const { categoryId } = useParams();
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
                 const data = await getCategories();
                 setCategories(data);
+                if (categoryId) {
+                    for (const category of data) {
+                        const subCategory = category.subCategories.find(
+                            sub => sub.id === Number(categoryId)
+                        );
+                        if (subCategory) {
+                            setSelectedCategory(subCategory.name);
+                            break;
+                        }
+                    }
+                }
             } catch (err) {
                 console.error('Error fetching categories:', err);
             } finally {
