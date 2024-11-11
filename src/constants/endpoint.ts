@@ -11,6 +11,13 @@ export const ENDPOINTS = {
 
     SEARCH: {
         SEARCH_BY_FILTER: '/search/filters'
+    },
+
+    STUDENT: {
+        CHECK_USERNAME: '/student/existsByUsername',
+        CHECK_EMAIL: '/student/existsByEmail',
+        CHECK_PHONENUMBER: '/student/existsByPhoneNumber',
+        REGISTER: '/student/register'
     }
 
 

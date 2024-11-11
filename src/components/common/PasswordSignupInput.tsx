@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import React from "react";
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 
@@ -32,13 +32,21 @@ const passwordRequirements: PasswordRequirement[] = [
 
 // Component cho trường nhập mật khẩu chính
 export const MainPasswordInput = ({
-                               password,
-                               setPassword,
+                                      password,
+                                      setPassword,
+                                      setValidPassword
                            }: {
     password: string;
     setPassword: (value: string) => void;
+    setValidPassword: (valid: boolean) => void;
 }) => {
+
     const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        const isValid = passwordRequirements.every(req => req.validator(password));
+        setValidPassword(isValid);
+    }, [password, setValidPassword]);
 
     return (
         <div>
@@ -98,15 +106,22 @@ export const MainPasswordInput = ({
 
 // Component cho trường xác nhận mật khẩu
 export const ConfirmPasswordInput = ({
-                                  confirmPassword,
-                                  setConfirmPassword,
-                                  originalPassword,
-                              }: {
+                                         confirmPassword,
+                                         setConfirmPassword,
+                                         originalPassword,
+                                         setValidConfirmPassword,
+                                     }: {
     confirmPassword: string;
     setConfirmPassword: (value: string) => void;
     originalPassword: string;
+    setValidConfirmPassword: (valid: boolean) => void;
 }) => {
     const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        setValidConfirmPassword(confirmPassword === originalPassword);
+    }, [confirmPassword, originalPassword, setValidConfirmPassword]);
+
 
     return (
         <div>

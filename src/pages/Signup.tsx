@@ -1,8 +1,9 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import React from "react";
 import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
 import {Link} from "react-router-dom";
 import {ConfirmPasswordInput, MainPasswordInput} from "../components/common/PasswordSignupInput";
+import {checkEmailExists, checkUsernameExists, register} from "../services/studentService";
 
 export function SignupPage() {
     const [username, setUsername] = useState('');
@@ -13,49 +14,139 @@ export function SignupPage() {
     const [gender, setGender] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
+    const [notification, setNotification] = useState("")
+    const [errorNotification, setErrorNotification] = useState("")
+    const [isLoading, setIsLoading] = useState(false);
     const [agreeToTerms, setAgreeToTerms] = useState(false);
+
+    // is valid
+    const [isValidPassword, setValidPassword] = useState<boolean>(false);
+    const [isValidConfirmPassword, setValidConfirmPassword] = useState<boolean>(false);
+    const [isValidUsername, setValidUsername] = useState<boolean>(false);
+    const [isValidEmail, setValidEmail] = useState<boolean>(false);
 
 
     // error variable
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
-    const [phoneError, setPhoneError] = useState('');
+    // const [phoneError, setPhoneError] = useState('');
 
     // check
     const checkUsername = async (username: string) => {
         try {
-            // await checkUsernameExists(username);
-            setUsernameError('');
+            let usernameExists = await checkUsernameExists(username);
+
+            setValidUsername(!usernameExists);
+
+
+            if(usernameExists)
+            {
+                setUsernameError('Tên đăng nhập đã tồn tại');
+            }
+            else setUsernameError('');
+
+
         } catch (err) {
-            setUsernameError('Tên đăng nhập đã tồn tại');
+            setUsernameError('Đã có lỗi xảy ra !');
         }
     };
 
     const checkEmail = async (email: string) => {
         try {
-            // await checkEmailExists(email);
-            setEmailError('');
+            let emailExists = await checkEmailExists(email);
+
+            // neu exist = true => valid = false
+            setValidEmail(!emailExists)
+
+            if(emailExists)
+            {
+                setEmailError('Email đã tồn tại');
+            }else
+            {
+                setEmailError('');
+
+            }
         } catch (err) {
             setEmailError('Email đã tồn tại');
         }
     };
 
-    const checkPhone = async (phone: string) => {
-        try {
-            // await checkPhoneExists(phone);
-            setPhoneError('Số điện thoại đã tồn tại');
-        } catch (err) {
-            setPhoneError('Số điện thoại đã tồn tại');
-        }
-    };
+    // const checkPhone = async (phone: string) => {
+    //     try {
+    //         // await checkPhoneExists(phone);
+    //         setPhoneError('Số điện thoại đã tồn tại');
+    //     } catch (err) {
+    //         setPhoneError('Số điện thoại đã tồn tại');
+    //     }
+    // };
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Implement signup logic here
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setNotification("")
+        setErrorNotification("")
+        setUsernameError("")
+        setEmailError("")
+
+        // check again
+        let emailExists = await checkEmailExists(email);
+        let usernameExists = await checkUsernameExists(username);
+
+        if(emailExists || usernameExists)
+        {
+            setErrorNotification("Email hoặc username đã tồn tại !")
+            return;
+        }
+
+        if(isValidPassword && isValidUsername && isValidConfirmPassword && isValidEmail)
+        {
+            setIsLoading(true);
+
+            let isRegisterSuccess: boolean = await register({
+                                                                username,
+                                                                email,
+                                                                password,
+                                                                confirmPassword,
+                                                                fullName,
+                                                                gender,
+                                                                phoneNumber,
+                                                                dateOfBirth,
+                                                                agreeToTerms
+                                                    });
+
+            setIsLoading(false);
+
+            if(isRegisterSuccess)
+            {
+                setUsername("")
+                setEmail("")
+                setPassword("")
+                setConfirmPassword("")
+                setFullName("")
+                setGender("")
+                setPhoneNumber("")
+                setDateOfBirth("")
+                setNotification("Register successfully, please check your email to active your account !");
+            }
+            else{
+                setNotification("Error ! Please try again.")
+            }
+        }else alert("Vui lòng điền đúng theo yêu cầu !")
     };
+
 
     return (
         <SearchHeaderAndFooterLayout>
+            {isLoading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+                    <div className="relative w-20 h-20">
+                        <div
+                            className="border-gray-300 h-20 w-20 animate-spin rounded-full border-8 border-t-blue-600"/>
+                    </div>
+                </div>
+            )}
             <div className="flex-1 flex flex-col justify-center py-8 sm:px-6 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
                     <h2 className="text-center text-3xl font-bold text-gray-900">
@@ -69,8 +160,20 @@ export function SignupPage() {
                     </p>
                 </div>
 
+
                 <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-2xl">
+                    {errorNotification ? (
+                        <div className="flex items-center justify-center border border-red-600 h-10 ">
+                            <div className="text-red-600 text-center">{errorNotification}</div>
+                        </div>
+                    ): null}
+                    {notification ? (
+                        <div className="flex items-center justify-center border border-green-600 h-10 ">
+                            <div className="text-green-600 text-center">{notification}</div>
+                        </div>
+                    ): null}
                     <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
+
                         <form className="space-y-5" onSubmit={handleSignup}>
                             {/* Grid layout for first row */}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -112,10 +215,18 @@ export function SignupPage() {
                                             autoComplete="email"
                                             required
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value)
+                                                if (e.target.value) checkEmail(e.target.value);
+                                            }}
                                             placeholder="example@gmail.com"
-                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            className={`appearance-none block w-full px-3 py-2 border ${
+                                                emailError ? 'border-red-500' : 'border-gray-300'
+                                            } rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                                         />
+                                        {emailError && (
+                                            <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -204,12 +315,14 @@ export function SignupPage() {
                             <MainPasswordInput
                                 password={password}
                                 setPassword={setPassword}
+                                setValidPassword={setValidPassword}
                             />
 
                             <ConfirmPasswordInput
                                 confirmPassword={confirmPassword}
                                 setConfirmPassword={setConfirmPassword}
                                 originalPassword={password}
+                                setValidConfirmPassword={setValidConfirmPassword}
                             />
 
                             {/* Terms and conditions */}
@@ -249,6 +362,7 @@ export function SignupPage() {
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
