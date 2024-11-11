@@ -95,16 +95,38 @@ export async function searchCourses(
 export async function searchCoursesBySubCategory(
     subCategoryId: string | number,
     searchQuery: string,
-    page: number = 0
+    page: number = 0,
+    filters?: {
+        price?: string;
+        rating?: number;
+        level?: string;
+        sortBy?: string;
+    }
 ): Promise<CourseResult> {
-    console.log(`[SearchService] Searching courses in subcategory ${subCategoryId} with query "${searchQuery}", page ${page}...`);
+    console.log('Searching with filters:', { subCategoryId, searchQuery, page, filters });
 
     try {
         // Xây dựng query params
-        const queryParams = new URLSearchParams({
-            q: searchQuery,
-            page: page.toString()
-        });
+        const queryParams = new URLSearchParams();
+        if (searchQuery) {
+            queryParams.set('q', searchQuery);
+        }
+        queryParams.set('page', page.toString());
+
+        if (filters) {
+            if (filters.price && filters.price !== 'all') {
+                queryParams.append('price', filters.price);
+            }
+            if (filters.rating) {
+                queryParams.append('rating', filters.rating.toString());
+            }
+            if (filters.level && filters.level !== 'all') {
+                queryParams.append('level', filters.level);
+            }
+            if (filters.sortBy && filters.sortBy !== 'newest') {
+                queryParams.append('sort', filters.sortBy);
+            }
+        }
 
         const response = await request<CourseResponse>(
             ENDPOINTS.CATEGORY.BY_SUBCATEGORY+`/${subCategoryId}/filters?${queryParams}`

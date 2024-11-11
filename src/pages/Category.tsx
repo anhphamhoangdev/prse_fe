@@ -84,6 +84,16 @@ export function Category() {
         return;
     }
 
+    const hasActiveFilters = (): boolean => {
+        return (
+            filters.q !== '' ||
+            filters.price !== 'all' ||
+            filters.rating !== undefined ||
+            filters.level !== 'all' ||
+            filters.sortBy !== 'newest'
+        );
+    };
+
     // Fetch courses với filters
     useEffect(() => {
         const fetchCourses = async () => {
@@ -98,12 +108,18 @@ export function Category() {
                 const apiPage = currentPage > 0 ? currentPage - 1 : 0;
 
                 let result;
-                if (searchQuery) {
+                if (hasActiveFilters()) {
                     // Nếu có search query, gọi API search
                     result = await searchCoursesBySubCategory(
                         categoryId!,
-                        searchQuery,
-                        apiPage
+                        filters.q || '',
+                        apiPage,
+                        {
+                            price: filters.price,
+                            rating: filters.rating,
+                            level: filters.level,
+                            sortBy: filters.sortBy
+                        }
                     );
                 } else {
                     // Nếu không có search query, gọi API get courses bình thường
