@@ -135,7 +135,7 @@ export const Header = () => {
     return (
         <header className="flex justify-between items-center py-3 px-4 bg-white shadow-sm">
             <Link to="/" className="text-4xl font-bold text-blue-600">
-                Easy<span className="text-black">Edu.vn</span>
+                Easy<span className="text-black">Edu</span>
             </Link>
 
             <div className="flex-1 max-w-xl mx-4">
