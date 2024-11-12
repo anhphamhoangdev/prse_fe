@@ -10,6 +10,12 @@ interface RegisterResponse {
     };
 }
 
+interface ActivationResponse {
+    success: boolean;
+    error_message: any;
+    code: number;
+}
+
 export async function checkUsernameExists(username: string): Promise<boolean> {
     console.log(`[StudentService] Checking if username ${username} exists`);
     try {
@@ -100,5 +106,41 @@ export async function register({
     } catch (error) {
         console.error("[StudentService] Error :", error);
         return false;
+    }
+}
+
+export async function activateStudentAccount(
+    {email, activateCode}
+        : {email: string | undefined , activateCode: string | undefined}
+): Promise<ActivationResponse> {
+    console.log(`[StudentService] Activate account for email : ${email}`);
+    try {
+        const endpoint = ENDPOINTS.STUDENT.ACTIVATE_ACCOUNT + `?email=${email}&activateCode=${activateCode}`
+
+        const response = await request<RegisterResponse>(
+            endpoint,
+        );
+
+        if (response.code === 1) {
+            console.log(`[StudentService] Activate email ${email} successfully`);
+            return {
+                success: true,
+                code: response.code,
+                error_message: undefined
+            };
+        }
+        console.warn("[StudentService][activateStudentAccount] Received unexpected response code:", response);
+        return {
+            success: false,
+            code: response.code,
+            error_message: response.error_message || "Activation failed. Please try again."
+        };
+    } catch (error) {
+        console.error("[StudentService][activateStudentAccount] Error :", error);
+        return {
+            success: false,
+            code: 0,
+            error_message: error instanceof Error ? error.message : "An unexpected error occurred"
+        };
     }
 }

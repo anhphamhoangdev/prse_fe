@@ -13,7 +13,7 @@ export const Header = () => {
         return searchParams.get('q') || '';
     });
 
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [user, setUser] = useState(null);
     const [cartCount, setCartCount] = useState(0);
@@ -53,9 +53,10 @@ export const Header = () => {
     };
 
     const checkAuthStatus = () => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem("token");
         if (token) {
-            fetchUserInfo(token);
+            // fetchUserInfo(token);
+            setIsLoggedIn(true);
         } else {
             setIsLoggedIn(false);
             setUser(null);
@@ -119,6 +120,7 @@ export const Header = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setIsLoggedIn(false);
         setUser(null);
         setCartCount(0);

@@ -1,16 +1,69 @@
 import {useState} from "react";
 import React from "react";
 import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {requestPost} from "../utils/request";
+import {ENDPOINTS} from "../constants/endpoint";
+
+interface JwtData {
+    token: string;
+}
+
+interface LoginResponse
+{
+    error_message: string // Có thể là string hoặc object rỗng
+    code: number;  // 1 là success, 0 là error
+    data: {
+        jwt? : JwtData
+    };
+
+}
 
 export function LoginPage() {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("")
+
+    const navigate = useNavigate(); // Khởi tạo useNavigate
+
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Implement login logic here
+
+        setError("")
+
+        const loginRequest = {
+            username,
+            password,
+            rememberMe
+        }
+
+        if(username && password)
+        {
+            setLoading(true);
+            const response = await requestPost<LoginResponse>(ENDPOINTS.STUDENT.LOGIN, loginRequest);
+            if(response.code === 1)
+            {
+                if(rememberMe) {
+                    sessionStorage.removeItem("token");
+                    localStorage.setItem("token", response.data.jwt?.token ? response.data.jwt?.token : "");
+                }
+                else {
+                    localStorage.removeItem("token");
+                    sessionStorage.setItem("token", response.data.jwt?.token ? response.data.jwt?.token : "");
+                }
+
+                navigate("/")
+            }
+            else
+            {
+                setError(response.error_message);
+            }
+            setLoading(false);
+        }
     };
 
     return (
@@ -30,21 +83,26 @@ export function LoginPage() {
 
                 <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
+
+                        {error && (
+                            <div className="mb-4 p-4 text-red-700 bg-red-100 border border-red-400 rounded-lg">
+                                {error}
+                            </div>
+                        )}
                         <form className="space-y-5" onSubmit={handleLogin}>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                    Username
+                                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                                    Tên đăng nhập
                                 </label>
                                 <div className="mt-1">
                                     <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
+                                        id="username"
+                                        name="username"
+                                        type="text"
                                         required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="name@company.com"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="ute123"
                                         className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -94,9 +152,23 @@ export function LoginPage() {
                             <div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    disabled={loading}
                                 >
-                                    Sign in
+                                    {loading ? (
+                                        <>
+                                            <svg className="animate-spin h-5 w-5 text-white mr-2"
+                                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor"
+                                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Đang đăng nhập...
+                                        </>
+                                    ) : (
+                                        'Đăng nhập'
+                                    )}
                                 </button>
                             </div>
                         </form>

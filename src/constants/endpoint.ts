@@ -17,7 +17,9 @@ export const ENDPOINTS = {
         CHECK_USERNAME: '/student/existsByUsername',
         CHECK_EMAIL: '/student/existsByEmail',
         CHECK_PHONENUMBER: '/student/existsByPhoneNumber',
-        REGISTER: '/student/register'
+        REGISTER: '/student/register',
+        ACTIVATE_ACCOUNT: '/student/activate',
+        LOGIN: '/student/login'
     }
 
 

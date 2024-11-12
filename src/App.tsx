@@ -7,6 +7,7 @@ import {LoginPage} from "./pages/Login";
 import {SignupPage} from "./pages/Signup";
 import {Category} from "./pages/Category";
 import {Search} from "./pages/Search";
+import {ActivateAccount} from "./pages/student/ActivateAccount";
 
 function App() {
     return (
@@ -18,8 +19,11 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/category/:categoryId" element={<Category />} />
                 <Route path="/course/:id" element={<CourseDetail />} />
+
+
+                <Route path='activate/:email/:activateCode' element={<ActivateAccount/>}></Route>
+
             </Routes>
-            {/* Các route khác */}
         </BrowserRouter>
     );
 }
