@@ -8,6 +8,7 @@ import {SignupPage} from "./pages/Signup";
 import {Category} from "./pages/Category";
 import {Search} from "./pages/Search";
 import {ActivateAccount} from "./pages/student/ActivateAccount";
+import {Profile} from "./pages/student/Profile";
 
 function App() {
     return (
@@ -22,6 +23,8 @@ function App() {
 
 
                 <Route path='activate/:email/:activateCode' element={<ActivateAccount/>}></Route>
+
+                <Route path='profile' element={<Profile/>}></Route>
 
             </Routes>
         </BrowserRouter>
