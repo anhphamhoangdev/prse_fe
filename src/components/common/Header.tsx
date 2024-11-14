@@ -18,7 +18,7 @@ export const Header = () => {
     const [user, setUser] = useState(null);
     const [cartCount, setCartCount] = useState(0);
     const [wishlistCount, setWishlistCount] = useState(0);
-
+    const [isAuthChecking, setIsAuthChecking] = useState(true); // New state for loading
 
 
 
@@ -61,7 +61,9 @@ export const Header = () => {
             setIsLoggedIn(false);
             setUser(null);
         }
+        setIsAuthChecking(false); // Set loading to false after check completes
     };
+
 
     const fetchUserInfo = async (token: string) => {
         try {
@@ -162,109 +164,103 @@ export const Header = () => {
             </div>
 
             <div className="flex items-center space-x-6">
-                {isLoggedIn ? (
-                    <>
-                        {/* Wishlist Icon */}
-                        <Link to="/wishlist" className="relative">
-                            <button className="text-gray-600 hover:text-gray-800">
-                                <i className="fas fa-heart text-xl"/>
-                                {wishlistCount > 0 && (
-                                    <span
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                        {wishlistCount}
-                                    </span>
-                                )}
-                            </button>
-                        </Link>
+                {!isAuthChecking && ( // Only render auth-related UI after checking is complete
+                    isLoggedIn ? (
+                        <>
+                            {/* Wishlist Icon */}
+                            <Link to="/wishlist" className="relative">
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-heart text-xl"/>
+                                    {wishlistCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            {wishlistCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </Link>
 
-                        {/* Cart Icon */}
-                        <Link to="/cart" className="relative">
-                            <button className="text-gray-600 hover:text-gray-800">
-                                <i className="fas fa-shopping-cart text-xl"/>
-                                {cartCount > 0 && (
-                                    <span
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </button>
-                        </Link>
+                            {/* Cart Icon */}
+                            <Link to="/cart" className="relative">
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-shopping-cart text-xl"/>
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </Link>
 
-                        {/* User Profile */}
-                        <div className="relative">
-                            <button
-                                onClick={toggleDropdown}
-                                className="flex items-center space-x-2 focus:outline-none"
+                            {/* User Profile */}
+                            <div className="relative">
+                                <button
+                                    onClick={toggleDropdown}
+                                    className="flex items-center space-x-2 focus:outline-none"
+                                >
+                                    <i className="fas fa-user-circle text-2xl text-gray-600 hover:text-gray-800"/>
+                                </button>
+
+                                {isDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i className="fas fa-user mr-2"/>
+                                            My Account
+                                        </Link>
+                                        <Link to="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i className="fas fa-book-open mr-2"/>
+                                            My Courses
+                                        </Link>
+                                        <Link to="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i className="fas fa-heart mr-2"/>
+                                            My Wishlist
+                                        </Link>
+                                        <Link to="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i className="fas fa-shopping-cart mr-2"/>
+                                            My Cart
+                                        </Link>
+                                        <hr className="my-1 border-gray-200"/>
+                                        <button
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                            onClick={handleLogout}
+                                        >
+                                            <i className="fas fa-sign-out-alt mr-2"/>
+                                            Log Out
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center space-x-4">
+                            <Link
+                                to="/login"
+                                className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-md shadow-md hover:from-blue-600 hover:to-blue-700 transition duration-300"
                             >
-
-                                <i className="fas fa-user-circle text-2xl text-gray-600 hover:text-gray-800"/>
-                            </button>
-
-                            {isDropdownOpen && (
-                                <div
-                                    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                                    <Link to="/profile"
-                                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i className="fas fa-user mr-2"/>
-                                        My Account
-                                    </Link>
-                                    <Link to="/my-courses"
-                                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i className="fas fa-book-open mr-2"/>
-                                        My Courses
-                                    </Link>
-                                    <Link to="/wishlist"
-                                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i className="fas fa-heart mr-2"/>
-                                        My Wishlist
-                                    </Link>
-                                    <Link to="/cart"
-                                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i className="fas fa-shopping-cart mr-2"/>
-                                        My Cart
-                                    </Link>
-                                    <hr className="my-1 border-gray-200"/>
-                                    <button
-                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                        onClick={handleLogout}
-                                    >
-                                        <i className="fas fa-sign-out-alt mr-2"/>
-                                        Log Out
-                                    </button>
-                                </div>
-                            )}
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                     strokeLinejoin="round">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                    <polyline points="10 17 15 12 10 7"/>
+                                    <line x1="15" y1="12" x2="3" y2="12"/>
+                                </svg>
+                                Đăng nhập
+                            </Link>
+                            <Link
+                                to="/signup"
+                                className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-green-500 to-green-600 rounded-md shadow-md hover:from-green-600 hover:to-green-700 transition duration-300"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                     strokeLinejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="8.5" cy="7" r="4"/>
+                                    <line x1="20" y1="8" x2="20" y2="14"/>
+                                    <line x1="23" y1="11" x2="17" y2="11"/>
+                                </svg>
+                                Đăng ký
+                            </Link>
                         </div>
-                    </>
-                ) : (
-                    <div className="flex items-center space-x-4">
-                        <Link
-                            to="/login"
-                            className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-md shadow-md hover:from-blue-600 hover:to-blue-700 transition duration-300"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                 strokeLinejoin="round">
-                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                                <polyline points="10 17 15 12 10 7"/>
-                                <line x1="15" y1="12" x2="3" y2="12"/>
-                            </svg>
-                            Đăng nhập
-                        </Link>
-                        <Link
-                            to="/signup"
-                            className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-green-500 to-green-600 rounded-md shadow-md hover:from-green-600 hover:to-green-700 transition duration-300"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                 strokeLinejoin="round">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="8.5" cy="7" r="4"/>
-                                <line x1="20" y1="8" x2="20" y2="14"/>
-                                <line x1="23" y1="11" x2="17" y2="11"/>
-                            </svg>
-                            Đăng ký
-                        </Link>
-                    </div>
+                    )
                 )}
             </div>
         </header>

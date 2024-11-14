@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { SearchHeaderAndFooterLayout } from "../../layouts/UserLayout";
 import { Mail, Phone, CalendarDays, User, MoreHorizontal, Check, X, Upload } from "lucide-react";
+import {requestWithAuth} from "../../utils/request";
+import {ENDPOINTS} from "../../constants/endpoint";
 
 interface UserData {
     id: number;
@@ -14,33 +16,37 @@ interface UserData {
     isBlocked: boolean;
     money: number;
     point: number;
-    avatar: string;
+    avatarUrl: string | null;
+}
+
+interface ProfileResponse {
+    student: UserData;
 }
 
 export function Profile() {
-    const [userData, setUserData] = useState<UserData | null>({
-        id: 1,
-        username: "hoanganh",
-        email: "hoanganh@gmail.com",
-        fullName: "Hoàng Anh",
-        dateOfBirth: "1990-05-15",
-        gender: "Male",
-        phoneNumber: "0123456789",
-        isActive: true,
-        isBlocked: false,
-        money: 1000,
-        point: 500,
-        avatar: "https://scontent.fsgn2-3.fna.fbcdn.net/v/t39.30808-6/416238737_2395657973950734_3403316050107008880_n.jpg?stp=cp6_dst-jpg&_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Uw9WhVETCh4Q7kNvgE9J-QN&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=AtlHbcurO4hk2fKzyA5sGqc&oh=00_AYCIQyqv4lFc2C1Cfzsesqry_zd8x7bIfbbls3NGxnTXGQ&oe=67394C38",
-    });
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [avatarChanged, setAvatarChanged] = useState(false);
     const [prevAvatar, setPrevAvatar] = useState<string | null>(null);
 
-    // useEffect(() => {
-    //   // Fetch user data from API
-    //   // Update userData state with the fetched data
-    // }, []);
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            setLoading(true);
+            const response = await requestWithAuth<ProfileResponse>(ENDPOINTS.STUDENT.PROFILE);
+            setUserData(response.student);
+            setError("");
+        } catch (error) {
+            setError("Không thể tải thông tin người dùng");
+            console.error("Error fetching profile:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleChangePassword = () => {
         // Logic to change password
@@ -49,31 +55,42 @@ export function Profile() {
 
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setPrevAvatar(userData?.avatar || null);
+            setPrevAvatar(userData?.avatarUrl || null);
             const reader = new FileReader();
             reader.onload = (event) => {
-                setUserData((prev) => prev ? ({ ...prev, avatar: event.target?.result as string }) : null);
+                setUserData(prev => prev ? ({
+                    ...prev,
+                    avatarUrl: event.target?.result as string
+                }) : null);
                 setAvatarChanged(true);
             };
             reader.readAsDataURL(e.target.files[0]);
         }
     };
-
     const handleSaveAvatar = async () => {
-        // Logic to save avatar to the server
-        // You can send the userData.avatar to the server using an API call
-        // After successful save, set avatarChanged back to false
-        setAvatarChanged(false);
-        setPrevAvatar(null);
-    };
+        try {
+            // Implement logic to save avatar
+            // const formData = new FormData();
+            // formData.append('avatar', file);
+            // await requestPostWithAuth('/student/update-avatar', formData);
 
+            setAvatarChanged(false);
+            setPrevAvatar(null);
+            // Sau khi upload thành công, fetch lại profile
+            await fetchUserProfile();
+        } catch (error) {
+            setError("Không thể cập nhật ảnh đại diện");
+            handleCancelAvatar();
+        }
+    };
     const handleCancelAvatar = () => {
         if (prevAvatar) {
-            setUserData((prev) => prev ? ({ ...prev, avatar: prevAvatar }) : null);
+            setUserData(prev => prev ? ({ ...prev, avatarUrl: prevAvatar }) : null);
             setPrevAvatar(null);
         }
         setAvatarChanged(false);
     };
+
 
     return (
         <SearchHeaderAndFooterLayout>
@@ -88,7 +105,9 @@ export function Profile() {
                         <div className="grid grid-cols-1 md:grid-cols-3">
                             <div className="md:col-span-1 p-6 flex flex-col items-center justify-center border-r">
                                 <div className="relative w-40 h-40 rounded-full overflow-hidden mb-4">
-                                    <img src={userData.avatar} alt="User Avatar"
+                                    <img
+                                        src={userData.avatarUrl || '/default-avatar.png'}
+                                         alt="User Avatar"
                                          className="w-full h-full object-cover"/>
                                     <div
                                         className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
@@ -154,7 +173,9 @@ export function Profile() {
                                             </div>
                                             <div className="flex items-center">
                                                 <MoreHorizontal className="w-5 h-5 mr-2 text-gray-500"/>
-                                                <span>Giới tính: {userData.gender}</span>
+                                                <span>
+                                                  Giới tính: {userData.gender === "MALE" ? "Nam" : userData.gender === "FEMALE" ? "Nữ" : "Khác"}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

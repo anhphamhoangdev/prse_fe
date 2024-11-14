@@ -28,9 +28,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         >
             <img src={course.imageUrl} alt={course.title} className="w-full h-40 object-cover rounded-t-lg" />
             <div className="p-4">
-                <h2 className="text-lg font-bold mb-2 h-20 overflow-hidden course-title">
+                <h4 className="text font-bold mb-2 h-20 overflow-hidden course-title">
                     {course.title}
-                </h2>
+                </h4>
                 <div className="flex items-center mb-2">
                     <i className="fas fa-user mr-2"></i>
                     <span>{course.totalStudents}</span>

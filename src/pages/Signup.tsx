@@ -128,10 +128,10 @@ export function SignupPage() {
                 setGender("")
                 setPhoneNumber("")
                 setDateOfBirth("")
-                setNotification("Register successfully, please check your email to active your account !");
+                setNotification("Đăng ký thành công, vui lòng kiểm tra email để kích hoạt tài khoản!");
             }
             else{
-                setNotification("Error ! Please try again.")
+                setErrorNotification("Lỗi ! Vui lòng thử lại.")
             }
         }else alert("Vui lòng điền đúng theo yêu cầu !")
     };

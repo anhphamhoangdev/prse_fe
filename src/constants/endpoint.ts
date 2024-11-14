@@ -19,7 +19,8 @@ export const ENDPOINTS = {
         CHECK_PHONENUMBER: '/student/existsByPhoneNumber',
         REGISTER: '/student/register',
         ACTIVATE_ACCOUNT: '/student/activate',
-        LOGIN: '/student/login'
+        LOGIN: '/student/login',
+        PROFILE: '/student/profile'
     }
 
 
