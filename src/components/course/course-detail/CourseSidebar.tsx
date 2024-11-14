@@ -1,10 +1,10 @@
-import {CourseData} from "../../../types/course";
 import {BookOpen, Code, FileText, Play} from "lucide-react";
 import {EnrollButton} from "./EnrollButton";
 import React from "react";
+import {CourseDetailData} from "../../../types/course";
 
 interface CourseSidebarProps {
-    courseData: CourseData;
+    courseData: CourseDetailData;
     onAddToCart?: () => void;
     onBuyNow?: () => void;
     onStartLearning?: () => void;  // Thêm prop mới
@@ -20,7 +20,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
         <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-4 shadow-sm">
             <div className="space-y-6">
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900">This course includes:</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{courseData.title} includes:</h3>
                     <ul className="space-y-3">
                         <li className="flex items-center space-x-3 text-gray-700">
                             <Play className="w-4 h-4 text-blue-600" />

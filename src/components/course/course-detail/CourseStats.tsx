@@ -1,9 +1,10 @@
 import React from "react";
 import {Clock, Globe, Star, Users} from "lucide-react";
-import {CourseData} from "../../../types/course";
+import {CourseDetailData} from "../../../types/course";
+import {AiFillStar} from "react-icons/ai";
 
 interface CourseStatsProps {
-    courseData: CourseData;
+    courseData: CourseDetailData;
 }
 
 export const CourseStats: React.FC<CourseStatsProps> = ({ courseData }) => {
@@ -22,7 +23,7 @@ export const CourseStats: React.FC<CourseStatsProps> = ({ courseData }) => {
                 {courseData.language}
             </div>
             <div className="flex items-center text-gray-300">
-                <Star className="w-4 h-4 mr-2 text-yellow-400" />
+                <AiFillStar className="w-4 h-4 mr-2 text-yellow-400" />
                 {courseData.rating}
             </div>
         </div>

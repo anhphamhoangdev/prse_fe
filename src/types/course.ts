@@ -69,7 +69,7 @@ interface Prerequisite {
     content: string;
 }
 
-export interface CourseData {
+export interface CourseDetailData {
     id: number;
     title: string;
     description: string;
@@ -86,4 +86,23 @@ export interface CourseData {
     learningPoints: LearningPoint[];
     prerequisites: Prerequisite[];
     previewVideoUrl?: string;
+    feedbacks: {
+        id: number;
+        userId: number;
+        userName: string;
+        userAvatar: string;
+        rating: number;
+        comment: string;
+        createdAt: string;
+    }[];
+}
+
+export interface FeedbackData {
+    id: number;
+    userId: number;
+    userName: string;
+    userAvatar: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
 }

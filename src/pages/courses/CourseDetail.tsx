@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { SearchHeaderAndFooterLayout } from '../../layouts/UserLayout';
-import {CourseData} from "../../types/course";
 import {CourseSidebar} from "../../components/course/course-detail/CourseSidebar";
 import {CourseContent} from "../../components/course/course-detail/CourseContent";
 import {CourseHero} from "../../components/course/course-detail/CourseHero";
 import {CourseOverview} from "../../components/course/course-detail/CourseOverview";
+import {CourseDetailData} from "../../types/course";
 
 
 const handleAddToCart = () => {
@@ -23,8 +23,13 @@ const handleStartLearning = () => {
     // router.push(`/learn/${courseData.id}`);
 };
 
+const handleSubmitFeedback = (rating: number, comment: string) => {
+    console.log('Submitting feedback:', { rating, comment });
+    // Implement API call to submit feedback
+};
+
 const CourseDetail: React.FC = () => {
-    const courseData: CourseData = {
+    const courseData: CourseDetailData = {
         id: 1,
         title: "Complete Web Development Bootcamp",
         description: "Learn web development from scratch to advanced level with practical projects and real-world examples. Master HTML, CSS, JavaScript, React and more.",
@@ -36,7 +41,7 @@ const CourseDetail: React.FC = () => {
             totalCourses: 12,
             totalStudents: 50000
         },
-        isEnrolled: true,
+        isEnrolled: false,
         totalStudents: 1500,
         language: "English",
         rating: 4.8,
@@ -104,7 +109,27 @@ const CourseDetail: React.FC = () => {
                 content: "A computer with internet connection"
             }
         ],
-        previewVideoUrl: "https://res.cloudinary.com/dhithdcsn/video/upload/v1731596078/fw0dfy7qyyg9ckagdeji.mp4"
+        previewVideoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        feedbacks: [
+            {
+                id: 1,
+                userId: 1,
+                userName: "Sarah Johnson",
+                userAvatar: "https://example.com/avatar1.jpg",
+                rating: 5,
+                comment: "This course is exactly what I needed to start my web development journey. The instructor explains everything clearly and the projects are very practical.",
+                createdAt: "2024-03-15T10:00:00Z"
+            },
+            {
+                id: 2,
+                userId: 2,
+                userName: "Michael Chen",
+                userAvatar: "https://example.com/avatar2.jpg",
+                rating: 4,
+                comment: "Great course content and structure. Would love to see more advanced topics covered in future updates.",
+                createdAt: "2024-03-10T15:30:00Z"
+            }
+        ]
     };
 
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
@@ -155,8 +180,10 @@ const CourseDetail: React.FC = () => {
 
                         {/* Tab Content */}
                         {activeTab === 'overview' ? (
-                            <CourseOverview courseData={courseData} />
-                        ) : (
+                            <CourseOverview
+                                courseData={courseData}
+                                onSubmitFeedback={handleSubmitFeedback}
+                            />                        ) : (
                             <CourseContent
                                 chapters={courseData.chapters}
                                 expandedChapters={expandedChapters}

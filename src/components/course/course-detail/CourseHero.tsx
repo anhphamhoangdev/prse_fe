@@ -2,12 +2,12 @@ import React, {useState} from "react";
 import {InstructorInfo} from "./InstructorInfo";
 import {CourseStats} from "./CourseStats";
 import {EnrollButton} from "./EnrollButton";
-import {CourseData} from "../../../types/course";
 import {Play} from "lucide-react";
 import {VideoPlayer} from "../../common/VideoPlayer";
+import {CourseDetailData} from "../../../types/course";
 
 interface CourseHeroProps {
-    courseData: CourseData;
+    courseData: CourseDetailData;
     onAddToCart?: () => void;
     onBuyNow?: () => void;
     onStartLearning?: () => void;

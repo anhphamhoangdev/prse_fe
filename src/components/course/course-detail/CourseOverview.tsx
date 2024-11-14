@@ -1,6 +1,15 @@
-import {CourseData} from "../../../types/course";
+import { CourseDetailData } from "../../../types/course";
+import { CourseFeedback } from "./CourseFeedback";
 
-export const CourseOverview: React.FC<{ courseData: CourseData }> = ({ courseData }) => (
+interface CourseOverviewProps {
+    courseData: CourseDetailData;
+    onSubmitFeedback: (rating: number, comment: string) => void;
+}
+
+export const CourseOverview: React.FC<CourseOverviewProps> = ({
+                                                                  courseData,
+                                                                  onSubmitFeedback
+                                                              }) => (
     <div className="space-y-6">
         <section>
             <h2 className="text-xl font-semibold mb-4 text-gray-900">What you'll learn</h2>
@@ -21,6 +30,14 @@ export const CourseOverview: React.FC<{ courseData: CourseData }> = ({ courseDat
                     <li key={prerequisite.id}>{prerequisite.content}</li>
                 ))}
             </ul>
+        </section>
+
+        <section>
+            <CourseFeedback
+                feedbacks={courseData.feedbacks}
+                isEnrolled={courseData.isEnrolled}
+                onSubmitFeedback={onSubmitFeedback}
+            />
         </section>
     </div>
 );
