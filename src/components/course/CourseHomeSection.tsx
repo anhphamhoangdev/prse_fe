@@ -35,6 +35,14 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
 
     const hasMoreCourses = displayType === 'home' && courses.length > initialDisplayCount;
 
+    function handleAddToCart (course : Course) {
+        console.log("Add to cart : " + course.id)
+    }
+
+    function handleBuyNow (course : Course) {
+        console.log("Enroll now : " + course.id)
+    }
+
     return (
         <div className="my-8">
             <div className="flex justify-between items-center mb-4">
@@ -63,7 +71,7 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
             } gap-4 gap-y-5`}
             >
                 {displayedCourses.map((course) => (
-                    <CourseCard key={course.id} course={course}/>
+                    <CourseCard key={course.id} course={course} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow}/>
                 ))}
             </div>
 

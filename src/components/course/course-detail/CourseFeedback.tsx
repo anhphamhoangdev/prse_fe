@@ -26,7 +26,7 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
 
     return (
         <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-6 text-gray-900">Student Feedback</h2>
+            <h2 className="text-xl font-semibold mb-6 text-gray-900">Đánh giá từ học viên</h2>
 
             {/* Feedback Form for enrolled students */}
             {isEnrolled && (
@@ -79,14 +79,14 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                         <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
                                 <img
-                                    src={feedback.userAvatar}
-                                    alt={feedback.userName}
+                                    src={feedback.studentAvatarUrl}
+                                    alt={feedback.studentName}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                    <h4 className="font-medium text-gray-900">{feedback.userName}</h4>
+                                    <h4 className="font-medium text-gray-900">{feedback.studentName}</h4>
                                     <div className="flex gap-0.5">
                                         {[...Array(5)].map((_, index) => (
                                             <Star
@@ -99,7 +99,10 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                                     </div>
                                 </div>
                                 <p className="text-sm text-gray-500 mt-1">
-                                    {new Date(feedback.createdAt).toLocaleDateString()}
+                                    {new Date(feedback.createdAt).toLocaleString("vi-VN", {
+                                        timeZone: "UTC",
+                                        hour12: false
+                                    })}
                                 </p>
                                 <p className="mt-2 text-gray-700">{feedback.comment}</p>
                             </div>

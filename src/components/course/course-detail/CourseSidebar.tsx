@@ -42,10 +42,12 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                 </div>
                 <EnrollButton
                     isEnrolled={courseData.isEnrolled}
-                    price={courseData.price}
+                    originalPrice={courseData.originalPrice}
+                    discountPrice={courseData.discountPrice}
                     onAddToCart={onAddToCart}
                     onBuyNow={onBuyNow}
                     onStartLearning={onStartLearning}
+                    isAside={true}
                 />
                 <p className="text-sm text-center text-gray-500">
                     30-day money-back guarantee

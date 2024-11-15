@@ -52,8 +52,8 @@ export interface Chapter {
 
 export interface Instructor {
     id: number;
-    name: string;
-    avatar: string;
+    fullName: string;
+    avatarUrl: string;
     title: string;
     totalCourses?: number;
     totalStudents?: number;
@@ -69,40 +69,45 @@ interface Prerequisite {
     content: string;
 }
 
+export interface FeedbackData {
+    id: number;
+    studentId: number;
+    studentName: string;
+    studentAvatarUrl: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+}
+
+export interface SubCategory {
+    id: number;
+    subcategoryName: string;
+}
+
+
 export interface CourseDetailData {
     id: number;
     title: string;
     description: string;
-    instructor: Instructor;
-    isEnrolled: boolean;
     totalStudents: number;
+    totalViews: number;
     language: string;
-    rating: number;
-    price: number;
-    thumbnail: string;
+    averageRating: number;
+    originalPrice: number;
+    discountPrice: number;
+    imageUrl: string;
     totalDuration: string;
     lastUpdated: string;
+    previewVideoUrl?: string;
+    previewVideoDuration?: number;
+
+
+    isEnrolled: boolean;
+
+    instructor: Instructor;
+    subcategories: SubCategory[];
     chapters: Chapter[];
     learningPoints: LearningPoint[];
     prerequisites: Prerequisite[];
-    previewVideoUrl?: string;
-    feedbacks: {
-        id: number;
-        userId: number;
-        userName: string;
-        userAvatar: string;
-        rating: number;
-        comment: string;
-        createdAt: string;
-    }[];
-}
-
-export interface FeedbackData {
-    id: number;
-    userId: number;
-    userName: string;
-    userAvatar: string;
-    rating: number;
-    comment: string;
-    createdAt: string;
+    feedbacks: FeedbackData[];
 }

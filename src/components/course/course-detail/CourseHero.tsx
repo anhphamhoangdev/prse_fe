@@ -5,6 +5,7 @@ import {EnrollButton} from "./EnrollButton";
 import {Play} from "lucide-react";
 import {VideoPlayer} from "../../common/VideoPlayer";
 import {CourseDetailData} from "../../../types/course";
+import {Link} from "react-router-dom";
 
 interface CourseHeroProps {
     courseData: CourseDetailData;
@@ -35,7 +36,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
         return (
             <div className="relative group cursor-pointer" onClick={handlePlayVideo}>
                 <img
-                    src={courseData.thumbnail}
+                    src={courseData.imageUrl}
                     alt="Course Preview"
                     className="rounded-lg shadow-lg border-2 border-gray-800 w-full aspect-video object-cover"
                 />
@@ -47,7 +48,6 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                 <div className="absolute bottom-4 left-4 right-4">
                     <div className="backdrop-blur-md bg-white/10 rounded-lg p-3">
                         <div className="flex items-center gap-3">
-                            {/*<Play className="w-5 h-5 text-white" />*/}
                             <div>
                                 <div className="text-white font-medium">Preview this course</div>
                                 <div className="text-gray-300 text-sm">Watch introduction video</div>
@@ -64,22 +64,35 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-2 gap-8 items-center">
                     <div>
-                        <div className="text-blue-500 text-sm mb-2">Web Development</div>
+                        <div className="flex gap-2 items-center mb-2">
+                            {courseData.subcategories.map((subcategory, index) => (
+                                <React.Fragment key={subcategory.id}>
+                                    {index > 0 && <span className="text-gray-400">•</span>}
+                                    <Link
+                                        to={`/category/${subcategory.id}`}
+                                        className="text-blue-500 text-sm hover:text-blue-400 transition-colors cursor-pointer"
+                                    >
+                                        {subcategory.subcategoryName}
+                                    </Link>
+                                </React.Fragment>
+                            ))}
+                        </div>
                         <h1 className="text-4xl font-bold mb-4">{courseData.title}</h1>
                         <p className="text-gray-300 mb-6">{courseData.description}</p>
 
-                        <InstructorInfo instructor={courseData.instructor} />
-                        <CourseStats courseData={courseData} />
+                        <InstructorInfo instructor={courseData.instructor}/>
+                        <CourseStats courseData={courseData}/>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="space-y-3">
                             <EnrollButton
                                 isEnrolled={courseData.isEnrolled}
-                                price={courseData.price}
+                                originalPrice={courseData.originalPrice}
+                                discountPrice={courseData.discountPrice}
                                 onAddToCart={onAddToCart}
                                 onBuyNow={onBuyNow}
                                 onStartLearning={onStartLearning}
                             />
-                            <p className="text-sm text-gray-400">Last updated: {courseData.lastUpdated}</p>
+                            <p className="text-sm text-gray-400 text-center">Last updated: {courseData.lastUpdated}</p>
                         </div>
                     </div>
                     <div className="relative aspect-video">

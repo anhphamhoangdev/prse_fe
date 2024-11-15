@@ -24,7 +24,7 @@ export const CourseStats: React.FC<CourseStatsProps> = ({ courseData }) => {
             </div>
             <div className="flex items-center text-gray-300">
                 <AiFillStar className="w-4 h-4 mr-2 text-yellow-400" />
-                {courseData.rating}
+                {courseData.averageRating}
             </div>
         </div>
     );

@@ -30,104 +30,161 @@ const handleSubmitFeedback = (rating: number, comment: string) => {
 
 const CourseDetail: React.FC = () => {
     const courseData: CourseDetailData = {
-        id: 1,
-        title: "Complete Web Development Bootcamp",
-        description: "Learn web development from scratch to advanced level with practical projects and real-world examples. Master HTML, CSS, JavaScript, React and more.",
-        instructor: {
-            id: 1,
-            name: "John Doe",
-            avatar: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/416238737_2395657973950734_3403316050107008880_n.jpg?stp=cp6_dst-jpg_s480x480&_nc_cat=107&ccb=1-7&_nc_sid=0ecb9b&_nc_ohc=DRCU1GspZYIQ7kNvgFV3wMg&_nc_zt=24&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=ADNDDwPCVl9NSCcrQR1yGj-&oh=00_AYB7RTb5xd5UNDCaGaLuXTZtZfbtrX7EQuBUwiUV1rPHvg&oe=673BD3B6",
-            title: "Senior Web Developer & Instructor",
-            totalCourses: 12,
-            totalStudents: 50000
+        "id": 1,
+        "title": "Huỷ diệt Java Spring Boot",
+        "description": "Làm quen với lập trình Back-end bằng Spring Boot từ cơ bản đến nâng cao. Xây dựng RESTful API, xử lý bất đồng bộ, tối ưu hiệu suất và triển khai ứng dụng thực tế.",
+        "totalStudents": 1500,
+        "totalViews": 5000,
+        "language": "Tiếng Việt",
+        "averageRating": 4.8,
+        "originalPrice": 300000,
+        "discountPrice": 300000,
+        "imageUrl": "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
+        "totalDuration": "45 giờ",
+        "lastUpdated": "Tháng 3 2024",
+        "previewVideoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "previewVideoDuration": 596,
+        "isEnrolled": false,
+
+        "instructor": {
+            "id": 1,
+            "fullName": "John Doe",
+            "avatarUrl": "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/416238737_2395657973950734_3403316050107008880_n.jpg",
+            "title": "Senior Java Developer & Instructor",
+            "totalCourses": 8,
+            "totalStudents": 35000
         },
-        isEnrolled: false,
-        totalStudents: 1500,
-        language: "English",
-        rating: 4.8,
-        price: 99.99,
-        thumbnail: "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
-        totalDuration: "32 hours",
-        lastUpdated: "September 2023",
-        chapters: [
+
+        "chapters": [
             {
-                id: 1,
-                title: "Getting Started",
-                lessons: [
-                    { id: 1, title: "Course Introduction", type: "video", duration: "10:00" },
-                    { id: 2, title: "Setting Up Environment", type: "text" },
-                    { id: 3, title: "Basic HTML Quiz", type: "quiz" }
+                "id": 1,
+                "title": "Giới thiệu Spring Boot",
+                "lessons": [
+                    {
+                        "id": 1,
+                        "title": "Tổng quan về Spring Boot",
+                        "type": "video",
+                        "duration": "15:00"
+                    },
+                    {
+                        "id": 2,
+                        "title": "Cài đặt môi trường phát triển",
+                        "type": "text"
+                    },
+                    {
+                        "id": 3,
+                        "title": "Kiểm tra kiến thức Spring Boot cơ bản",
+                        "type": "quiz"
+                    }
                 ]
             },
             {
-                id: 2,
-                title: "HTML & CSS Basics",
-                lessons: [
-                    { id: 4, title: "HTML Structure", type: "video", duration: "15:00" },
-                    { id: 5, title: "CSS Styling", type: "code" },
-                    { id: 6, title: "Responsive Design", type: "text" }
+                "id": 2,
+                "title": "RESTful API với Spring Boot",
+                "lessons": [
+                    {
+                        "id": 4,
+                        "title": "REST Controller và Request Mapping",
+                        "type": "video",
+                        "duration": "20:00"
+                    },
+                    {
+                        "id": 5,
+                        "title": "Xử lý Request và Response",
+                        "type": "code"
+                    },
+                    {
+                        "id": 6,
+                        "title": "Validation và Exception Handling",
+                        "type": "text"
+                    }
                 ]
             }
         ],
-        learningPoints: [
+
+        "learningPoints": [
             {
-                id: 1,
-                content: "Build modern responsive websites"
+                "id": 1,
+                "content": "Xây dựng ứng dụng web với Spring Boot từ A-Z"
             },
             {
-                id: 2,
-                content: "Master HTML5, CSS3, and JavaScript"
+                "id": 2,
+                "content": "Thiết kế và phát triển RESTful API chuẩn"
             },
             {
-                id: 3,
-                content: "Learn React and modern frontend development"
+                "id": 3,
+                "content": "Làm việc với cơ sở dữ liệu sử dụng Spring Data JPA"
             },
             {
-                id: 4,
-                content: "Build real-world projects from scratch"
+                "id": 4,
+                "content": "Xử lý bất đồng bộ và tối ưu hiệu suất"
             },
             {
-                id: 5,
-                content: "Understand web development best practices"
+                "id": 5,
+                "content": "Bảo mật ứng dụng với Spring Security"
             },
             {
-                id: 6,
-                content: "Deploy websites to production"
+                "id": 6,
+                "content": "Triển khai ứng dụng lên môi trường production"
             }
         ],
-        prerequisites: [
+
+        "prerequisites": [
             {
-                id: 1,
-                content: "Basic computer knowledge"
+                "id": 1,
+                "content": "Kiến thức cơ bản về Java"
             },
             {
-                id: 2,
-                content: "No programming experience required"
+                "id": 2,
+                "content": "Hiểu biết về lập trình hướng đối tượng (OOP)"
             },
             {
-                id: 3,
-                content: "A computer with internet connection"
+                "id": 3,
+                "content": "Cơ bản về HTML, SQL và RESTful API"
+            },
+        ],
+
+        "feedbacks": [
+            {
+                "id": 1,
+                "studentId": 1,
+                "studentName": "Anh Long",
+                "studentAvatarUrl": "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/433129123_385482517594012_376337141649238004_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=C5wAqfqjZGIQ7kNvgHpVV8R&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=A0sW7sTsX-ZrRlCLmZ2z5ev&oh=00_AYA2G5foZuP4NOjkL-QWPelwBF9dtVp-1JVKr-EREyXe0A&oe=673C97D7",
+                "rating": 5,
+                "comment": "Học Spring Boot xong, giờ tôi là bậc thầy của @Autowired! Dependency Injection giờ đây chỉ là chuyện nhỏ như con thỏ. Bean của tôi mọc lên tươi tốt như rau trong vườn! 🌱",
+                "createdAt": "2024-03-15T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "studentId": 2,
+                "studentName": "Em Long Huy",
+                "studentAvatarUrl": "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/456583606_1226900268512711_5713235832187306782_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=tzxXAdK8Mk8Q7kNvgGLAMZz&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=AuezSaY9cLuF4IIi3Pzcey-&oh=00_AYDZzsyXDZILyK-BaDtP0f94huSNCi-zZnevmayTopg3Og&oe=673C8733",
+                "rating": 4,
+                "comment": "Ban đầu tưởng Spring Boot khó như leo núi Everest, ai ngờ giảng viên giải thích dễ hiểu đến mức tôi còn code được trong lúc... ăn phở! Giờ REST API với tôi đơn giản như trở bàn tay 🍜",
+                "createdAt": "2024-03-10T15:30:00Z"
+            },
+            {
+                "id": 3,
+                "studentId": 3,
+                "studentName": "Em Long Linh",
+                "studentAvatarUrl": "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/434639741_2040379269666782_6839187750192260565_n.jpg?stp=dst-jpg_s480x480&_nc_cat=110&ccb=1-7&_nc_sid=0ecb9b&_nc_ohc=wCZCv4xKCRsQ7kNvgH0x2f_&_nc_zt=24&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=ARz2Oi5wMPMR1u_1Utw63MB&oh=00_AYDF4QY4dwkUNrPYRc2jXEYvUHQaKqhXH_bQq6ka3f04pQ&oe=673C8507",
+                "rating": 5,
+                "comment": "Sau khóa học này, tôi đã biết cách làm cho ứng dụng 'nhảy múa' theo ý mình! Spring Security giờ không còn là cơn ác mộng nữa, exception handling đã trở thành người bạn thân thiết. Có thể nói tôi đã từ 'gà mờ' thành 'đại bàng' Java! 🦅",
+                "createdAt": "2024-03-10T15:30:00Z"
             }
         ],
-        previewVideoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        feedbacks: [
+        subcategories: [
             {
-                id: 1,
-                userId: 1,
-                userName: "Sarah Johnson",
-                userAvatar: "https://example.com/avatar1.jpg",
-                rating: 5,
-                comment: "This course is exactly what I needed to start my web development journey. The instructor explains everything clearly and the projects are very practical.",
-                createdAt: "2024-03-15T10:00:00Z"
+                "id": 1,
+                "subcategoryName": "Java Spring Boot"
             },
             {
-                id: 2,
-                userId: 2,
-                userName: "Michael Chen",
-                userAvatar: "https://example.com/avatar2.jpg",
-                rating: 4,
-                comment: "Great course content and structure. Would love to see more advanced topics covered in future updates.",
-                createdAt: "2024-03-10T15:30:00Z"
+                "id": 2,
+                "subcategoryName": "Back-end Development"
+            },
+            {
+                "id": 1,
+                "subcategoryName": "Java Spring Boot"
             }
         ]
     };

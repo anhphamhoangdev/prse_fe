@@ -6,14 +6,14 @@ import { formatCurrency } from "../../utils/formatCurrency";
 
 interface CourseCardProps {
     course: Course;
-    onAddToCart?: (course: Course) => void;
-    onAddToWishlist?: (course: Course) => void;
+    onAddToCart: (course: Course) => void;
+    onBuyNow: (course: Course) => void;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({
                                                           course,
-                                                          onAddToCart = () => alert('Added to cart'),
-                                                          onAddToWishlist = () => alert('Added to wishlist')
+                                                          onAddToCart,
+                                                          onBuyNow
                                                       }) => {
     const navigate = useNavigate();
 
@@ -67,24 +67,28 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
                     <div className="flex space-x-2">
                         <button
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors group relative"
                             onClick={(e) => {
-                                e.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
+                                e.stopPropagation();
                                 onAddToCart(course);
                             }}
-                            title="Add to Cart"
                         >
                             <i className="fas fa-shopping-cart text-sm"></i>
+                            <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                Add to Cart
+                            </span>
                         </button>
                         <button
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600 transition-colors group relative"
                             onClick={(e) => {
-                                e.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
-                                onAddToWishlist(course);
+                                e.stopPropagation();
+                                onBuyNow(course);
                             }}
-                            title="Add to Wishlist"
                         >
-                            <i className="fas fa-heart text-sm"></i>
+                            <i className="fas fa-bolt text-sm"></i>
+                            <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                Buy Now
+                            </span>
                         </button>
                     </div>
                 </div>
