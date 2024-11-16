@@ -37,17 +37,33 @@ export interface CourseFilters {
 
 
 // course detail
+
+export interface LessonProgress {
+    status: 'not_started' | 'completed';
+    completedAt?: string;
+    lastAccessedAt?: string;
+}
+
+export interface ChapterProgress {
+    status: 'not_started' | 'in_progress' | 'completed';
+    completedAt?: string;
+    progressPercent: number;
+}
+
+
 export interface Lesson {
     id: number;
     title: string;
     type: 'video' | 'text' | 'code' | 'quiz';
     duration?: string;
+    progress?: LessonProgress;
 }
 
 export interface Chapter {
     id: number;
     title: string;
     lessons: Lesson[];
+    progress?: ChapterProgress;
 }
 
 export interface Instructor {
@@ -81,11 +97,12 @@ export interface FeedbackData {
 
 export interface SubCategory {
     id: number;
-    subcategoryName: string;
+    name: string;
 }
 
 
-export interface CourseDetailData {
+
+export interface CourseBasicDTO {
     id: number;
     title: string;
     description: string;
@@ -96,18 +113,29 @@ export interface CourseDetailData {
     originalPrice: number;
     discountPrice: number;
     imageUrl: string;
-    totalDuration: string;
+    totalDuration: number;
     lastUpdated: string;
     previewVideoUrl?: string;
     previewVideoDuration?: number;
-
-
     isEnrolled: boolean;
 
     instructor: Instructor;
     subcategories: SubCategory[];
-    chapters: Chapter[];
     learningPoints: LearningPoint[];
     prerequisites: Prerequisite[];
-    feedbacks: FeedbackData[];
 }
+
+export interface CourseCurriculumDTO {
+    chapters: Chapter[];
+}
+
+export interface CourseFeedbacksDTO {
+    items: FeedbackData[];  // Sử dụng lại FeedbackData interface
+    total: number;
+    currentPage: number;
+    hasMore: boolean;
+}
+
+
+
+

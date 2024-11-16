@@ -5,23 +5,37 @@ import type { FeedbackData } from '../../../types/course';
 interface CourseFeedbackProps {
     feedbacks: FeedbackData[];
     isEnrolled: boolean;
+    hasMoreFeedbacks: boolean;
+    isLoadingMore?: boolean;
+    onLoadMoreFeedbacks: () => void;
     onSubmitFeedback: (rating: number, comment: string) => void;
 }
 
 export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                                                                   feedbacks,
                                                                   isEnrolled,
+                                                                  hasMoreFeedbacks,
+                                                                  isLoadingMore = false,
+                                                                  onLoadMoreFeedbacks,
                                                                   onSubmitFeedback
                                                               }) => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmitFeedback(rating, comment);
-        setRating(5);
-        setComment('');
+        setIsSubmitting(true);
+        try {
+            await onSubmitFeedback(rating, comment);
+            setRating(5);
+            setComment('');
+        } catch (error) {
+            console.error('Failed to submit feedback:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -64,10 +78,10 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                     </div>
                     <button
                         type="submit"
-                        disabled={!comment.trim()}
+                        disabled={!comment.trim() || isSubmitting}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        Submit Feedback
+                        {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
                     </button>
                 </form>
             )}
@@ -109,7 +123,27 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                         </div>
                     </div>
                 ))}
+
+                {/* Load More Button */}
+                {hasMoreFeedbacks && (
+                    <div className="flex justify-center pt-4">
+                        <button
+                            onClick={onLoadMoreFeedbacks}
+                            disabled={isLoadingMore}
+                            className="px-4 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            {isLoadingMore ? 'Loading...' : 'Load More Reviews'}
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/* No Feedbacks State */}
+            {feedbacks.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                    No reviews yet. Be the first to review this course!
+                </div>
+            )}
         </div>
     );
 };

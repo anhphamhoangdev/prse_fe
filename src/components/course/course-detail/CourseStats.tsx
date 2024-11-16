@@ -1,10 +1,11 @@
 import React from "react";
 import {Clock, Globe, Star, Users} from "lucide-react";
-import {CourseDetailData} from "../../../types/course";
+import {CourseBasicDTO} from "../../../types/course";
 import {AiFillStar} from "react-icons/ai";
+import {formatDuration} from "../../../utils/formatSecondToHour";
 
 interface CourseStatsProps {
-    courseData: CourseDetailData;
+    courseData: CourseBasicDTO;
 }
 
 export const CourseStats: React.FC<CourseStatsProps> = ({ courseData }) => {
@@ -16,7 +17,7 @@ export const CourseStats: React.FC<CourseStatsProps> = ({ courseData }) => {
             </div>
             <div className="flex items-center text-gray-300">
                 <Clock className="w-4 h-4 mr-2" />
-                {courseData.totalDuration}
+                {formatDuration(courseData.totalDuration)}
             </div>
             <div className="flex items-center text-gray-300">
                 <Globe className="w-4 h-4 mr-2" />

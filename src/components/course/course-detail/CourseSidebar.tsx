@@ -1,13 +1,13 @@
 import {BookOpen, Code, FileText, Play} from "lucide-react";
 import {EnrollButton} from "./EnrollButton";
 import React from "react";
-import {CourseDetailData} from "../../../types/course";
+import {CourseBasicDTO} from "../../../types/course";
 
 interface CourseSidebarProps {
-    courseData: CourseDetailData;
+    courseData: CourseBasicDTO;
     onAddToCart?: () => void;
     onBuyNow?: () => void;
-    onStartLearning?: () => void;  // Thêm prop mới
+    onStartLearning?: () => void;
 }
 
 export const CourseSidebar: React.FC<CourseSidebarProps> = ({

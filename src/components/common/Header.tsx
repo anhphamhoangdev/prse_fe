@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from "react";
 import {Link, useLocation, useNavigate, useSearchParams} from "react-router-dom";
+import {
+    Search, Heart, ShoppingCart, User, LogOut, BookOpen,
+    ChevronDown, Wallet, Award, GraduationCap, ArrowRight
+} from "lucide-react";
 import {ENDPOINTS} from "../../constants/endpoint";
+import {requestWithAuth} from "../../utils/request";
+
+
+interface UserData {
+    id: number;
+    username: string;
+    email: string;
+    fullName: string;
+    avatarUrl: string | null;
+    money: number;
+    point: number;
+}
+
+interface ProfileResponse {
+    student: UserData;
+}
 
 export const Header = () => {
 
@@ -15,10 +35,12 @@ export const Header = () => {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<UserData | null>(null);
     const [cartCount, setCartCount] = useState(0);
     const [wishlistCount, setWishlistCount] = useState(0);
     const [isAuthChecking, setIsAuthChecking] = useState(true); // New state for loading
+
+    const [isInstructor, setIsInstructor] = useState(true);
 
 
 
@@ -34,6 +56,16 @@ export const Header = () => {
         }
     }, [searchParams]);
 
+
+    const handleBecomeInstructor = () => {
+        navigate('/become-instructor');
+        setIsDropdownOpen(false);
+    };
+
+    const handleSwitchToInstructor = () => {
+        navigate('/instructor/dashboard');
+        setIsDropdownOpen(false);
+    };
 
 
     const handleSearch = (e: React.FormEvent) => {
@@ -55,7 +87,7 @@ export const Header = () => {
     const checkAuthStatus = () => {
         const token = localStorage.getItem('token') || sessionStorage.getItem("token");
         if (token) {
-            // fetchUserInfo(token);
+            fetchUserInfo(token);
             setIsLoggedIn(true);
         } else {
             setIsLoggedIn(false);
@@ -67,21 +99,12 @@ export const Header = () => {
 
     const fetchUserInfo = async (token: string) => {
         try {
-            const response = await fetch('/api/user/info', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const userData = await response.json();
-                setUser(userData);
-                setIsLoggedIn(true);
-                // Fetch cart and wishlist counts
-                fetchCartCount(token);
-                fetchWishlistCount(token);
-            } else {
-                handleLogout();
-            }
+            const response = await requestWithAuth<ProfileResponse>(ENDPOINTS.STUDENT.PROFILE);
+            setUser(response.student);
+            // Fetch cart and wishlist counts
+            // fetchCartCount(token);
+            // fetchWishlistCount(token);
+
         } catch (error) {
             console.error('Error fetching user info:', error);
             handleLogout();
@@ -135,133 +158,177 @@ export const Header = () => {
     };
 
     return (
-        <header className="flex justify-between items-center py-3 px-4 bg-white shadow-sm">
-            <Link to="/" className="text-4xl font-bold text-blue-600">
-                Easy<span className="text-black">Edu</span>
-            </Link>
-
-            <div className="flex-1 max-w-xl mx-4">
-                <form onSubmit={handleSearch} className="relative">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Tìm kiếm khóa học..."
-                        className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500"
-                    />
-                    <button
-                        type="submit"
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                        onClick={handleSearch}
+        <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm backdrop-blur-sm bg-white/80">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-between items-center py-4 px-4 sm:px-6">
+                    {/* Logo */}
+                    <Link
+                        to="/"
+                        className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </button>
-                </form>
-            </div>
+                        Easy<span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
+                    </Link>
 
-            <div className="flex items-center space-x-6">
-                {!isAuthChecking && ( // Only render auth-related UI after checking is complete
-                    isLoggedIn ? (
-                        <>
-                            {/* Wishlist Icon */}
-                            <Link to="/wishlist" className="relative">
-                                <button className="text-gray-600 hover:text-gray-800">
-                                    <i className="fas fa-heart text-xl"/>
-                                    {wishlistCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                            {wishlistCount}
-                                        </span>
-                                    )}
-                                </button>
-                            </Link>
+                    {/* Search Bar */}
+                    <div className="hidden sm:block flex-1 max-w-xl mx-8">
+                        <form onSubmit={handleSearch} className="relative group">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Tìm kiếm khóa học..."
+                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50
+                                         focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                                         transition-all duration-300 pl-11"
+                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                        </form>
+                    </div>
 
-                            {/* Cart Icon */}
-                            <Link to="/cart" className="relative">
-                                <button className="text-gray-600 hover:text-gray-800">
-                                    <i className="fas fa-shopping-cart text-xl"/>
-                                    {cartCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                            {cartCount}
-                                        </span>
-                                    )}
-                                </button>
-                            </Link>
+                    {/* Actions */}
+                    <div className="flex items-center space-x-1 sm:space-x-4">
+                        {!isAuthChecking && (
+                            isLoggedIn ? (
+                                <>
+                                    {/*/!* Wishlist *!/*/}
+                                    {/*<Link to="/wishlist" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">*/}
+                                    {/*    <Heart className="w-6 h-6 text-slate-600 hover:text-blue-500 transition-colors" />*/}
+                                    {/*    {wishlistCount > 0 && (*/}
+                                    {/*        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">*/}
+                                    {/*            {wishlistCount}*/}
+                                    {/*        </span>*/}
+                                    {/*    )}*/}
+                                    {/*</Link>*/}
 
-                            {/* User Profile */}
-                            <div className="relative">
-                                <button
-                                    onClick={toggleDropdown}
-                                    className="flex items-center space-x-2 focus:outline-none"
-                                >
-                                    <i className="fas fa-user-circle text-2xl text-gray-600 hover:text-gray-800"/>
-                                </button>
+                                    {/* Cart */}
+                                    <Link to="/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                        <ShoppingCart className="w-6 h-6 text-slate-600 hover:text-blue-500 transition-colors" />
+                                        {cartCount > 0 && (
+                                            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                                {cartCount}
+                                            </span>
+                                        )}
+                                    </Link>
 
-                                {isDropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            <i className="fas fa-user mr-2"/>
-                                            My Account
-                                        </Link>
-                                        <Link to="/my-courses" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            <i className="fas fa-book-open mr-2"/>
-                                            My Courses
-                                        </Link>
-                                        <Link to="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            <i className="fas fa-heart mr-2"/>
-                                            My Wishlist
-                                        </Link>
-                                        <Link to="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            <i className="fas fa-shopping-cart mr-2"/>
-                                            My Cart
-                                        </Link>
-                                        <hr className="my-1 border-gray-200"/>
+                                    {/* User Menu */}
+                                    <div className="relative">
                                         <button
-                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                            onClick={handleLogout}
+                                            onClick={toggleDropdown}
+                                            className="flex items-center space-x-2 p-2 hover:bg-slate-100 rounded-lg transition-colors"
                                         >
-                                            <i className="fas fa-sign-out-alt mr-2"/>
-                                            Log Out
+                                            {user?.avatarUrl ? (
+                                                <img
+                                                    src={user.avatarUrl}
+                                                    alt={user.fullName}
+                                                    className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <User className="w-5 h-5 text-blue-600" />
+                                                </div>
+                                            )}
+                                            <ChevronDown className="w-4 h-4 text-slate-600" />
                                         </button>
+
+                                        {isDropdownOpen && (
+                                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg py-2 border border-slate-200">
+                                                <div className="px-4 py-3 border-b border-slate-100">
+                                                    <p className="text-sm font-medium text-slate-900">{user?.fullName}</p>
+                                                    <p className="text-sm text-slate-500">{user?.email}</p>
+                                                    <div className="mt-2 flex items-center justify-between text-xs">
+                                                        <div className="flex items-center text-blue-600">
+                                                            <Wallet className="w-4 h-4 mr-1" />
+                                                            {user?.money.toLocaleString()} VND
+                                                        </div>
+                                                        <div className="flex items-center text-amber-600">
+                                                            <Award className="w-4 h-4 mr-1" />
+                                                            {user?.point} điểm
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <Link to="/profile"
+                                                      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                                                    <User className="w-4 h-4 mr-2" />
+                                                    Tài khoản của tôi
+                                                </Link>
+
+                                                <Link to="/my-courses"
+                                                      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                                                    <BookOpen className="w-4 h-4 mr-2" />
+                                                    Khóa học của tôi
+                                                </Link>
+
+                                                {/* Instructor Option */}
+                                                {isInstructor ? (
+                                                    <button
+                                                        onClick={handleSwitchToInstructor}
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 group"
+                                                    >
+                                                        <GraduationCap className="w-4 h-4 mr-2" />
+                                                        <span className="flex-1 text-left">Chuyển sang Instructor</span>
+                                                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={handleBecomeInstructor}
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 group"
+                                                    >
+                                                        <GraduationCap className="w-4 h-4 mr-2" />
+                                                        <span className="flex-1 text-left">Trở thành Instructor</span>
+                                                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </button>
+                                                )}
+
+                                                {/* Divider */}
+                                                <div className="h-px bg-slate-200 my-2"></div>
+
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                >
+                                                    <LogOut className="w-4 h-4 mr-2" />
+                                                    Đăng xuất
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex items-center space-x-4">
-                            <Link
-                                to="/login"
-                                className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-md shadow-md hover:from-blue-600 hover:to-blue-700 transition duration-300"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                     strokeLinejoin="round">
-                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                                    <polyline points="10 17 15 12 10 7"/>
-                                    <line x1="15" y1="12" x2="3" y2="12"/>
-                                </svg>
-                                Đăng nhập
-                            </Link>
-                            <Link
-                                to="/signup"
-                                className="flex items-center justify-center px-4 py-2 text-sm text-white bg-gradient-to-r from-green-500 to-green-600 rounded-md shadow-md hover:from-green-600 hover:to-green-700 transition duration-300"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                     strokeLinejoin="round">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="8.5" cy="7" r="4"/>
-                                    <line x1="20" y1="8" x2="20" y2="14"/>
-                                    <line x1="23" y1="11" x2="17" y2="11"/>
-                                </svg>
-                                Đăng ký
-                            </Link>
-                        </div>
-                    )
-                )}
+                                </>
+                            ) : (
+                                <div className="flex items-center space-x-3">
+                                    <Link
+                                        to="/login"
+                                        className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                                    >
+                                        Đăng nhập
+                                    </Link>
+                                    <Link
+                                        to="/signup"
+                                        className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
+                                    >
+                                        Đăng ký
+                                    </Link>
+                                </div>
+                            )
+                        )}
+                    </div>
+                </div>
+
+                {/* Mobile Search */}
+                <div className="sm:hidden px-4 pb-4">
+                    <form onSubmit={handleSearch} className="relative group">
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Tìm kiếm khóa học..."
+                            className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50
+                                     focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                                     transition-all duration-300 pl-11"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    </form>
+                </div>
             </div>
         </header>
     );

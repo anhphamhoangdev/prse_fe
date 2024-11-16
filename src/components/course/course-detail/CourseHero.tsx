@@ -4,11 +4,11 @@ import {CourseStats} from "./CourseStats";
 import {EnrollButton} from "./EnrollButton";
 import {Play} from "lucide-react";
 import {VideoPlayer} from "../../common/VideoPlayer";
-import {CourseDetailData} from "../../../types/course";
+import {CourseBasicDTO} from "../../../types/course";
 import {Link} from "react-router-dom";
 
 interface CourseHeroProps {
-    courseData: CourseDetailData;
+    courseData: CourseBasicDTO;
     onAddToCart?: () => void;
     onBuyNow?: () => void;
     onStartLearning?: () => void;
@@ -72,7 +72,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                                         to={`/category/${subcategory.id}`}
                                         className="text-blue-500 text-sm hover:text-blue-400 transition-colors cursor-pointer"
                                     >
-                                        {subcategory.subcategoryName}
+                                        {subcategory.name}
                                     </Link>
                                 </React.Fragment>
                             ))}

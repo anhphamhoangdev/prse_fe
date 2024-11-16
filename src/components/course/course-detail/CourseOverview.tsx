@@ -1,13 +1,22 @@
-import { CourseDetailData } from "../../../types/course";
 import { CourseFeedback } from "./CourseFeedback";
+import {CourseBasicDTO, FeedbackData} from "../../../types/course";
+import React from "react";
 
 interface CourseOverviewProps {
-    courseData: CourseDetailData;
+    courseData: CourseBasicDTO;
+    feedbacks: FeedbackData[];
+    hasMoreFeedbacks: boolean;
+    isLoadingMore?: boolean;
+    onLoadMoreFeedbacks: () => void;
     onSubmitFeedback: (rating: number, comment: string) => void;
 }
 
 export const CourseOverview: React.FC<CourseOverviewProps> = ({
                                                                   courseData,
+                                                                  feedbacks,
+                                                                  hasMoreFeedbacks,
+                                                                  isLoadingMore = false,
+                                                                  onLoadMoreFeedbacks,
                                                                   onSubmitFeedback
                                                               }) => (
     <div className="space-y-6">
@@ -34,8 +43,11 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
 
         <section>
             <CourseFeedback
-                feedbacks={courseData.feedbacks}
+                feedbacks={feedbacks}
                 isEnrolled={courseData.isEnrolled}
+                hasMoreFeedbacks={hasMoreFeedbacks}
+                isLoadingMore={isLoadingMore}
+                onLoadMoreFeedbacks={onLoadMoreFeedbacks}
                 onSubmitFeedback={onSubmitFeedback}
             />
         </section>
