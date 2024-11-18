@@ -9,6 +9,7 @@ interface CourseOverviewProps {
     isLoadingMore?: boolean;
     onLoadMoreFeedbacks: () => void;
     onSubmitFeedback: (rating: number, comment: string) => void;
+    isLoadingFeedback: boolean;
 }
 
 export const CourseOverview: React.FC<CourseOverviewProps> = ({
@@ -17,7 +18,8 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
                                                                   hasMoreFeedbacks,
                                                                   isLoadingMore = false,
                                                                   onLoadMoreFeedbacks,
-                                                                  onSubmitFeedback
+                                                                  onSubmitFeedback,
+                                                                  isLoadingFeedback = false
                                                               }) => (
     <div className="space-y-6">
         <section>
@@ -44,11 +46,12 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
         <section>
             <CourseFeedback
                 feedbacks={feedbacks}
-                isEnrolled={courseData.isEnrolled}
+                isEnrolled={courseData.enrolled}
                 hasMoreFeedbacks={hasMoreFeedbacks}
                 isLoadingMore={isLoadingMore}
                 onLoadMoreFeedbacks={onLoadMoreFeedbacks}
                 onSubmitFeedback={onSubmitFeedback}
+                isLoadingFeedback={isLoadingFeedback}
             />
         </section>
     </div>

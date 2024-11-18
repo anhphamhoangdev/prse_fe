@@ -1,10 +1,13 @@
 
 const BASE_URL = `https://${process.env.REACT_APP_BASE_IP}:8443/api`;
 
+interface RequestParams {
+    [key: string]: string | number | boolean | undefined;
+}
 
+// GET
 export async function request<T>(endpoint: string): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
-    console.log(url)
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -14,6 +17,8 @@ export async function request<T>(endpoint: string): Promise<T> {
     return response.json();
 }
 
+
+// POST WITH BODY
 export async function requestPost<T>(endpoint: string, data: any): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
     console.log(url);
@@ -33,7 +38,7 @@ export async function requestPost<T>(endpoint: string, data: any): Promise<T> {
     return response.json();
 }
 
-
+// GET WITH AUTHENTICATION
 export async function requestWithAuth<T>(endpoint: string): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
 
@@ -70,6 +75,8 @@ export async function requestWithAuth<T>(endpoint: string): Promise<T> {
     return jsonResponse.data; // Trả về data
 }
 
+
+// POST WITH AUTHENTICATION
 export async function requestPostWithAuth<T>(endpoint: string, data: any): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
 
@@ -98,6 +105,63 @@ export async function requestPostWithAuth<T>(endpoint: string, data: any): Promi
 
     if (!response.ok) {
         throw new Error(`Failed to post to ${url}: ${response.statusText}`);
+    }
+
+    return response.json();
+}
+
+// GET WITH AUTHENTICATION OR NOT
+export async function requestGetWithOptionalAuth<T>(endpoint: string): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+    console.log(`[Request] Fetching ${url}`);
+
+    // Check for token
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    // Prepare headers
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+            throw new Error(`Request failed with status: ${response.status}`);
+        }
+
+        const jsonResponse = await response.json();
+        return jsonResponse;
+
+    } catch (error) {
+        console.error('[Request] Error during fetch:', error);
+        throw error;
+    }
+}
+
+
+// GET WITH PARAM
+export async function requestWithParams<T>(endpoint: string, params?: RequestParams): Promise<T> {
+    // Ensure endpoint starts with /
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = new URL(`${BASE_URL}${normalizedEndpoint}`);
+
+    // Add query parameters if they exist
+    if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined) {
+                url.searchParams.append(key, value.toString());
+            }
+        });
+    }
+
+    console.log(`[Request] Fetching with params:`, url.toString());
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
     }
 
     return response.json();

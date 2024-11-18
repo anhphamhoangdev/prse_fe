@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { SearchHeaderAndFooterLayout } from '../../layouts/UserLayout';
 import {CourseSidebar} from "../../components/course/course-detail/CourseSidebar";
 import {CourseContent} from "../../components/course/course-detail/CourseContent";
@@ -6,72 +6,12 @@ import {CourseHero} from "../../components/course/course-detail/CourseHero";
 import {CourseOverview} from "../../components/course/course-detail/CourseOverview";
 import {CourseBasicDTO, CourseCurriculumDTO, FeedbackData} from "../../types/course";
 import {useParams} from "react-router-dom";
+import {getBasicDetailCourse, getCourseFeedbacks} from "../../services/courseService";
+import {CourseNotFound} from "../../components/course/course-detail/CourseNotFound";
 
 interface FeedbackPages {
     [key: string]: FeedbackData[];  // index signature
 }
-const mockFeedbackPages: FeedbackPages = {
-    page1: [
-        {
-            id: 1,
-            studentId: 1,
-            studentName: "Anh Long",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/433129123_385482517594012_376337141649238004_n.jpg",
-            rating: 5,
-            comment: "Học Spring Boot xong, giờ tôi là bậc thầy của @Autowired! Dependency Injection giờ đây chỉ là chuyện nhỏ như con thỏ. Bean của tôi mọc lên tươi tốt như rau trong vườn! 🌱",
-            createdAt: "2024-03-15T10:00:00"
-        },
-        {
-            id: 2,
-            studentId: 2,
-            studentName: "Em Long Huy",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/456583606_1226900268512711_5713235832187306782_n.jpg",
-            rating: 4,
-            comment: "Ban đầu tưởng Spring Boot khó như leo núi Everest, ai ngờ giảng viên giải thích dễ hiểu đến mức tôi còn code được trong lúc... ăn phở! Giờ REST API với tôi đơn giản như trở bàn tay 🍜",
-            createdAt: "2024-03-10T15:30:00"
-        },
-        {
-            id: 3,
-            studentId: 3,
-            studentName: "Em Long Linh",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/434639741_2040379269666782_6839187750192260565_n.jpg",
-            rating: 5,
-            comment: "Sau khóa học này, tôi đã biết cách làm cho ứng dụng 'nhảy múa' theo ý mình! Spring Security giờ không còn là cơn ác mộng nữa, exception handling đã trở thành người bạn thân thiết. Có thể nói tôi đã từ 'gà mờ' thành 'đại bàng' Java! 🦅",
-            createdAt: "2024-03-10T15:30:00"
-        }
-    ],
-    page2: [
-        {
-            id: 4,
-            studentId: 4,
-            studentName: "Chị Long Lanh",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/433129123_385482517594012_376337141649238004_n.jpg",
-            rating: 5,
-            comment: "Tuyệt vời! Khóa học này đã giúp tôi từ zero đến hero trong Spring Boot. Instructor giảng rất chi tiết và dễ hiểu! 🚀",
-            createdAt: "2024-03-09T14:20:00"
-        },
-        {
-            id: 5,
-            studentId: 5,
-            studentName: "Anh Long Lê",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/456583606_1226900268512711_5713235832187306782_n.jpg",
-            rating: 4,
-            comment: "Spring Boot giờ đã trở thành người bạn thân của tôi. JPA, Security, đều không còn là vấn đề nữa! 💪",
-            createdAt: "2024-03-08T16:45:00"
-        }
-    ],
-    page3: [
-        {
-            id: 6,
-            studentId: 6,
-            studentName: "Em Long Lê",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/434639741_2040379269666782_6839187750192260565_n.jpg",
-            rating: 5,
-            comment: "Đầu tư vào khóa học này là quyết định đúng đắn nhất của tôi trong năm nay. Kiến thức quá xịn! 🎯",
-            createdAt: "2024-03-07T09:15:00"
-        }
-    ]
-};
 
 const handleLessonClick = (chapterId: number, lessonId: number) => {
     // Handle navigation or other actions
@@ -114,7 +54,7 @@ const CourseDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
 
     // STATE
-    const [basicInfo, setBasicInfo] = useState<CourseBasicDTO>({
+    const [basicInfo, setBasicInfo] = useState<CourseBasicDTO | null>({
         id: 1,
         title: "Huỷ diệt Java Spring Boot",
         description: "Làm quen với lập trình Back-end bằng Spring Boot từ cơ bản đến nâng cao. Xây dựng RESTful API, xử lý bất đồng bộ, tối ưu hiệu suất và triển khai ứng dụng thực tế.",
@@ -129,7 +69,7 @@ const CourseDetail: React.FC = () => {
         totalDuration: 162000,
         previewVideoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
         previewVideoDuration: 596,
-        isEnrolled: true,
+        enrolled: true,
 
         instructor: {
             id: 1,
@@ -309,58 +249,123 @@ const CourseDetail: React.FC = () => {
             }
         ]
     });
-    const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([
-        {
-            id: 1,
-            studentId: 1,
-            studentName: "Anh Long",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/433129123_385482517594012_376337141649238004_n.jpg",
-            rating: 5,
-            comment: "Học Spring Boot xong, giờ tôi là bậc thầy của @Autowired! Dependency Injection giờ đây chỉ là chuyện nhỏ như con thỏ. Bean của tôi mọc lên tươi tốt như rau trong vườn! 🌱",
-            createdAt: "2024-03-15T10:00:00"
-        },
-        {
-            id: 2,
-            studentId: 2,
-            studentName: "Em Long Huy",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/456583606_1226900268512711_5713235832187306782_n.jpg",
-            rating: 4,
-            comment: "Ban đầu tưởng Spring Boot khó như leo núi Everest, ai ngờ giảng viên giải thích dễ hiểu đến mức tôi còn code được trong lúc... ăn phở! Giờ REST API với tôi đơn giản như trở bàn tay 🍜",
-            createdAt: "2024-03-10T15:30:00"
-        },
-        {
-            id: 3,
-            studentId: 3,
-            studentName: "Em Long Linh",
-            studentAvatarUrl: "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-1/434639741_2040379269666782_6839187750192260565_n.jpg",
-            rating: 5,
-            comment: "Sau khóa học này, tôi đã biết cách làm cho ứng dụng 'nhảy múa' theo ý mình! Spring Security giờ không còn là cơn ác mộng nữa, exception handling đã trở thành người bạn thân thiết. Có thể nói tôi đã từ 'gà mờ' thành 'đại bàng' Java! 🦅",
-            createdAt: "2024-03-10T15:30:00"
-        }
-    ]);
 
-    const [feedbackMeta, setFeedbackMeta] = useState({ total: 3, page: 1, hasMore: true });
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
     const [activeTab, setActiveTab] = useState<'overview' | 'content'>('overview');
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+
+    // feedback state
+    const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
+    const [feedbackMeta, setFeedbackMeta] = useState({
+        total: 0,
+        currentPage: 1,
+        hasMore: true
+    });
+    const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
 
 
-    // useEffect(() => {
-    //     const fetchBasicInfo = async () => {
-    //         setIsLoading(true);
-    //         try {
-    //             const data = await courseService.getCourseBasic(Number(id));
-    //             setBasicInfo(data);
-    //         } catch (error) {
-    //             console.error('Failed to fetch course info:', error);
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     };
-    //
-    //     if (id) fetchBasicInfo();
-    // }, [id]);
+    // fetchBasicInfo
+    useEffect(() => {
+        const fetchBasicInfo = async () => {
+            console.log('[CourseDetail] Starting to fetch course details');
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                if (!id) {
+                    throw new Error('Course ID is required');
+                }
+
+                const data = await getBasicDetailCourse(Number(id));
+
+                if (data === null) {
+                    console.warn(`[CourseDetail] No data found for course ID: ${id}`);
+                    setBasicInfo(null);
+                    return;
+                }
+
+                console.log(`[CourseDetail] Successfully loaded course: ${data.title}`);
+                setBasicInfo(data);
+
+            } catch (err) {
+                const error = err instanceof Error ? err : new Error('An unknown error occurred');
+                console.error('[CourseDetail] Error fetching course details:', error.message);
+                setError(error);
+                setBasicInfo(null);
+            } finally {
+                setIsLoading(false);
+                console.log('[CourseDetail] Finished fetching course details');
+            }
+        };
+
+        if (id) {
+            fetchBasicInfo();
+        } else {
+            console.log('[CourseDetail] No course ID provided');
+            setIsLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        const fetchInitialFeedbacks = async () => {
+            if (!id) return;
+
+            setIsLoadingFeedbacks(true);
+            try {
+                console.log('[CourseDetail] Starting to fetch initial feedbacks');
+                const data = await getCourseFeedbacks(Number(id), 1);
+
+                if (data) {
+                    setFeedbacks(data.items);
+                    setFeedbackMeta({
+                        total: data.total,
+                        currentPage: 2, // Set to next page
+                        hasMore: data.hasMore
+                    });
+                    console.log('[CourseDetail] Successfully loaded initial feedbacks');
+                } else {
+                    console.log('[CourseDetail] No feedbacks found');
+                    setFeedbacks([]);
+                    setFeedbackMeta({
+                        total: 0,
+                        currentPage: 1,
+                        hasMore: false
+                    });
+                }
+            } catch (error) {
+                console.error('[CourseDetail] Error loading initial feedbacks:', error);
+                setFeedbacks([]);
+            } finally {
+                setIsLoadingFeedbacks(false);
+            }
+        };
+
+        fetchInitialFeedbacks();
+    }, [id]);
+
+    const loadMoreFeedbacks = async () => {
+        if (!id || !feedbackMeta.hasMore || isLoadingFeedbacks) return;
+
+        setIsLoadingFeedbacks(true);
+        try {
+            console.log(`[CourseDetail] Loading more feedbacks, page: ${feedbackMeta.currentPage}`);
+            const data = await getCourseFeedbacks(Number(id), feedbackMeta.currentPage);
+            if (data) {
+                setFeedbacks(prev => [...prev, ...data.items]);
+                setFeedbackMeta({
+                    total: data.total,
+                    currentPage: feedbackMeta.currentPage + 1,
+                    hasMore: data.hasMore
+                });
+                console.log('[CourseDetail] Successfully loaded more feedbacks');
+            }
+        } catch (error) {
+            console.error('[CourseDetail] Error loading more feedbacks:', error);
+        } finally {
+            setIsLoadingFeedbacks(false);
+        }
+    };
 
     // Fetch curriculum when switching to content tab
     // useEffect(() => {
@@ -377,32 +382,6 @@ const CourseDetail: React.FC = () => {
     //
     //     fetchCurriculum();
     // }, [activeTab, curriculum, id]);
-
-    // Load more feedbacks
-    const loadMoreFeedbacks = async () => {
-        if (!feedbackMeta.hasMore) return;
-
-        setIsLoadingMore(true);
-        try {
-            // Giả lập API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Lấy data tương ứng với page hiện tại
-            const nextPage = feedbackMeta.page;
-            const newFeedbacks = mockFeedbackPages[`page${nextPage}`] || [];
-
-            setFeedbacks(prev => [...prev, ...newFeedbacks]);
-            setFeedbackMeta({
-                total: feedbackMeta.total + newFeedbacks.length,
-                page: nextPage + 1,
-                hasMore: nextPage < 3 // Có 3 pages
-            });
-        } catch (error) {
-            console.error('Failed to fetch feedbacks:', error);
-        } finally {
-            setIsLoadingMore(false);
-        }
-    };
 
     const handleSubmitFeedback = async (rating: number, comment: string) => {
         if (!id) return;
@@ -422,11 +401,15 @@ const CourseDetail: React.FC = () => {
         }
     };
 
-    if (isLoading || !basicInfo) return (
+    if (isLoading) return (
         <div className="fixed inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-gray-200 rounded-full animate-spin border-t-blue-600"></div>
         </div>
     );
+
+    if (error || !basicInfo) {
+        return <CourseNotFound />;
+    }
 
     return (
         <SearchHeaderAndFooterLayout>
@@ -444,13 +427,13 @@ const CourseDetail: React.FC = () => {
                             <div className="flex space-x-8">
                                 <TabButton
                                     tab="overview"
-                                    label="Overview"
+                                    label="Tổng quan"
                                     onClick={() => setActiveTab('overview')}
                                     isActive={activeTab === 'overview'}
                                 />
                                 <TabButton
                                     tab="content"
-                                    label="Course Content"
+                                    label="Nội dung khoá học"
                                     onClick={() => setActiveTab('content')}
                                     isActive={activeTab === 'content'}
                                 />
@@ -465,6 +448,7 @@ const CourseDetail: React.FC = () => {
                                 hasMoreFeedbacks={feedbackMeta.hasMore}
                                 onLoadMoreFeedbacks={loadMoreFeedbacks}
                                 onSubmitFeedback={handleSubmitFeedback}
+                                isLoadingFeedback={isLoadingFeedbacks}
                             />
                         ) : (
                             curriculum && (
@@ -472,7 +456,7 @@ const CourseDetail: React.FC = () => {
                                     chapters={curriculum.chapters}
                                     expandedChapters={expandedChapters}
                                     setExpandedChapters={setExpandedChapters}
-                                    isEnrolled={basicInfo.isEnrolled}
+                                    isEnrolled={basicInfo.enrolled}
                                     onLessonClick={handleLessonClick}
                                 />
                             )

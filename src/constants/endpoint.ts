@@ -21,6 +21,11 @@ export const ENDPOINTS = {
         ACTIVATE_ACCOUNT: '/student/activate',
         LOGIN: '/student/login',
         PROFILE: '/student/profile'
+    },
+
+    COURSE: {
+        BASIC_DETAIL: '/course',
+        TEST: '/test',
     }
 
 

@@ -117,7 +117,7 @@ export interface CourseBasicDTO {
     lastUpdated: string;
     previewVideoUrl?: string;
     previewVideoDuration?: number;
-    isEnrolled: boolean;
+    enrolled: boolean;
 
     instructor: Instructor;
     subcategories: SubCategory[];
@@ -130,7 +130,7 @@ export interface CourseCurriculumDTO {
 }
 
 export interface CourseFeedbacksDTO {
-    items: FeedbackData[];  // Sử dụng lại FeedbackData interface
+    items: FeedbackData[];
     total: number;
     currentPage: number;
     hasMore: boolean;
