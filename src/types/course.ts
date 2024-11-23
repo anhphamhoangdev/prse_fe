@@ -39,15 +39,15 @@ export interface CourseFilters {
 // course detail
 
 export interface LessonProgress {
-    status: 'not_started' | 'completed';
-    completedAt?: string;
-    lastAccessedAt?: string;
+    status: 'not_started' | 'completed' | null;
+    completedAt?: string | null;
+    lastAccessedAt?: string | null;
 }
 
 export interface ChapterProgress {
-    status: 'not_started' | 'in_progress' | 'completed';
-    completedAt?: string;
-    progressPercent: number;
+    status: 'not_started' | 'in_progress' | 'completed' | null;
+    completedAt?: string | null;
+    progressPercent: number | null;
 }
 
 
@@ -55,8 +55,8 @@ export interface Lesson {
     id: number;
     title: string;
     type: 'video' | 'text' | 'code' | 'quiz';
-    duration?: string;
-    progress?: LessonProgress;
+    duration?: number | null;
+    progress?: LessonProgress | null;
 }
 
 export interface Chapter {
@@ -135,6 +135,38 @@ export interface CourseFeedbacksDTO {
     currentPage: number;
     hasMore: boolean;
 }
+
+export interface FeedbackResponse {
+    error_message: Record<string, any>;
+    code: number;
+    data: {
+        totalItems: number;
+        totalPages: number;
+        feedbacks: {
+            id: number;
+            studentId: number;
+            studentName: string;
+            studentAvatarUrl: string;
+            rating: number;
+            comment: string;
+            createdAt: string;
+        }[];
+        hasNext: boolean;
+        currentPage: number;
+    };
+}
+
+
+// lesson detail
+export interface VideoLessonData {
+    id: number;
+    lessonId: number;
+    videoUrl: string;
+    duration: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 
 
 

@@ -1,5 +1,5 @@
 import {ENDPOINTS} from "../constants/endpoint";
-import {request, requestPost} from "../utils/request";
+import {request, requestPost, requestPostFormDataWithAuth} from "../utils/request";
 
 
 interface RegisterResponse {
@@ -14,6 +14,15 @@ interface ActivationResponse {
     success: boolean;
     error_message: any;
     code: number;
+}
+
+interface ResponseAvatarUrl {
+    avatarUrl: string | null;
+}
+interface UploadAvatarResponse {
+    success: boolean;
+    avatarUrl: string | null;  // Đảm bảo có thể null
+    error?: string;
 }
 
 export async function checkUsernameExists(username: string): Promise<boolean> {
@@ -141,6 +150,29 @@ export async function activateStudentAccount(
             success: false,
             code: 0,
             error_message: error instanceof Error ? error.message : "An unexpected error occurred"
+        };
+    }
+}
+
+export async function uploadAvatar(file: File): Promise<UploadAvatarResponse> {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await requestPostFormDataWithAuth<ResponseAvatarUrl>(
+            ENDPOINTS.STUDENT.UPDATE_AVATAR,
+            formData
+        );
+
+        return {
+            success: true,
+            avatarUrl: response.avatarUrl || null  // Convert undefined to null
+        };
+    } catch (error) {
+        return {
+            success: false,
+            avatarUrl: null,
+            error: error instanceof Error ? error.message : 'Unknown error occurred'
         };
     }
 }

@@ -1,7 +1,7 @@
 import {Course} from "../models/Course";
 import {request, requestGetWithOptionalAuth, requestWithParams} from "../utils/request";
 import {ENDPOINTS} from "../constants/endpoint";
-import {CourseBasicDTO, CourseFeedbacksDTO, FeedbackData} from "../types/course";
+import {CourseBasicDTO, CourseCurriculumDTO, CourseFeedbacksDTO, FeedbackData, FeedbackResponse} from "../types/course";
 
 interface HomeCourseResponse {
     error_message: any;
@@ -19,17 +19,14 @@ interface BasicCourseResponse {
     };
 }
 
-interface FeedbackResponse {
-    error_message: Record<string, any>;
+interface CourseCurriculumResponse {
+    error_message: Record<string, unknown>;
     code: number;
     data: {
-        totalItems: number;
-        totalPages: number;
-        feedbacks: FeedbackData[];
-        hasNext: boolean;
-        currentPage: number;
+        chapters: CourseCurriculumDTO | null;
     };
 }
+
 
 export async function getHomeFreeCourses(): Promise<Course[]> {
     console.log('[CourseService] Fetching home free courses');
@@ -113,7 +110,7 @@ export async function getBasicDetailCourse(courseId: number): Promise<CourseBasi
 
     try {
         const response = await requestGetWithOptionalAuth<BasicCourseResponse>(
-            ENDPOINTS.COURSE.BASIC_DETAIL + `/${courseId}`
+            ENDPOINTS.COURSE.BASIC + `/${courseId}`
         );
 
         if (response.code === 1 && response.data.course) {
@@ -139,27 +136,50 @@ export async function getBasicDetailCourse(courseId: number): Promise<CourseBasi
     }
 }
 
+export async function getCourseCurriculum(courseId: number): Promise<CourseCurriculumDTO | null> {
+    console.log(`[CourseService] Fetching curriculum for course ID: ${courseId}`);
 
-// types/api.ts
-interface FeedbackResponse {
-    error_message: Record<string, any>;
-    code: number;
-    data: {
-        totalItems: number;
-        totalPages: number;
-        feedbacks: {
-            id: number;
-            studentId: number;
-            studentName: string;
-            studentAvatarUrl: string;
-            rating: number;
-            comment: string;
-            createdAt: string;
-        }[];
-        hasNext: boolean;
-        currentPage: number;
-    };
+    try {
+        const response = await requestGetWithOptionalAuth<CourseCurriculumResponse>(
+            ENDPOINTS.COURSE.BASIC + `/${courseId}/curriculum`
+        );
+
+        // Early return for invalid response code
+        if (response.code !== 1) {
+            console.warn('[CourseService] Received unexpected response code:', response.code);
+            return null;
+        }
+
+        const chapters = response.data?.chapters?.chapters;
+
+        // Check if chapters exists and is an array
+        if (!chapters || !Array.isArray(chapters)) {
+            console.warn('[CourseService] No valid chapters data found');
+            return null;
+        }
+
+        // Check if array is empty
+        if (chapters.length === 0) {
+            console.warn('[CourseService] Course has no chapters');
+            return { chapters: [] };
+        }
+
+        console.log(`[CourseService] Successfully fetched curriculum with ${chapters.length} chapters`);
+        return { chapters };
+
+    } catch (error) {
+        console.error('[CourseService] Error fetching course curriculum:', error);
+        if (error instanceof Error) {
+            console.error('[CourseService] Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+        }
+        return null;
+    }
 }
+
+
 
 
 export async function getCourseFeedbacks(
@@ -170,7 +190,7 @@ export async function getCourseFeedbacks(
 
     try {
         const response = await requestWithParams<FeedbackResponse>(
-            `${ENDPOINTS.COURSE.BASIC_DETAIL}/${courseId}/feedbacks`,
+            `${ENDPOINTS.COURSE.BASIC}/${courseId}/feedbacks`,
             {
                     page: page-1,
                     size: 3

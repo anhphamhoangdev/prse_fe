@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import React from "react";
 import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
 import {Link, useNavigate} from "react-router-dom";
@@ -29,6 +29,19 @@ export function LoginPage() {
 
     const navigate = useNavigate(); // Khởi tạo useNavigate
 
+
+    useEffect(() => {
+        const checkAuth = () => {
+            const sessionToken = sessionStorage.getItem("token");
+            const localToken = localStorage.getItem("token");
+
+            if (sessionToken || localToken) {
+                navigate("/");
+            }
+        };
+
+        checkAuth();
+    }, [navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

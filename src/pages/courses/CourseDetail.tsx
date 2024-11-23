@@ -4,14 +4,13 @@ import {CourseSidebar} from "../../components/course/course-detail/CourseSidebar
 import {CourseContent} from "../../components/course/course-detail/CourseContent";
 import {CourseHero} from "../../components/course/course-detail/CourseHero";
 import {CourseOverview} from "../../components/course/course-detail/CourseOverview";
-import {CourseBasicDTO, CourseCurriculumDTO, FeedbackData} from "../../types/course";
-import {useParams} from "react-router-dom";
-import {getBasicDetailCourse, getCourseFeedbacks} from "../../services/courseService";
+import {Chapter, CourseBasicDTO, CourseCurriculumDTO, FeedbackData} from "../../types/course";
+import {useNavigate, useParams} from "react-router-dom";
+import {getBasicDetailCourse, getCourseCurriculum, getCourseFeedbacks} from "../../services/courseService";
 import {CourseNotFound} from "../../components/course/course-detail/CourseNotFound";
+import CourseContentLoading from "../../components/course/course-detail/CourseContentLoading";
+import {getLessonPath} from "../../types/lesson";
 
-interface FeedbackPages {
-    [key: string]: FeedbackData[];  // index signature
-}
 
 const handleLessonClick = (chapterId: number, lessonId: number) => {
     // Handle navigation or other actions
@@ -28,11 +27,6 @@ const handleBuyNow = () => {
     console.log('Processing purchase...');
 };
 
-const handleStartLearning = () => {
-    // Có thể chuyển hướng người dùng đến trang học
-    console.log('Starting course...');
-    // router.push(`/learn/${courseData.id}`);
-};
 
 const TabButton: React.FC<{
     tab: 'overview' | 'content';
@@ -51,9 +45,10 @@ const TabButton: React.FC<{
 
 const CourseDetail: React.FC = () => {
 
+    const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    // STATE
+    // basic info - thong tin tong quan
     const [basicInfo, setBasicInfo] = useState<CourseBasicDTO | null>({
         id: 1,
         title: "Huỷ diệt Java Spring Boot",
@@ -134,124 +129,16 @@ const CourseDetail: React.FC = () => {
         ]
     });
 
-    const [curriculum, setCurriculum] = useState<CourseCurriculumDTO>({
-        chapters: [
-            {
-                id: 1,
-                title: "Giới thiệu Spring Boot",
-                progress: {
-                    status: 'completed',
-                    completedAt: '2024-03-14T10:30:00',
-                    progressPercent: 100
-                },
-                lessons: [
-                    {
-                        id: 1,
-                        title: "Tổng quan về Spring Boot",
-                        type: "video",
-                        duration: "15:00",
-                        progress: {
-                            status: 'completed',
-                            completedAt: '2024-03-12T15:30:00',
-                            lastAccessedAt: '2024-03-12T16:45:00'
-                        }
-                    },
-                    {
-                        id: 2,
-                        title: "Cài đặt môi trường phát triển",
-                        type: "text",
-                        duration: "15:00",
-                        progress: {
-                            status: 'completed',
-                            completedAt: '2024-03-13T09:20:00',
-                            lastAccessedAt: '2024-03-13T10:15:00'
-                        }
-                    },
-                    {
-                        id: 3,
-                        title: "Kiểm tra kiến thức Spring Boot cơ bản",
-                        type: "quiz",
-                        duration: "14:00",
-                        progress: {
-                            status: 'completed',
-                            completedAt: '2024-03-14T10:30:00',
-                            lastAccessedAt: '2024-03-14T11:00:00'
-                        }
-                    }
-                ]
-            },
-            {
-                id: 2,
-                title: "RESTful API với Spring Boot",
-                progress: {
-                    status: 'in_progress',
-                    progressPercent: 33.33
-                },
-                lessons: [
-                    {
-                        id: 4,
-                        title: "REST Controller và Request Mapping",
-                        type: "video",
-                        duration: "20:00",
-                        progress: {
-                            status: 'completed',
-                            completedAt: '2024-03-15T14:20:00',
-                            lastAccessedAt: '2024-03-15T15:00:00'
-                        }
-                    },
-                    {
-                        id: 5,
-                        title: "Xử lý Request và Response",
-                        type: "code",
-                        duration: "3:00",
-                        progress: {
-                            status: 'not_started',
-                        }
-                    },
-                    {
-                        id: 6,
-                        title: "Validation và Exception Handling",
-                        type: "text",
-                        duration: "3:00",
-                        progress: {
-                            status: 'not_started'
-                        }
-                    }
-                ]
-            },
-            {
-                id: 3,
-                title: "Spring Data JPA & Database",
-                progress: {
-                    status: 'not_started',
-                    progressPercent: 0
-                },
-                lessons: [
-                    {
-                        id: 7,
-                        title: "Giới thiệu về Spring Data JPA",
-                        type: "video",
-                        duration: "25:00",
-                        progress: {
-                            status: 'not_started'
-                        }
-                    },
-                    {
-                        id: 8,
-                        title: "Làm việc với Repository",
-                        type: "text",
-                        duration: "15:00",
-                        progress: {
-                            status: 'not_started'
-                        }
-                    }
-                ]
-            }
-        ]
-    });
+    // curriculum - noi dung khoa hoc
+    const [curriculum, setCurriculum] = useState<CourseCurriculumDTO | null>(null);
+    const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
 
+
+
+    // chapter expand
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
     const [activeTab, setActiveTab] = useState<'overview' | 'content'>('overview');
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -307,6 +194,7 @@ const CourseDetail: React.FC = () => {
         }
     }, [id]);
 
+    // fetch feedback
     useEffect(() => {
         const fetchInitialFeedbacks = async () => {
             if (!id) return;
@@ -368,20 +256,29 @@ const CourseDetail: React.FC = () => {
     };
 
     // Fetch curriculum when switching to content tab
-    // useEffect(() => {
-    //     const fetchCurriculum = async () => {
-    //         if (activeTab === 'content' && !curriculum && id) {
-    //             try {
-    //                 const data = await courseService.getCourseCurriculum(Number(id));
-    //                 setCurriculum(data);
-    //             } catch (error) {
-    //                 console.error('Failed to fetch curriculum:', error);
-    //             }
-    //         }
-    //     };
-    //
-    //     fetchCurriculum();
-    // }, [activeTab, curriculum, id]);
+    const fetchCurriculum = async (courseId: number) => {
+        try {
+            setIsLoadingCurriculum(true);
+            const data = await getCourseCurriculum(courseId);
+            setCurriculum(data);
+            console.log('[CourseDetail] Successfully fetched curriculum:', data);
+            return data; // Return data để sử dụng ngay
+        } catch (error) {
+            console.error('Failed to fetch curriculum:', error);
+            return null;
+        } finally {
+            setIsLoadingCurriculum(false);
+        }
+    };
+    useEffect(() => {
+        const loadCurriculum = async () => {
+            if (activeTab === 'content' && !curriculum && id) {
+                await fetchCurriculum(Number(id));
+            }
+        };
+
+        loadCurriculum();
+    }, [activeTab, curriculum, id]);
 
     const handleSubmitFeedback = async (rating: number, comment: string) => {
         if (!id) return;
@@ -401,6 +298,110 @@ const CourseDetail: React.FC = () => {
         }
     };
 
+
+    // start learning
+    const findNextLesson = (chapters: Chapter[]): {
+        chapterId: number;
+        lessonId: number;
+        type: string;
+    } | null => {
+        // Duyệt qua từng chapter
+        for (const chapter of chapters) {
+            // Duyệt qua từng lesson trong chapter
+            for (let i = 0; i < chapter.lessons.length; i++) {
+                const currentLesson = chapter.lessons[i];
+
+                // Nếu là bài học đầu tiên chưa hoàn thành hoặc null
+                if (!currentLesson.progress || currentLesson.progress.status !== 'completed') {
+                    return {
+                        chapterId: chapter.id,
+                        lessonId: currentLesson.id,
+                        type: currentLesson.type
+                    };
+                }
+
+                // Nếu là bài học cuối cùng đã hoàn thành trong chapter
+                if (currentLesson.progress?.status === 'completed' &&
+                    i === chapter.lessons.length - 1) {
+                    // Kiểm tra chapter tiếp theo
+                    continue;
+                }
+
+                // Nếu bài hiện tại đã hoàn thành, kiểm tra bài tiếp theo
+                if (currentLesson.progress?.status === 'completed' &&
+                    i < chapter.lessons.length - 1) {
+                    const nextLesson = chapter.lessons[i + 1];
+                    if (!nextLesson.progress || nextLesson.progress.status !== 'completed') {
+                        return {
+                            chapterId: chapter.id,
+                            lessonId: nextLesson.id,
+                            type: nextLesson.type
+                        };
+                    }
+                }
+            }
+        }
+
+        // Nếu không tìm thấy bài chưa hoàn thành, trả về bài đầu tiên
+        if (chapters.length > 0 && chapters[0].lessons.length > 0) {
+            return {
+                chapterId: chapters[0].id,
+                lessonId: chapters[0].lessons[0].id,
+                type: chapters[0].lessons[0].type
+            };
+        }
+
+        return null;
+    };
+
+
+    const handleStartLearning = (
+        courseId: string | number,
+        isEnrolled: boolean,
+        chapters: Chapter[],
+        navigate: (path: string) => void
+    ): void => {
+        // Kiểm tra đã enroll chưa
+        if (!isEnrolled) return;
+
+        const nextLesson = findNextLesson(chapters);
+
+        if (nextLesson) {
+            const path = getLessonPath(
+                courseId,
+                nextLesson.chapterId,
+                nextLesson.lessonId,
+                nextLesson.type
+            );
+            navigate(path);
+        } else {
+            console.warn('No lessons found in the course');
+        }
+    };
+
+    const handleStartLearningClick = async () => {
+        if (!id) return;
+
+        let currentCurriculum = curriculum;
+
+        // Nếu chưa có curriculum thì fetch
+        if (!currentCurriculum) {
+            const fetchedData = await fetchCurriculum(Number(id));
+            if (!fetchedData) return; // Nếu fetch thất bại thì return
+            currentCurriculum = fetchedData;
+        }
+
+        // Kiểm tra và thực hiện navigate
+        if (currentCurriculum?.chapters) {
+            handleStartLearning(
+                Number(id),
+                (basicInfo?.enrolled ? basicInfo.enrolled : false),
+                currentCurriculum.chapters,
+                navigate
+            );
+        }
+    };
+
     if (isLoading) return (
         <div className="fixed inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-gray-200 rounded-full animate-spin border-t-blue-600"></div>
@@ -417,7 +418,7 @@ const CourseDetail: React.FC = () => {
                 courseData={basicInfo}
                 onAddToCart={handleAddToCart}
                 onBuyNow={handleBuyNow}
-                onStartLearning={handleStartLearning}
+                onStartLearning={handleStartLearningClick}
             />
             <div className="container mx-auto px-4 py-8">
                 <div className="flex space-x-8">
@@ -451,12 +452,15 @@ const CourseDetail: React.FC = () => {
                                 isLoadingFeedback={isLoadingFeedbacks}
                             />
                         ) : (
-                            curriculum && (
+                            isLoadingCurriculum ? (
+                                <CourseContentLoading />
+                            ) : curriculum && (
                                 <CourseContent
                                     chapters={curriculum.chapters}
                                     expandedChapters={expandedChapters}
                                     setExpandedChapters={setExpandedChapters}
                                     isEnrolled={basicInfo.enrolled}
+                                    courseId={id}
                                     onLessonClick={handleLessonClick}
                                 />
                             )
@@ -468,7 +472,7 @@ const CourseDetail: React.FC = () => {
                             courseData={basicInfo}
                             onAddToCart={handleAddToCart}
                             onBuyNow={handleBuyNow}
-                            onStartLearning={handleStartLearning}
+                            onStartLearning={handleStartLearningClick}
                         />
                     </div>
                 </div>

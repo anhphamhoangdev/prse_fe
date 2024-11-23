@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import React from "react";
 import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {ConfirmPasswordInput, MainPasswordInput} from "../components/common/PasswordSignupInput";
 import {checkEmailExists, checkUsernameExists, register} from "../services/studentService";
 
@@ -30,6 +30,21 @@ export function SignupPage() {
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
     // const [phoneError, setPhoneError] = useState('');
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const checkAuth = () => {
+            const sessionToken = sessionStorage.getItem("token");
+            const localToken = localStorage.getItem("token");
+
+            if (sessionToken || localToken) {
+                navigate("/");
+            }
+        };
+
+        checkAuth();
+    }, [navigate]);
 
     // check
     const checkUsername = async (username: string) => {

@@ -197,6 +197,30 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                 ))}
             </div>
 
+
+            {/* Load More Button */}
+            {hasMoreFeedbacks && feedbacks.length > 0 && (
+                <div className="flex justify-center mt-8">
+                    <button
+                        onClick={onLoadMoreFeedbacks}
+                        disabled={isLoadingMore}
+                        className="inline-flex items-center justify-center px-6 py-3 border border-transparent shadow-md text-base font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 hover:shadow-lg"
+                    >
+                        {isLoadingMore ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"/>
+                                Đang tải...
+                            </>
+                        ) : (
+                            <>
+                                Xem thêm đánh giá
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
+
+
             {/* No Feedbacks State */}
             {feedbacks.length === 0 && !isLoadingFeedback && (
                 <div className="text-center py-12 bg-gray-50 rounded-xl">

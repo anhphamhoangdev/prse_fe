@@ -164,9 +164,17 @@ export const Header = () => {
                     {/* Logo */}
                     <Link
                         to="/"
-                        className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                     >
-                        Easy<span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
+                        <img
+                            src="/logo.png" // Đường dẫn đến logo sau khi bạn đã lưu vào thư mục public
+                            alt="HCMUTE Logo"
+                            className="w-10 h-10 object-contain"
+                        />
+                        <span className="text-2xl sm:text-3xl font-bold">
+                            <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Easy</span>
+                            <span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
+                        </span>
                     </Link>
 
                     {/* Search Bar */}

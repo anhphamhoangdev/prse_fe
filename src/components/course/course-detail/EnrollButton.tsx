@@ -129,4 +129,3 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
     );
 };
 
-export default EnrollButton;

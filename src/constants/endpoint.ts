@@ -16,17 +16,32 @@ export const ENDPOINTS = {
     STUDENT: {
         CHECK_USERNAME: '/student/existsByUsername',
         CHECK_EMAIL: '/student/existsByEmail',
-        CHECK_PHONENUMBER: '/student/existsByPhoneNumber',
+        CHECK_PHONE_NUMBER: '/student/existsByPhoneNumber',
         REGISTER: '/student/register',
         ACTIVATE_ACCOUNT: '/student/activate',
         LOGIN: '/student/login',
-        PROFILE: '/student/profile'
+        PROFILE: '/student/profile',
+        UPDATE_AVATAR: '/student/update-avatar',
     },
 
     COURSE: {
-        BASIC_DETAIL: '/course',
+        BASIC: '/course',
         TEST: '/test',
+    },
+
+    CART: {
+        BASIC: '/cart',
+        REMOVE_ITEM: '/cart/remove-course',
+    },
+
+    CHECKOUT: {
+        CREATE: '/checkout/create',
+    },
+
+    PAYMENT: {
+        GET_ALL_METHODS: '/payment-method',
     }
+
 
 
     // USER: {
