@@ -7,6 +7,7 @@ import {FilterSection} from "../components/common/Filter";
 import {CourseHomeSection} from "../components/course/CourseHomeSection";
 import {Pagination} from "../components/common/Pagination";
 import {searchCoursesBySubCategory} from "../services/searchService";
+import {useNotification} from "../components/notification/NotificationProvider";
 
 export function Category() {
     const { categoryId } = useParams();
@@ -30,6 +31,9 @@ export function Category() {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const { showNotification } = useNotification();
+
 
     // Hàm cập nhật filters
     const updateFilters = (newFilters: Partial<CourseFilters>) => {
@@ -67,6 +71,8 @@ export function Category() {
         updateFilters({ ...filterChanges, page: 1 });
     };
 
+
+
     // Xử lý clear tất cả filter
     const handleClearFilters = () => {
         updateFilters({
@@ -93,6 +99,25 @@ export function Category() {
             filters.sortBy !== 'newest'
         );
     };
+
+    // xu li notification
+    const handleAddToCartSuccess = () => {
+        showNotification(
+            'success',
+            'Thành công',
+            'Khóa học đã được thêm vào giỏ hàng thành công'
+        );
+    };
+
+    const handleAddToCartError = (message: string) => {
+        showNotification(
+            'error',
+            'Không thành công',
+            message
+        );
+    };
+
+
 
     // Fetch courses với filters
     useEffect(() => {
@@ -199,6 +224,8 @@ export function Category() {
                                     title={`Danh sách khóa học ${filters.q ? `- Tìm kiếm "${filters.q}"` : ''}`}
                                     courses={courseData.courses}
                                     displayType='category'
+                                    onAddToCartSuccess={handleAddToCartSuccess}
+                                    onAddToCartError={handleAddToCartError}
                                 />
                                 {courseData.totalPages > 1 && (
                                     <Pagination

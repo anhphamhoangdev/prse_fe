@@ -273,9 +273,9 @@ export async function requestPostWithAuthFullResponse<T>(endpoint: string, data:
     const jsonResponse = await response.json();
 
     // Check response code từ API
-    if (jsonResponse.code === 0) {
-        throw new Error(jsonResponse.error_message);
-    }
+    // if (jsonResponse.code === 0) {
+    //     throw new Error(jsonResponse.error_message);
+    // }
 
     return jsonResponse;
 }

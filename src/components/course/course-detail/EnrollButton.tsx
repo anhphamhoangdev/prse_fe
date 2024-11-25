@@ -53,7 +53,7 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
                     ${isAside ? 'px-4 py-2 text-sm' : 'px-8 py-3'}`}
             >
                 <Play className="w-4 h-4" />
-                Bắt đầu học
+                Vào học
             </button>
         );
     }

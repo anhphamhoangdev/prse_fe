@@ -27,6 +27,24 @@ interface CourseCurriculumResponse {
     };
 }
 
+interface PageResponse<T> {
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    last: boolean;
+    size: number;
+    content: T[];
+    number: number;
+    numberOfElements: number;
+}
+
+interface MyCoursesResponse {
+    code: number;
+    error_message: any;
+    data: {
+        courses: PageResponse<Course>
+    }
+}
 
 export async function getHomeFreeCourses(): Promise<Course[]> {
     console.log('[CourseService] Fetching home free courses');
@@ -66,15 +84,78 @@ export async function getHomeFreeCourses(): Promise<Course[]> {
     }
 }
 
-export async function getHomeDiscountCourse(): Promise<Course[]> {
-    console.log('[CourseService] Fetching home discount courses');
+
+
+export async function getMyCourses(page: number = 0, size: number = 12): Promise<PageResponse<Course>> {
+    console.log('[CourseService] Fetching my courses');
     try {
-        const response = await request<HomeCourseResponse>(
-            ENDPOINTS.HOME.DISCOUNT_COURSES
+        const response = await requestGetWithOptionalAuth<MyCoursesResponse>(
+            `${ENDPOINTS.COURSE.MY_COURSES}?page=${page}&size=${size}`
         );
 
         if (response.code === 1) {
-            const discountCourses = response.data.courses.map((course: Course) => new Course(
+            const pageData = response.data.courses;
+            pageData.content = pageData.content.map((course: Course) => new Course(
+                course.id,
+                course.instructorId,
+                course.title,
+                course.shortDescription,
+                course.description,
+                course.imageUrl,
+                course.language,
+                course.originalPrice,
+                course.averageRating,
+                course.totalStudents,
+                course.totalViews,
+                course.isPublish,
+                course.isHot,
+                course.isDiscount,
+                course.createdAt,
+                course.updatedAt,
+                course.originalPrice
+            ));
+
+            console.log(`[CourseService] Successfully fetched ${pageData.content.length} courses (Page ${page + 1} of ${pageData.totalPages})`);
+            return pageData;
+        }
+
+        console.warn('[CourseService] Received unexpected response code:', response.code);
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
+    } catch (error) {
+        console.error('[CourseService] Error fetching my courses:', error);
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
+    }
+}
+
+
+export async function getHomeDiscountCourse(page: number = 0, size: number = 8): Promise<PageResponse<Course>> {
+    console.log('[CourseService] Fetching home discount courses');
+    try {
+        const response = await requestGetWithOptionalAuth<MyCoursesResponse>(
+            `${ENDPOINTS.HOME.DISCOUNT_COURSES}?page=${page}&size=${size}`
+        );
+
+        if (response.code === 1) {
+            const pageData = response.data.courses;
+            pageData.content = pageData.content.map((course: Course) => new Course(
                 course.id,
                 course.instructorId,
                 course.title,
@@ -93,14 +174,93 @@ export async function getHomeDiscountCourse(): Promise<Course[]> {
                 course.updatedAt,
                 course.discountPrice
             ));
-            console.log(`[CourseService] Successfully fetched ${discountCourses.length} discount courses`);
-            return discountCourses;
+
+            console.log(`[CourseService] Successfully fetched ${pageData.content.length} discount courses (Page ${page + 1} of ${pageData.totalPages})`);
+            return pageData;
         }
+
         console.warn('[CourseService] Received unexpected response code:', response.code);
-        return [];
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
     } catch (error) {
         console.error('[CourseService] Error fetching discount courses:', error);
-        return [];
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
+    }
+}
+
+export async function getHomeHotCourse(page: number = 0, size: number = 8): Promise<PageResponse<Course>> {
+    console.log('[CourseService] Fetching home discount courses');
+    try {
+        const response = await requestGetWithOptionalAuth<MyCoursesResponse>(
+            `${ENDPOINTS.HOME.HOT_COURSES}?page=${page}&size=${size}`
+        );
+
+        if (response.code === 1) {
+            const pageData = response.data.courses;
+            pageData.content = pageData.content.map((course: Course) => new Course(
+                course.id,
+                course.instructorId,
+                course.title,
+                course.shortDescription,
+                course.description,
+                course.imageUrl,
+                course.language,
+                course.originalPrice,
+                course.averageRating,
+                course.totalStudents,
+                course.totalViews,
+                course.isPublish,
+                course.isHot,
+                course.isDiscount,
+                course.createdAt,
+                course.updatedAt,
+                course.discountPrice
+            ));
+
+            console.log(`[CourseService] Successfully fetched ${pageData.content.length} hot courses (Page ${page + 1} of ${pageData.totalPages})`);
+            return pageData;
+        }
+
+        console.warn('[CourseService] Received unexpected response code:', response.code);
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
+    } catch (error) {
+        console.error('[CourseService] Error fetching hot courses:', error);
+        return {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true,
+            size: size,
+            number: page,
+            numberOfElements: 0
+        };
     }
 }
 

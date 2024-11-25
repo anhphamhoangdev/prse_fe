@@ -2,18 +2,23 @@ import {Course} from "../../models/Course";
 import React from "react";
 import {CourseCard} from "./CourseCard";
 import {Pagination} from "../common/Pagination";
+import {addToCart} from "../../services/cartService";
+import {Link} from "react-router-dom";
 
 interface CourseHomeSectionProps {
     title: string;
     courses: Course[];
     showHotLabel?: boolean;
-    displayType: 'home' | 'category' | 'search'; // Thêm prop để phân biệt kiểu hiển thị
-    // Props cho trang home
+    displayType: 'home' | 'category' | 'search';
     initialDisplayCount?: number;
-    // Props cho trang category
     currentPage?: number;
     totalPages?: number;
     onPageChange?: (page: number) => void;
+    onAddToCartSuccess?: () => void;
+    onAddToCartError?: (message: string) => void;
+    hideActions?: boolean; // thêm prop mới này,
+    totalElements?: number;
+    viewAllLink?: string;  // Thêm prop này
 }
 
 export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
@@ -24,7 +29,12 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
                                                                         initialDisplayCount = 8,
                                                                         currentPage,
                                                                         totalPages,
-                                                                        onPageChange
+                                                                        onPageChange,
+                                                                        onAddToCartSuccess,
+                                                                        onAddToCartError,
+                                                                        hideActions = false,
+                                                                        totalElements,
+                                                                        viewAllLink,
                                                                     }) => {
     const [showAll, setShowAll] = React.useState(false);
 
@@ -35,9 +45,26 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
 
     const hasMoreCourses = displayType === 'home' && courses.length > initialDisplayCount;
 
-    function handleAddToCart (course : Course) {
-        console.log("Add to cart : " + course.id)
-    }
+    const updateHeaderCartCount = () => {
+        // Dispatch một custom event để Header component có thể lắng nghe
+        const event = new CustomEvent('cartUpdated');
+        window.dispatchEvent(event);
+    };
+
+    const handleAddToCart = async (course: Course) => {
+        try {
+            const response = await addToCart(course.id);
+            if (response.code === 1) {
+                updateHeaderCartCount();
+                onAddToCartSuccess?.();
+            } else {
+                onAddToCartError?.(response.error_message ? response.error_message : 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+            }
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            onAddToCartError?.('Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    };
 
     function handleBuyNow (course : Course) {
         console.log("Enroll now : " + course.id)
@@ -54,7 +81,16 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
                         </span>
                     )}
                 </h2>
-                {displayType === 'home' && hasMoreCourses && (
+                {viewAllLink && totalElements && (
+                    <Link
+                        to={viewAllLink}
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                    >
+                        Xem tất cả ({totalElements})
+                    </Link>
+                )}
+                {/* Nút Thu gọn/Xem thêm cho trang home */}
+                {displayType === 'home' && hasMoreCourses && !viewAllLink && (
                     <button
                         onClick={() => setShowAll(!showAll)}
                         className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
@@ -67,21 +103,25 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${
                 displayType === 'home'
                     ? 'md:grid-cols-3 lg:grid-cols-4'
-                    : 'md:grid-cols-3'  // category và search chỉ có 3 cột
+                    : 'md:grid-cols-3 lg:grid-cols-4'  // category và search chỉ có 3 cột
             } gap-4 gap-y-5`}
             >
                 {displayedCourses.map((course) => (
-                    <CourseCard key={course.id} course={course} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow}/>
+                    <CourseCard key={course.id}
+                                course={course}
+                                onAddToCart={handleAddToCart}
+                                onBuyNow={handleBuyNow}
+                                hideActions={hideActions}
+                    />
                 ))}
             </div>
 
-            {displayType === 'home' && hasMoreCourses ? (
-                // Nút xem thêm cho trang home
+            {displayType === 'home' && hasMoreCourses && !viewAllLink ? (
                 <div className="flex justify-center mt-4">
                     <button
                         onClick={() => setShowAll(!showAll)}
                         className={`px-4 py-2 rounded-lg transition-colors duration-200 
-                            ${showAll
+                        ${showAll
                             ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                             : 'bg-blue-100 hover:bg-blue-200 text-blue-700'}`}
                     >
@@ -89,7 +129,6 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
                     </button>
                 </div>
             ) : (displayType === 'category' || displayType === 'search') && totalPages && totalPages > 1 ? (
-                // Pagination cho trang category
                 <Pagination
                     currentPage={currentPage || 1}
                     totalPages={totalPages}

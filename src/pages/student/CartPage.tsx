@@ -281,8 +281,10 @@ export function CartPage() {
             setLoading(true);
 
             const response = await createCheckout(cart.id);
+            console.log("handleCheckout", response)
             if (response.code === 1 && response.data.checkout_draft) {
                 localStorage.setItem('checkoutDraft', JSON.stringify(response.data.checkout_draft));
+                console.log("handleCheckout", response.data.checkout_draft);
                 navigate('/checkout', {
                     state: { checkoutDraftId: response.data.checkout_draft.id }
                 });

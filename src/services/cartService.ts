@@ -38,6 +38,12 @@ interface DeleteResponse {
     data: Record<string, never>;
 }
 
+interface AddToCartResponse {
+    error_message: string | null;
+    code: number;
+    data: Record<string, never>;
+}
+
 export async function getCart(): Promise<Cart> {
     console.log('[CartService] Fetching cart');
     try {
@@ -46,6 +52,20 @@ export async function getCart(): Promise<Cart> {
         return response.cart;
     } catch (error) {
         console.error('[CartService] Error fetching cart:', error);
+        throw error;
+    }
+}
+
+export async function addToCart(itemId: number): Promise<AddToCartResponse> {
+    console.log(`[CartService] Adding item ${itemId} to cart`);
+    try {
+        const response = await requestPostWithAuthFullResponse<AddToCartResponse>(`${ENDPOINTS.CART.BASIC}`, {
+            courseId: itemId
+        });
+        console.log('[CartService] Item added successfully');
+        return response;
+    } catch (error) {
+        console.error('[CartService] Error added item to cart:', error);
         throw error;
     }
 }
@@ -76,3 +96,4 @@ export async function createCheckout(cartId: number): Promise<CheckoutDraftRespo
         throw error;
     }
 }
+

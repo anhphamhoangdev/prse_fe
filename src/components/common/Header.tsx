@@ -6,20 +6,17 @@ import {
 } from "lucide-react";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {requestWithAuth} from "../../utils/request";
+import {UserData} from "../../types/users";
 
 
-interface UserData {
-    id: number;
-    username: string;
-    email: string;
-    fullName: string;
-    avatarUrl: string | null;
-    money: number;
-    point: number;
-}
+
 
 interface ProfileResponse {
     student: UserData;
+}
+
+interface CartCountResponse {
+    count: number;
 }
 
 export const Header = () => {
@@ -40,7 +37,6 @@ export const Header = () => {
     const [wishlistCount, setWishlistCount] = useState(0);
     const [isAuthChecking, setIsAuthChecking] = useState(true); // New state for loading
 
-    const [isInstructor, setIsInstructor] = useState(true);
 
 
 
@@ -55,6 +51,14 @@ export const Header = () => {
             setSearchTerm(query);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (user) {
+            fetchCartCount();
+        }
+    }, [user]);
+
+
 
 
     const handleBecomeInstructor = () => {
@@ -111,21 +115,36 @@ export const Header = () => {
         }
     };
 
-    const fetchCartCount = async (token: string) => {
+    const fetchCartCount = async () => {
         try {
-            const response = await fetch('/api/cart/count', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const { count } = await response.json();
-                setCartCount(count);
-            }
+            const response = await requestWithAuth<CartCountResponse>(ENDPOINTS.CART.COUNT);
+            setCartCount(response.count);
         } catch (error) {
             console.error('Error fetching cart count:', error);
+            setCartCount(0);
         }
     };
+
+    useEffect(() => {
+        // Fetch cart count when user changes
+        if (user) {
+            fetchCartCount();
+        }
+
+        // Add event listener for cart updates
+        const handleCartUpdate = () => {
+            if (user) {
+                fetchCartCount();
+            }
+        };
+
+        window.addEventListener('cartUpdated', handleCartUpdate);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('cartUpdated', handleCartUpdate);
+        };
+    }, [user]);
 
     const fetchWishlistCount = async (token: string) => {
         try {
@@ -268,7 +287,7 @@ export const Header = () => {
                                                 </Link>
 
                                                 {/* Instructor Option */}
-                                                {isInstructor ? (
+                                                {user?.instructor ? (
                                                     <button
                                                         onClick={handleSwitchToInstructor}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 group"

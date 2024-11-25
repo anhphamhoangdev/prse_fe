@@ -15,3 +15,10 @@ export interface PaymentMethodResponse {
         payment_method: PaymentMethod[];
     }
 }
+export interface PaymentStatusUpdate {
+    code: string;
+    id: string;
+    status: string;
+    orderCode: string;
+    cancel: boolean;
+}

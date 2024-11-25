@@ -6,6 +6,19 @@ import {useNavigate, useParams} from "react-router-dom";
 import {formatDuration} from "../../utils/formatSecondToHour";
 import {requestPostWithAuth, requestWithAuth} from "../../utils/request";
 import {usePreventInspect} from "../../utils/hooks";
+import AIChatDrawer from "../../components/course/AIChatDrawer";
+import {LoadingState} from "../../components/course/LoadingState";
+
+export type MessageType = 'text' | 'code';
+
+export interface Message {
+    id: number;
+    content: string;
+    sender: 'user' | 'ai';
+    timestamp: string;
+    type?: MessageType;
+    language?: string;
+}
 
 
 interface VideoLessonApiResponse {
@@ -52,6 +65,16 @@ const VideoLessonDetail: React.FC = () => {
 
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            id: 1,
+            content: "Xin chào! Tôi có thể giúp gì cho bạn về bài học này?",
+            sender: "ai",
+            timestamp: new Date().toISOString()
+        }
+    ]);
+
 
     // 2. Data Fetching
     useEffect(() => {
@@ -104,6 +127,48 @@ const VideoLessonDetail: React.FC = () => {
             fetchCurriculum();
         }
     }, [courseId, refreshTrigger]);
+
+
+
+
+    const handleAIMessage = async (message: string): Promise<void> => {
+        try {
+            // Add user message first
+            const userMessage: Message = {
+                id: Date.now(),
+                content: message,
+                sender: 'user',
+                timestamp: new Date().toISOString(),
+                type: 'text' // Default type for user messages
+            };
+            setMessages(prev => [...prev, userMessage]);
+            //
+            // // Get AI response
+            // const aiResponse = await simulateAIResponse(message);
+            //
+            // // Add AI response to messages
+            // const aiMessage: Message = {
+            //     id: Date.now() + 1,
+            //     content: aiResponse.content,
+            //     sender: 'ai',
+            //     timestamp: new Date().toISOString(),
+            //     type: aiResponse.type || 'text', // Provide default type
+            //     language: aiResponse.language
+            // };
+            // setMessages(prev => [...prev, aiMessage]);
+        } catch (error) {
+            console.error('Error sending message to AI:', error);
+            // Add error message
+            const errorMessage: Message = {
+                id: Date.now(),
+                content: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
+                sender: 'ai',
+                timestamp: new Date().toISOString(),
+                type: 'text'
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        }
+    };
 
     // 3. Navigation Helpers
     const findNavigationInfo = useCallback(() => {
@@ -299,12 +364,12 @@ const VideoLessonDetail: React.FC = () => {
     };
 
     // 8. Loading States
-    if (isLessonLoading) {
-        return <div>Loading lesson...</div>;
-    }
-
-    if (!currentLesson || !curriculum) {
-        return <div>Lesson not found</div>;
+    if (isLessonLoading || !currentLesson || !curriculum) {
+        return (
+            <SearchHeaderAndFooterLayout>
+                <LoadingState />
+            </SearchHeaderAndFooterLayout>
+        );
     }
 
     // 9. Get Current Navigation Info
@@ -570,6 +635,11 @@ const VideoLessonDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
+            <AIChatDrawer
+                position="right"
+                onSendMessage={handleAIMessage}
+                messages={messages}
+            />
         </SearchHeaderAndFooterLayout>
     );
 };

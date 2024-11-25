@@ -6,6 +6,7 @@ import { CourseHomeSection } from "../components/course/CourseHomeSection";
 import { searchCourses } from "../services/searchService";
 import { Pagination } from "../components/common/Pagination";
 import { FilterSection } from "../components/common/Filter";
+import {useNotification} from "../components/notification/NotificationProvider";
 
 export function Search() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,8 @@ export function Search() {
         rating: Number(searchParams.get('rating')) || undefined,
         sortBy: searchParams.get('sort') || 'newest',
     };
+
+    const { showNotification } = useNotification();
 
     useEffect(() => {
         const fetchSearchResults = async () => {
@@ -84,6 +87,22 @@ export function Search() {
         setSearchParams(params);
     };
 
+    const handleAddToCartSuccess = () => {
+        showNotification(
+            'success',
+            'Thành công',
+            'Khóa học đã được thêm vào giỏ hàng thành công'
+        );
+    };
+
+    const handleAddToCartError = (message: string) => {
+        showNotification(
+            'error',
+            'Không thành công',
+            message
+        );
+    };
+
     if (loading) {
         return (
             <MainLayout>
@@ -126,6 +145,8 @@ export function Search() {
                             title={`Danh sách khóa học ${filters.q ? `- Tìm kiếm "${filters.q}"` : ''}`}
                             courses={searchResults.courses}
                             displayType='search'
+                            onAddToCartSuccess={handleAddToCartSuccess}
+                            onAddToCartError={handleAddToCartError}
                         />
 
                         {searchResults.totalPages > 1 && (

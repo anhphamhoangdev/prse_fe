@@ -3,7 +3,8 @@ export const ENDPOINTS = {
         BANNERS: '/home/banners',
         CATEGORIES: '/home/categories',
         FREE_COURSES: '/home/free-courses',
-        DISCOUNT_COURSES: '/home/discount-courses'
+        DISCOUNT_COURSES: '/home/discount-courses',
+        HOT_COURSES: '/home/hot-courses',
     },
     CATEGORY: {
         BY_SUBCATEGORY: '/category'
@@ -24,14 +25,22 @@ export const ENDPOINTS = {
         UPDATE_AVATAR: '/student/update-avatar',
     },
 
+    INSTRUCTOR: {
+        PROFILE: '/instructor/profile',
+    },
+
+
     COURSE: {
         BASIC: '/course',
+        MY_COURSES: '/course/my-courses',
         TEST: '/test',
+
     },
 
     CART: {
         BASIC: '/cart',
         REMOVE_ITEM: '/cart/remove-course',
+        COUNT: '/cart/count'
     },
 
     CHECKOUT: {
@@ -40,6 +49,8 @@ export const ENDPOINTS = {
 
     PAYMENT: {
         GET_ALL_METHODS: '/payment-method',
+        CREATE: '/payment/create',
+        UPDATE_STATUS: '/payment/update-status',
     }
 
 

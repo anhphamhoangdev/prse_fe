@@ -7,11 +7,8 @@ import {CheckoutSkeleton} from "../../components/payment/checkout/CheckoutSkelet
 import {PaymentMethods} from "../../components/payment/checkout/PaymentMethods";
 import {CheckoutCourseCard} from "../../components/payment/checkout/CheckoutCourseCard";
 import {OrderSummary} from "../../components/payment/checkout/OrderSummary";
-import {getPaymentMethods} from "../../services/paymentService";
+import {createPayment, getPaymentMethods} from "../../services/paymentService";
 import {PaymentMethod} from "../../types/payment";
-
-
-
 
 
 export function CheckoutPage() {
@@ -27,6 +24,7 @@ export function CheckoutPage() {
 
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(null);
 
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         const initCheckout = () => {
@@ -78,6 +76,42 @@ export function CheckoutPage() {
 
         fetchPaymentMethods();
     }, []);
+
+    const handlePayment = async () => {
+        if (!selectedPaymentMethod || !checkoutDraft) {
+            setError("Vui lòng chọn phương thức thanh toán");
+            return;
+        }
+
+        setIsProcessing(true);
+        setError("");
+
+        try {
+            const response = await createPayment(checkoutDraft, selectedPaymentMethod);
+
+            console.log(response)
+            // Nếu cần redirect (VNPay, Momo...)
+            if (response.code === 1 && response.data.payment_info.checkoutUrl) {
+                window.location.href = response.data.payment_info.checkoutUrl;
+            // } else {
+            //     // Nếu không cần redirect (ví dụ COD)
+            //     navigate('/payment/success', {
+            //         state: {
+            //             transactionId: response.transactionId,
+            //             status: response.status
+            //         }
+            //     });
+            }
+        } catch (error) {
+            let errorMessage = "Có lỗi xảy ra khi xử lý thanh toán";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setError(errorMessage);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     // Prevent showing old data while loading
     if (loading) {
@@ -136,14 +170,9 @@ export function CheckoutPage() {
                         <div className="sticky top-4">
                             <OrderSummary
                                 checkoutDraft={checkoutDraft}
-                                onProceed={() => {
-                                    if (!selectedPaymentMethod) {
-                                        setError("Vui lòng chọn phương thức thanh toán");
-                                        return;
-                                    }
-                                    // Handle payment
-                                }}
+                                onProceed={handlePayment}
                                 selectedPaymentMethod={selectedPaymentMethod}
+                                isProcessing={isProcessing}
                             />
                         </div>
                     </div>

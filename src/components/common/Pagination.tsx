@@ -88,7 +88,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                     className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                     aria-label="First page"
                 >
-                    ←
+                    Trang đầu
                 </button>
             )}
 
@@ -128,7 +128,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                     className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                     aria-label="Last page"
                 >
-                    →
+                    Trang cuối
                 </button>
             )}
 

@@ -20,6 +20,7 @@ export function PaymentSuccessPage() {
     };
 
     useEffect(() => {
+        console.log("CALLLLLLLLLLLLLLL ===== > ", paymentInfo)
         const updatePayment = async () => {
             if (!paymentInfo.id || !paymentInfo.orderCode) {
                 setError('Thiếu thông tin thanh toán');
@@ -44,7 +45,7 @@ export function PaymentSuccessPage() {
         };
 
         updatePayment();
-    }, [paymentInfo]);
+    }, []);
 
     // Show loading state
     if (isProcessing) {
