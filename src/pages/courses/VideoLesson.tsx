@@ -8,17 +8,10 @@ import {requestPostWithAuth, requestWithAuth} from "../../utils/request";
 import {usePreventInspect} from "../../utils/hooks";
 import AIChatDrawer from "../../components/course/AIChatDrawer";
 import {LoadingState} from "../../components/course/LoadingState";
-
-export type MessageType = 'text' | 'code';
-
-export interface Message {
-    id: number;
-    content: string;
-    sender: 'user' | 'ai';
-    timestamp: string;
-    type?: MessageType;
-    language?: string;
-}
+import {Message} from "postcss";
+import {sendMessageAI} from "../../services/chatService";
+import {createMessage, MessageUtils} from "../../utils/messageUtil";
+import {CHAT_MESSAGES} from "../../constants/chatMessage";
 
 
 interface VideoLessonApiResponse {
@@ -66,14 +59,9 @@ const VideoLessonDetail: React.FC = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: 1,
-            content: "Xin chào! Tôi có thể giúp gì cho bạn về bài học này?",
-            sender: "ai",
-            timestamp: new Date().toISOString()
-        }
-    ]);
+    const [messages, setMessages] = useState<Message[]>(() =>
+        MessageUtils.createInitialMessages() // Không cần truyền params
+    );
 
 
     // 2. Data Fetching
@@ -129,47 +117,39 @@ const VideoLessonDetail: React.FC = () => {
     }, [courseId, refreshTrigger]);
 
 
-
-
-    const handleAIMessage = async (message: string): Promise<void> => {
+    const handleAIMessage = async (content: string): Promise<void> => {
         try {
-            // Add user message first
-            const userMessage: Message = {
-                id: Date.now(),
-                content: message,
-                sender: 'user',
-                timestamp: new Date().toISOString(),
-                type: 'text' // Default type for user messages
-            };
+            // Add user message
+            const userMessage = MessageUtils.createUserMessage(content, {
+                lessonId: currentLesson?.id,
+                lessonTitle: lessonInfo?.title,
+                chapterId: currentChapter?.id
+            });
             setMessages(prev => [...prev, userMessage]);
-            //
-            // // Get AI response
-            // const aiResponse = await simulateAIResponse(message);
-            //
-            // // Add AI response to messages
-            // const aiMessage: Message = {
-            //     id: Date.now() + 1,
-            //     content: aiResponse.content,
-            //     sender: 'ai',
-            //     timestamp: new Date().toISOString(),
-            //     type: aiResponse.type || 'text', // Provide default type
-            //     language: aiResponse.language
-            // };
-            // setMessages(prev => [...prev, aiMessage]);
+
+            // Get AI response
+            const response = await sendMessageAI(content);
+
+            if (response.code === 1 && response.data?.message) {
+                const aiMessage = MessageUtils.createAIMessage(
+                    response.data.message,
+                    {
+                        lessonId: currentLesson?.id,
+                        lessonTitle: lessonInfo?.title,
+                        chapterId: currentChapter?.id
+                    }
+                );
+                setMessages(prev => [...prev, aiMessage]);
+            } else {
+                throw new Error('Failed to get AI response');
+            }
         } catch (error) {
-            console.error('Error sending message to AI:', error);
-            // Add error message
-            const errorMessage: Message = {
-                id: Date.now(),
-                content: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
-                sender: 'ai',
-                timestamp: new Date().toISOString(),
-                type: 'text'
-            };
+            const errorMessage = MessageUtils.createErrorMessage(
+                error instanceof Error ? error.message : undefined
+            );
             setMessages(prev => [...prev, errorMessage]);
         }
     };
-
     // 3. Navigation Helpers
     const findNavigationInfo = useCallback(() => {
         if (!curriculum || !lessonId) {
@@ -318,6 +298,7 @@ const VideoLessonDetail: React.FC = () => {
     //
     //     await fetchCurriculum();
     // }, [courseId]);
+
 
     const handleSubmitLesson = async (
         courseId: string | number,

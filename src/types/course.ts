@@ -168,6 +168,28 @@ export interface VideoLessonData {
 }
 
 
+// instructor course
+export interface InstructorCourse {
+    id: number;
+    title: string;
+    description: string;
+    shortDescription: string;
+    imageUrl: string;
+    language: string;
+    originalPrice: number;
+    isDiscount: boolean;
+    isHot: boolean;
+    isPublish: boolean;
+    totalStudents: number;
+    totalViews: number;
+    averageRating: number;
+    previewVideoUrl: string;
+    previewVideoDuration: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+
 
 
 

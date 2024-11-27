@@ -20,6 +20,11 @@ import {PaymentCancelledPage} from "./pages/payment/PaymentCancelledPage";
 import {MyCoursesPage} from "./pages/student/MyCoursesPage";
 import {AllDiscountCoursesPage} from "./pages/AllDiscountCoursesPage";
 import {AllHotCoursesPage} from "./pages/AllHotCoursesPage";
+import {InstructorLayout} from "./layouts/InstructorLayout";
+import {InstructorDashboard} from "./pages/instructor/InstructorDashboard";
+import {WebSocketProvider} from "./context/WebSocketContext";
+import CourseUpload from "./pages/instructor/CourseUpload";
+import InstructorCourses from "./pages/instructor/InstructorCourses";
 
 function App() {
     return (
@@ -66,6 +71,17 @@ function App() {
 
                     {/*instructor*/}
                     {/*<Route path="/instructor" element={<InstructorDashboard />} />*/}
+                    <Route path="/instructor/*" element={
+                            <InstructorLayout>
+                                <Routes>
+                                    <Route path="dashboard" element={<InstructorDashboard />} />
+                                    <Route path="courses" element={<InstructorCourses />} />
+                                    <Route path="upload" element={<CourseUpload />} />
+                                    {/*<Route path="earnings" element={<Earnings />} />*/}
+                                    {/*<Route path="analytics" element={<Analytics />} />*/}
+                                </Routes>
+                            </InstructorLayout>
+                    } />
                 </Routes>
             </BrowserRouter>
         </NotificationProvider>

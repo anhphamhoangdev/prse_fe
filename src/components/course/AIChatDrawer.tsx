@@ -1,14 +1,9 @@
 import React, {useState, useCallback, KeyboardEvent, ChangeEvent, useRef, useEffect} from 'react';
 import {MessageCircle, X, Send, Loader2, MinusCircle, Bot, ChevronUp, ChevronDown, Check, Copy} from 'lucide-react';
+import {Message} from "postcss";
+import {MessageContent} from "./MessageContent";
 
-export interface Message {
-    id: number;
-    content: string;
-    sender: 'user' | 'ai';
-    timestamp: string;
-    type?: 'text' | 'code';
-    language?: string;
-}
+
 
 interface AIChatDrawerProps {
     className?: string;
@@ -17,142 +12,6 @@ interface AIChatDrawerProps {
     onSendMessage: (message: string) => Promise<void>;
 }
 
-const CodeBlock: React.FC<{ content: string; language?: string }> = ({ content, language }) => {
-    const [isCopied, setIsCopied] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const codeRef = useRef<HTMLPreElement>(null);
-
-    const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(content);
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-        }
-    };
-
-    const isLongCode = content.split('\n').length > 10;
-
-    return (
-        <div className="relative font-mono text-sm bg-gray-900 rounded-lg overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-gray-400 text-xs">
-                <span>{language || 'code'}</span>
-                <div className="flex items-center gap-2">
-                    {isLongCode && (
-                        <button
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            className="hover:text-white transition-colors"
-                            aria-label={isExpanded ? 'Show less' : 'Show more'}
-                        >
-                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                    )}
-                    <button
-                        onClick={copyToClipboard}
-                        className="hover:text-white transition-colors"
-                        aria-label="Copy code"
-                    >
-                        {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                    </button>
-                </div>
-            </div>
-            {/* Code Content */}
-            <pre
-                ref={codeRef}
-                className={`p-4 text-gray-100 overflow-x-auto ${!isExpanded && isLongCode ? 'max-h-[250px]' : ''}`}
-            >
-                <code>{content}</code>
-            </pre>
-        </div>
-    );
-};
-
-const MessageContent: React.FC<{ message: Message }> = ({ message }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [isLongContent, setIsLongContent] = useState(false);
-
-    useEffect(() => {
-        if (contentRef.current) {
-            setIsLongContent(contentRef.current.scrollHeight > 300);
-        }
-    }, [message.content]);
-
-    const getMessageContent = () => {
-        if (message.type === 'code') {
-            return <CodeBlock content={message.content} language={message.language} />;
-        }
-
-        // Detect if the content contains code blocks (marked with ```)
-        const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-
-        while ((match = codeBlockRegex.exec(message.content)) !== null) {
-            // Add text before code block
-            if (match.index > lastIndex) {
-                parts.push({
-                    type: 'text',
-                    content: message.content.slice(lastIndex, match.index)
-                });
-            }
-
-            // Add code block
-            parts.push({
-                type: 'code',
-                language: match[1] || undefined,
-                content: match[2].trim()
-            });
-
-            lastIndex = match.index + match[0].length;
-        }
-
-        // Add remaining text
-        if (lastIndex < message.content.length) {
-            parts.push({
-                type: 'text',
-                content: message.content.slice(lastIndex)
-            });
-        }
-
-        return parts.length > 0 ? (
-            <div className="space-y-3">
-                {parts.map((part, index) => (
-                    part.type === 'code' ? (
-                        <CodeBlock key={index} content={part.content} language={part.language} />
-                    ) : (
-                        <div key={index} className="whitespace-pre-wrap">{part.content}</div>
-                    )
-                ))}
-            </div>
-        ) : (
-            <div className="whitespace-pre-wrap">{message.content}</div>
-        );
-    };
-
-    return (
-        <div
-            ref={contentRef}
-            className={`${!isExpanded && isLongContent ? 'max-h-[300px] overflow-hidden relative' : ''}`}
-        >
-            {getMessageContent()}
-            {isLongContent && !isExpanded && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-800 to-transparent pointer-events-none" />
-            )}
-            {isLongContent && (
-                <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                    {isExpanded ? 'Hiển thị ít hơn' : 'Xem thêm'}
-                </button>
-            )}
-        </div>
-    );
-};
 
 const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
                                                        className = '',
@@ -172,8 +31,8 @@ const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
         try {
             setIsLoading(true);
             setShowHint(false);
-            await onSendMessage(inputMessage);
             setInputMessage('');
+            await onSendMessage(inputMessage);
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
@@ -294,6 +153,7 @@ const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
                                                 : 'bg-white text-gray-800 rounded-bl-none'
                                         }`}
                                     >
+                                        {/* Sử dụng MessageContent component mới */}
                                         <MessageContent message={message}/>
                                     </div>
                                 </div>

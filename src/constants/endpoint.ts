@@ -27,6 +27,8 @@ export const ENDPOINTS = {
 
     INSTRUCTOR: {
         PROFILE: '/instructor/profile',
+        REVENUE: '/instructor/revenue',
+        RECENT_ENROLLMENT : '/instructor/recent-enrollments',
     },
 
 
@@ -51,6 +53,14 @@ export const ENDPOINTS = {
         GET_ALL_METHODS: '/payment-method',
         CREATE: '/payment/create',
         UPDATE_STATUS: '/payment/update-status',
+    },
+
+    CHAT: {
+        CHAT: '/chat',
+    },
+
+    WEBSOCKET: {
+        CONNECT: `https://${process.env.REACT_APP_BASE_IP}:8443/ws`,
     }
 
 
