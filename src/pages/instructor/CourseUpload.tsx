@@ -276,7 +276,7 @@ const UploadCourse: React.FC = () => {
                     ...errors,
                     submit: 'Vui lòng chọn đầy đủ ảnh và video cho khóa học'
                 });
-                setCurrentStep(3);
+                setCurrentStep(4);
                 return;
             }
 
@@ -322,7 +322,7 @@ const UploadCourse: React.FC = () => {
 
 
             // Redirect to course edit page
-            // navigate(`/instructor/courses`);
+            navigate(`/instructor/uploads`);
 
         } catch (error) {
             console.error('Error creating course:', error);
