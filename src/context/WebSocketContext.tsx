@@ -42,11 +42,21 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                             );
                             break;
 
+                        case 'UPLOAD_STARTED':
+                            const startedStatus: string = message.data;
+                            showNotification(
+                                'info',
+                                message.message,
+                                startedStatus
+                            );
+                            break;
+
                         case 'UPLOAD_COMPLETE':
+                            const successStatus: string = message.data;
                             showNotification(
                                 'success',
-                                'Hoàn thành',
-                                'Tải lên thành công!'
+                                message.message,
+                                successStatus
                             );
                             break;
 

@@ -25,6 +25,7 @@ import {InstructorDashboard} from "./pages/instructor/InstructorDashboard";
 import {WebSocketProvider} from "./context/WebSocketContext";
 import CourseUpload from "./pages/instructor/CourseUpload";
 import InstructorCourses from "./pages/instructor/InstructorCourses";
+import UploadStatusPage from "./pages/instructor/UploadStatusPage";
 
 function App() {
     return (
@@ -77,6 +78,7 @@ function App() {
                                     <Route path="dashboard" element={<InstructorDashboard />} />
                                     <Route path="courses" element={<InstructorCourses />} />
                                     <Route path="upload" element={<CourseUpload />} />
+                                    <Route path="uploads" element={<UploadStatusPage />} />
                                     {/*<Route path="earnings" element={<Earnings />} />*/}
                                     {/*<Route path="analytics" element={<Analytics />} />*/}
                                 </Routes>

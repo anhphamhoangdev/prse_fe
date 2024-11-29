@@ -26,9 +26,13 @@ export const ENDPOINTS = {
     },
 
     INSTRUCTOR: {
+        COURSES: '/instructor/courses',
         PROFILE: '/instructor/profile',
         REVENUE: '/instructor/revenue',
+        UPLOAD_STATUS: '/instructor/upload-status',
         RECENT_ENROLLMENT : '/instructor/recent-enrollments',
+        UPLOAD_COURSE : '/instructor/upload-course',
+        UPLOAD_PREVIEW_VIDEO: '/instructor/upload-preview-video',
     },
 
 

@@ -5,71 +5,16 @@ import {requestWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {CourseRow} from "../../components/instructor/CourseRow";
 import {BookOpen} from "lucide-react";
+import {Pagination} from "../../components/common/Pagination";
 
 enum TabType {
     PUBLISHED = 'published',
     DRAFT = 'draft'
 }
 
-const fakeCourses: InstructorCourse[] = [
-    {
-        id: 1,
-        title: "Học Lập Trình Web Cơ Bản",
-        description: "Khóa học này cung cấp kiến thức cơ bản về lập trình web, bao gồm HTML, CSS và JavaScript.",
-        shortDescription: "Khóa học lập trình web dành cho người mới bắt đầu.",
-        imageUrl: "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
-        language: "Tiếng Việt",
-        originalPrice: 1500000,
-        isDiscount: true,
-        isHot: true,
-        isPublish: false,
-        totalStudents: 200,
-        totalViews: 1500,
-        averageRating: 4.5,
-        previewVideoUrl: "https://example.com/videos/preview-web-development.mp4",
-        previewVideoDuration: "01:30",
-        createdAt: "2023-01-15T10:00:00Z",
-        updatedAt: "2023-10-01T12:00:00Z",
-    },
-    {
-        id: 2,
-        title: "Lập Trình Python Nâng Cao",
-        description: "Khóa học này giúp bạn phát triển kỹ năng lập trình Python từ cơ bản đến nâng cao.",
-        shortDescription: "Khóa học dành cho lập trình viên Python muốn nâng cao kỹ năng.",
-        imageUrl: "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
-        language: "Tiếng Việt",
-        originalPrice: 2000000,
-        isDiscount: false,
-        isHot: true,
-        isPublish: true,
-        totalStudents: 150,
-        totalViews: 800,
-        averageRating: 4.7,
-        previewVideoUrl: "https://example.com/videos/preview-python-advanced.mp4",
-        previewVideoDuration: "02:00",
-        createdAt: "2023-02-20T09:30:00Z",
-        updatedAt: "2023-10-01T12:00:00Z",
-    },
-    {
-        id: 3,
-        title: "Thiết Kế Giao Diện Người Dùng (UI/UX)",
-        description: "Khóa học này sẽ hướng dẫn bạn cách thiết kế giao diện người dùng hấp dẫn và thân thiện.",
-        shortDescription: "Khóa học thiết kế UI/UX cho người mới bắt đầu.",
-        imageUrl: "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
-        language: "Tiếng Việt",
-        originalPrice: 1800000,
-        isDiscount: true,
-        isHot: false,
-        isPublish: true,
-        totalStudents: 120,
-        totalViews: 600,
-        averageRating: 4.3,
-        previewVideoUrl: "https://example.com/videos/preview-ui-ux-design.mp4",
-        previewVideoDuration: "01:45",
-        createdAt: "2023-03-10T11:00:00Z",
-        updatedAt: "2023-10-01T12:00:00Z",
-    },
-];
+interface InstructorCoursesResponse {
+    courses: InstructorCourse[];
+}
 
 const InstructorCourses: React.FC = () => {
     const [courses, setCourses] = useState<InstructorCourse[]>([]);
@@ -77,12 +22,33 @@ const InstructorCourses: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(8);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab]);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const filteredCourses = courses.filter(course =>
+        activeTab === TabType.PUBLISHED ? course.isPublish : !course.isPublish
+    );
+    const currentCourses = filteredCourses.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+
+
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                // const response = await requestWithAuth(ENDPOINTS.INSTRUCTOR.COURSES);
+                const response = await requestWithAuth<InstructorCoursesResponse>(ENDPOINTS.INSTRUCTOR.COURSES);
                 // setCourses(response.data || []);
-                setCourses(fakeCourses);
+                setCourses(response.courses || []);
             } catch (error) {
                 console.error('Error fetching courses:', error);
             } finally {
@@ -93,9 +59,7 @@ const InstructorCourses: React.FC = () => {
         fetchCourses();
     }, []);
 
-    const filteredCourses = courses.filter(course =>
-        activeTab === TabType.PUBLISHED ? course.isPublish : !course.isPublish
-    );
+
 
     if (loading) {
         return (
@@ -107,7 +71,7 @@ const InstructorCourses: React.FC = () => {
 
     return (
         <div className="p-6">
-            {/* Header - Keep as is */}
+            {/* Header */}
             <div className="mb-6 flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-gray-900">Khóa học của tôi</h1>
                 <button
@@ -119,7 +83,7 @@ const InstructorCourses: React.FC = () => {
             </div>
 
             {/* Enhanced Tabs */}
-            <div className="mb-6">
+            <div className="mb-1">
                 <div className="flex gap-8">
                     {[
                         { type: TabType.PUBLISHED, label: 'Đã xuất bản', count: courses.filter(c => c.isPublish).length },
@@ -127,9 +91,12 @@ const InstructorCourses: React.FC = () => {
                     ].map((tab) => (
                         <button
                             key={tab.type}
-                            onClick={() => setActiveTab(tab.type)}
+                            onClick={() => {
+                                setActiveTab(tab.type);
+                                setCurrentPage(1); // Reset về trang 1 khi chuyển tab
+                            }}
                             className={`relative pb-4 px-2 text-sm font-medium border-b-2 transition-colors
-                            ${activeTab === tab.type
+                       ${activeTab === tab.type
                                 ? 'text-blue-600 border-blue-600'
                                 : 'text-gray-500 border-transparent hover:text-gray-700'
                             }`}
@@ -140,13 +107,51 @@ const InstructorCourses: React.FC = () => {
                 </div>
             </div>
 
+            {/* Pagination Top */}
+            {totalPages > 1 && (
+                <div className="mb-3 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="text-sm text-gray-600">
+                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length) + ' UploadStatusPage'}
+                        trong tổng số {filteredCourses.length} khóa học
+                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        maxButtons={5}
+                    />
+                </div>
+            )}
+
+
             {/* Grid Layout for Courses */}
             {filteredCourses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                    {filteredCourses.map(course => (
-                        <CourseRow key={course.id} course={course} />
-                    ))}
-                </div>
+                <>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                        {currentCourses.map(course => (
+                            <CourseRow key={course.id} course={course} />
+                        ))}
+                    </div>
+
+                    {/*/!* Pagination *!/*/}
+                    {/*{totalPages > 1 && (*/}
+                    {/*    <div className="mt-6">*/}
+                    {/*        <Pagination*/}
+                    {/*            currentPage={currentPage}*/}
+                    {/*            totalPages={totalPages}*/}
+                    {/*            onPageChange={handlePageChange}*/}
+                    {/*            maxButtons={5}*/}
+                    {/*        />*/}
+                    {/*    </div>*/}
+                    {/*)}*/}
+
+                    {/* Hiển thị thông tin về số lượng */}
+                    <div className="mt-4 text-center text-sm text-gray-600">
+                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length)}
+                        trong tổng số {filteredCourses.length} khóa học
+                    </div>
+                </>
             ) : (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
                     <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -155,13 +160,6 @@ const InstructorCourses: React.FC = () => {
                             ? 'Bạn chưa có khóa học nào được xuất bản'
                             : 'Bạn chưa có khóa học nào trong bản nháp'}
                     </p>
-                </div>
-            )}
-
-            {/* Optional Pagination */}
-            {filteredCourses.length > 0 && (
-                <div className="mt-6 flex justify-center">
-                    {/* Add pagination components if needed */}
                 </div>
             )}
         </div>

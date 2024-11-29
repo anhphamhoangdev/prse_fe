@@ -1,9 +1,12 @@
-import React from "react";
+import React, { ChangeEvent, FocusEvent } from 'react';
 import {LucideIcon} from "lucide-react";
 
 export interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     icon: LucideIcon;
     error?: string;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
+    onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
 }
 
 export interface FileDropZoneProps {
@@ -23,6 +26,10 @@ export interface CourseFormData {
     isDiscount: boolean;
     isHot: boolean;
     isPublish: boolean;
+    previewVideoDuration?: number;
+    subCategoryIds: number[];
+    prerequisites: string[];
+    objectives: string[];
 }
 
 export interface UploadVideoLesson {
