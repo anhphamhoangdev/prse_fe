@@ -23,3 +23,13 @@ export interface UserData {
     point: number;
     instructor: boolean;
 }
+
+export interface AdminData {
+    id: number;
+    email: string;
+    fullName: string;
+    isAdmin: boolean;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+}

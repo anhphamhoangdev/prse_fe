@@ -22,10 +22,14 @@ import {AllDiscountCoursesPage} from "./pages/AllDiscountCoursesPage";
 import {AllHotCoursesPage} from "./pages/AllHotCoursesPage";
 import {InstructorLayout} from "./layouts/InstructorLayout";
 import {InstructorDashboard} from "./pages/instructor/InstructorDashboard";
-import {WebSocketProvider} from "./context/WebSocketContext";
 import CourseUpload from "./pages/instructor/CourseUpload";
 import InstructorCourses from "./pages/instructor/InstructorCourses";
 import UploadStatusPage from "./pages/instructor/UploadStatusPage";
+import {AdminLayout} from "./layouts/AdminLayout";
+import {AdminLoginPage} from "./pages/admin/AdminLoginPage";
+import {AdminDashboard} from "./pages/admin/AdminDashboard";
+import StudentManagement from "./pages/admin/StudentManagement";
+import CourseEdit from "./pages/instructor/CourseEdit";
 
 function App() {
     return (
@@ -79,15 +83,32 @@ function App() {
                                     <Route path="courses" element={<InstructorCourses />} />
                                     <Route path="upload" element={<CourseUpload />} />
                                     <Route path="uploads" element={<UploadStatusPage />} />
+                                    <Route path="course/:courseId/edit" element={<CourseEdit />} />
                                     {/*<Route path="earnings" element={<Earnings />} />*/}
                                     {/*<Route path="analytics" element={<Analytics />} />*/}
                                 </Routes>
                             </InstructorLayout>
                     } />
+
+                    <Route path="/admin/login" element={<AdminLoginPage />} />
+                    <Route path="/admin/*" element={
+                        <AdminLayout>
+                            <Routes>
+                                <Route path="dashboard" element={<AdminDashboard />} />
+                                <Route path="users" element={<StudentManagement />} />
+                                {/*<Route path="courses" element={<AdminCourses />} />*/}
+                                {/*<Route path="settings" element={<AdminSettings />} />*/}
+                                {/*<Route path="users/:userId" element={<AdminUserDetail />} />*/}
+                                {/*<Route path="courses/:courseId" element={<AdminCourseDetail />} />*/}
+                            </Routes>
+                        </AdminLayout>
+                    } />
                 </Routes>
             </BrowserRouter>
         </NotificationProvider>
+
     );
+
 }
 
 

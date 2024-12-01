@@ -1,4 +1,5 @@
 import {Course} from "../models/Course";
+import React from "react";
 
 export interface CourseResponse {
     error_message: any;
@@ -190,6 +191,49 @@ export interface InstructorCourse {
 }
 
 
+export interface CourseInstructorEdit {
+    id: number;
+    title: string;
+    description: string;
+    shortDescription: string;
+    imageUrl: string;
+    language: string;
+    originalPrice: number;
+    isDiscount: boolean;
+    isHot: boolean;
+    isPublish: boolean;
+    previewVideoUrl: string;
+    previewVideoDuration: number;
+}
 
+export interface CourseInfoEditProps {
+    course: CourseInstructorEdit;
+    chapters: ChapterInstructorEdit[];
+    errorMessage: string;
+    onInfoChange: (field: keyof CourseInstructorEdit, value: any) => void;
+    onChaptersChange: (chapters: ChapterInstructorEdit[]) => void;
+    onInfoSubmit: (e: React.FormEvent) => void;
+    onCurriculumSubmit: (e: React.FormEvent) => void;
+    infoLoading: boolean;
+    curriculumLoading: boolean;
+}
+
+
+export interface LessonInstructorEdit {
+    id: number;
+    title: string;
+    type: 'video' | 'text' | 'code' | 'quiz';
+    duration?: number;
+    description?: string;
+    videoUrl?: string;
+    content?: string;
+}
+
+export interface ChapterInstructorEdit {
+    id: number;
+    title: string;
+    description?: string;
+    lessons: LessonInstructorEdit[];
+}
 
 
