@@ -10,8 +10,9 @@ import AIChatDrawer from "../../components/course/AIChatDrawer";
 import {LoadingState} from "../../components/course/LoadingState";
 import {Message} from "postcss";
 import {sendMessageAI} from "../../services/chatService";
-import {createMessage, MessageUtils} from "../../utils/messageUtil";
-import {CHAT_MESSAGES} from "../../constants/chatMessage";
+import {MessageUtils} from "../../utils/messageUtil";
+import VideoLesson from "./VideoLesson";
+import {VideoPlayer} from "../../components/common/VideoPlayer";
 
 
 interface VideoLessonApiResponse {
@@ -410,12 +411,10 @@ const VideoLessonDetail: React.FC = () => {
                             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                                 {currentLesson ? (
                                     <>
-                                        <div className="relative w-full" style={{paddingTop: '56.25%'}}>
-                                            <iframe
-                                                src={currentLesson.videoUrl}
-                                                className="absolute top-0 left-0 w-full h-full"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
+                                        <div className="relative w-full" >
+                                            <VideoPlayer
+                                                url={currentLesson.videoUrl}
+                                                className="w-full"
                                             />
                                         </div>
 
