@@ -33,6 +33,8 @@ export const ENDPOINTS = {
         RECENT_ENROLLMENT : '/instructor/recent-enrollments',
         UPLOAD_COURSE : '/instructor/upload-course',
         UPLOAD_PREVIEW_VIDEO: '/instructor/upload-preview-video',
+
+
     },
 
 

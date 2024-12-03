@@ -30,6 +30,8 @@ import {AdminLoginPage} from "./pages/admin/AdminLoginPage";
 import {AdminDashboard} from "./pages/admin/AdminDashboard";
 import StudentManagement from "./pages/admin/StudentManagement";
 import CourseEdit from "./pages/instructor/CourseEdit";
+import ChapterEditPage from "./pages/instructor/ChapterEditPage";
+import LessonEdit from "./pages/instructor/LessonEdit";
 
 function App() {
     return (
@@ -86,6 +88,8 @@ function App() {
                                     <Route path="course/:courseId/edit" element={<CourseEdit />} />
                                     {/*<Route path="earnings" element={<Earnings />} />*/}
                                     {/*<Route path="analytics" element={<Analytics />} />*/}
+                                    <Route path="course/:courseId/chapter/:chapterId" element={<ChapterEditPage />} />
+                                    {<Route path="course/:courseId/chapter/:chapterId/lesson/:lessonId" element={<LessonEdit />} />}
                                 </Routes>
                             </InstructorLayout>
                     } />

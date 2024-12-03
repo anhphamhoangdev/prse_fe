@@ -372,3 +372,53 @@ export async function requestAdminWithAuth<T>(endpoint: string): Promise<T> {
     }
     return jsonResponse.data; // Trả về data
 }
+
+
+// PUT
+export async function putWithAuth<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem("token");
+    if (!token) {
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem("token");
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    if(response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if(response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to update ${url}: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // Check response code từ API
+    if (jsonResponse.code === 0) {
+        throw new Error(jsonResponse.error_message);
+    }
+    return jsonResponse.data;
+}

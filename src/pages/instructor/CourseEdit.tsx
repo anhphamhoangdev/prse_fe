@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CourseInfoEdit from "../../components/instructor/CourseInfoEdit";
-import {requestWithAuth} from "../../utils/request";
+import {putWithAuth, requestWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {ChapterInstructorEdit, CourseInstructorEdit} from "../../types/course";
 
@@ -19,23 +19,40 @@ const CourseEdit: React.FC = () => {
 
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchData = async () => {
+            if (!courseId) return;
+
             try {
-                const response = await requestWithAuth<{ course: CourseInstructorEdit }>(
-                    `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}`
-                );
-                setCourse(response.course);
+                const [courseResponse, chaptersResponse] = await Promise.all([
+                    requestWithAuth<{ course: CourseInstructorEdit }>(
+                        `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}`
+                    ),
+                    requestWithAuth<{ chapters: ChapterInstructorEdit[] }>(
+                        `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/curriculum`
+                    )
+                ]);
+
+                setCourse(courseResponse.course);
+
+                // // Sắp xếp chapters theo orderIndex
+                // const sortedChapters = chaptersResponse.chapters.sort((a, b) => a.orderIndex - b.orderIndex);
+                //
+                // // Sắp xếp lessons trong mỗi chapter theo orderIndex
+                // const chaptersWithSortedLessons = sortedChapters.map(chapter => ({
+                //     ...chapter,
+                //     lessons: chapter.lessons.sort((a, b) => a.orderIndex - b.orderIndex)
+                // }));
+
+                setChapters(chaptersResponse.chapters);
             } catch (error) {
-                console.error('Error fetching course:', error);
+                console.error('Error fetching course data:', error);
                 setErrorMessage('Không thể tải thông tin khóa học. Vui lòng thử lại sau.');
             } finally {
                 setPageLoading(false);
             }
         };
 
-        if (courseId) {
-            fetchCourse();
-        }
+        fetchData();
     }, [courseId]);
 
     const handleInfoChange = (field: keyof CourseInstructorEdit, value: any) => {
@@ -61,14 +78,14 @@ const CourseEdit: React.FC = () => {
                 language: course.language,
                 isPublish: course.isPublish,
                 previewVideoUrl: course.previewVideoUrl,
-                previewVideoDuration: course.previewVideoDuration
+                previewVideoDuration: course.previewVideoDuration,
+                originalPrice: course.originalPrice,
             };
 
-            // await requestWithAuth(
-            //     `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/info`,
-            //     'PUT',
-            //     { course: courseInfo }
-            // );
+            await putWithAuth(
+                `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}`,
+                { course: courseInfo }
+            );
             setErrorMessage('');
         } catch (error) {
             console.error('Error updating course info:', error);
@@ -87,6 +104,8 @@ const CourseEdit: React.FC = () => {
             //     'PUT',
             //     { chapters }
             // );
+
+            console.log("CHAPTER : ",chapters)
             setErrorMessage('');
         } catch (error) {
             console.error('Error updating curriculum:', error);

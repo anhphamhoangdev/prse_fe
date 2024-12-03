@@ -18,15 +18,89 @@ const CourseInfoEdit: React.FC<CourseInfoEditProps> = ({
                                                            curriculumLoading
                                                        }) => {
     const [activeTab, setActiveTab] = useState<'info' | 'curriculum'>('info');
+    const [validationError, setValidationError] = useState<string>('');
+
+    const validateCourseInfo = () => {
+        // Kiểm tra các trường bắt buộc
+        const requiredFields = {
+            title: 'Tên khóa học',
+            shortDescription: 'Mô tả ngắn',
+            description: 'Mô tả chi tiết',
+            language: 'Ngôn ngữ',
+            imageUrl: 'Hình ảnh khóa học',
+            previewVideoUrl: 'Video giới thiệu',
+            originalPrice: 'Giá gốc'
+        };
+
+        for (const [field, label] of Object.entries(requiredFields)) {
+            if (!course[field as keyof typeof course]) {
+                setValidationError(`Vui lòng điền đầy đủ thông tin: ${label}`);
+                return false;
+            }
+        }
+
+        if (Number(course.originalPrice) < 2000) {
+            setValidationError('Giá gốc phải lớn hơn 2000');
+            return false;
+        }
+
+        if (course.shortDescription.length > 250) {
+            setValidationError('Mô tả ngắn không được vượt quá 150 ký tự');
+            return false;
+        }
+
+        if (course.description.length > 5000) {
+            setValidationError('Mô tả chi tiết không được vượt quá 5000 ký tự');
+            return false;
+        }
+
+        setValidationError('');
+        return true;
+    };
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (activeTab === 'info') {
-            onInfoSubmit(e);
+            if (validateCourseInfo()) {
+                onInfoSubmit(e);
+            }
         } else {
-            onCurriculumSubmit(e);
+            // if (validateCurriculum()) {
+                onCurriculumSubmit(e);
+            // }
         }
     };
+
+    // const validateCurriculum = () => {
+    //     if (!chapters.length) {
+    //         setValidationError('Vui lòng thêm ít nhất một chương');
+    //         return false;
+    //     }
+    //
+    //     for (const chapter of chapters) {
+    //         if (!chapter.title.trim()) {
+    //             setValidationError('Tên chương không được để trống');
+    //             return false;
+    //         }
+    //
+    //         if (!chapter.lectures?.length) {
+    //             setValidationError(`Chương "${chapter.title}" cần có ít nhất một bài giảng`);
+    //             return false;
+    //         }
+    //
+    //         for (const lecture of chapter.lectures) {
+    //             if (!lecture.title.trim()) {
+    //                 setValidationError('Tên bài giảng không được để trống');
+    //                 return false;
+    //             }
+    //         }
+    //     }
+    //
+    //     setValidationError('');
+    //     return true;
+    // };
 
     const tabs = [
         { id: 'info', label: 'Thông tin khóa học', icon: Globe },
@@ -47,7 +121,10 @@ const CourseInfoEdit: React.FC<CourseInfoEditProps> = ({
                         <button
                             key={tab.id}
                             type="button"
-                            onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                            onClick={() => {
+                                setActiveTab(tab.id as typeof activeTab)
+                                setValidationError('');
+                            }}
                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors 
                                 ${activeTab === tab.id
                                 ? 'bg-white text-blue-600 border-2 border-b-0 border-gray-200'
@@ -94,8 +171,6 @@ const CourseInfoEdit: React.FC<CourseInfoEditProps> = ({
                                 <MediaPanel course={course} onInfoChange={onInfoChange}/>
                             </div>
                         </div>
-
-
                     </div>
                 )}
 
@@ -103,12 +178,19 @@ const CourseInfoEdit: React.FC<CourseInfoEditProps> = ({
                 {activeTab === 'curriculum' && (
                     <div className="p-6">
                         <CurriculumEdit
+                            course={course}
                             chapters={chapters}
                             onChaptersChange={onChaptersChange}
                         />
                     </div>
                 )}
             </div>
+
+            {validationError && (
+                <div className="text-red-600 mt-4 p-4 bg-red-50 rounded-lg">
+                    {validationError}
+                </div>
+            )}
 
             {errorMessage && (
                 <div className="text-red-600 mt-4 p-4 bg-red-50 rounded-lg">

@@ -223,17 +223,15 @@ export interface LessonInstructorEdit {
     id: number;
     title: string;
     type: 'video' | 'text' | 'code' | 'quiz';
-    duration?: number;
-    description?: string;
-    videoUrl?: string;
-    content?: string;
+    publish: boolean;
+    orderIndex: number;
 }
 
 export interface ChapterInstructorEdit {
     id: number;
     title: string;
-    description?: string;
     lessons: LessonInstructorEdit[];
+    orderIndex: number;
 }
 
 

@@ -24,7 +24,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ course, onInfoChange }) =
                         value={course.originalPrice}
                         min={2000}
                         className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50
-                        text-gray-500 cursor-not-allowed focus:outline-none"
+                        text-gray-500 focus:outline-none"
                         onChange={(e) => onInfoChange('originalPrice', e.target.value)}
                     />
 
