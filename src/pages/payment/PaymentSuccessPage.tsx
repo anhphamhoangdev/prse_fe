@@ -136,7 +136,7 @@ export function PaymentSuccessPage() {
                     {/* Action Buttons */}
                     <div className="space-y-3">
                         <Link
-                            to="/learning"
+                            to="/my-courses"
                             className="block w-full py-3 px-4 rounded-lg text-center font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all"
                         >
                             Bắt đầu học ngay
