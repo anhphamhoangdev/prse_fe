@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { requestWithAuth, putWithAuth } from '../../utils/request';
+import { requestWithAuth, putWithAuth, requestPostFormDataWithAuth } from '../../utils/request';
 import { ENDPOINTS } from '../../constants/endpoint';
 import { formatDuration } from "../../utils/formatSecondToHour";
 import { AlertCircle, Upload, Video, CheckCircle2 } from 'lucide-react';
@@ -29,11 +29,17 @@ interface VideoLessonEditProps {
     lesson: Lesson;
 }
 
+interface VideoPreview {
+    file: File;
+    url: string;
+}
+
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
 
 const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
     const { courseId, chapterId } = useParams();
     const [videoLesson, setVideoLesson] = useState<VideoLesson | null>(null);
+    const [selectedVideo, setSelectedVideo] = useState<VideoPreview | null>(null);
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -43,6 +49,12 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
 
     useEffect(() => {
         fetchVideoLesson();
+        return () => {
+            // Cleanup preview URL when component unmounts
+            if (selectedVideo) {
+                URL.revokeObjectURL(selectedVideo.url);
+            }
+        };
     }, [lesson.id]);
 
     const fetchVideoLesson = async () => {
@@ -73,7 +85,7 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
         }
     };
 
-    const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -85,37 +97,48 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
             return;
         }
 
+        // Cleanup previous preview if exists
+        if (selectedVideo) {
+            URL.revokeObjectURL(selectedVideo.url);
+        }
+
+        // Create new preview
+        const videoURL = URL.createObjectURL(file);
+        setSelectedVideo({ file, url: videoURL });
+        setError(null);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedVideo) return;
+
         setUploading(true);
         setProgress(0);
         setError(null);
 
-        const formData = new FormData();
-        formData.append('video', file);
-
         try {
+            const formData = new FormData();
+            formData.append('video', selectedVideo.file);
+
             const uploadInterval = setInterval(() => {
                 setProgress(prev => Math.min(prev + 10, 90));
             }, 500);
 
-            const response = await fetch(
+            await requestPostFormDataWithAuth<{ data: boolean }>(
                 `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}/lesson/${lesson.id}/video/upload`,
-                {
-                    method: 'POST',
-                    body: formData,
-                }
+                formData
             );
 
             clearInterval(uploadInterval);
-
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
-
             setProgress(100);
             await fetchVideoLesson();
-        } catch (err) {
+
+            // Cleanup
+            URL.revokeObjectURL(selectedVideo.url);
+            setSelectedVideo(null);
+
+        } catch (error) {
+            console.error('Error uploading video:', error);
             setError('Không thể tải lên video');
-            console.error('Error uploading video:', err);
         } finally {
             setUploading(false);
             if (fileInputRef.current) {
@@ -166,19 +189,27 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
                         <h3 className="font-medium text-gray-900">Video bài giảng</h3>
                     </div>
 
-                    {videoLesson ? (
+                    {videoLesson || selectedVideo ? (
                         <div className="space-y-4">
                             <div className="relative rounded-lg overflow-hidden border border-gray-200">
                                 <video
                                     controls
                                     className="w-full aspect-video bg-black"
-                                    src={videoLesson.videoUrl}
+                                    src={selectedVideo ? selectedVideo.url : videoLesson?.videoUrl}
                                 />
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                <span>Thời lượng: {formatDuration(videoLesson.duration)}</span>
-                            </div>
+                            {videoLesson && !selectedVideo && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                    <span>Thời lượng: {formatDuration(videoLesson.duration)}</span>
+                                </div>
+                            )}
+                            {selectedVideo && (
+                                <div className="flex items-center gap-2 text-sm text-blue-600">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span>Video đang chờ tải lên</span>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="p-4 rounded-lg bg-blue-50 text-blue-600 flex items-center gap-2">
@@ -200,7 +231,7 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
                             ref={fileInputRef}
                             type="file"
                             accept="video/*"
-                            onChange={handleVideoUpload}
+                            onChange={handleFileChange}
                             disabled={uploading}
                             className="block w-full text-sm text-gray-500
                                 file:mr-4 file:py-2 file:px-4
@@ -215,6 +246,16 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
                             Kích thước tối đa: 100MB
                         </div>
                     </div>
+
+                    {selectedVideo && !uploading && (
+                        <button
+                            onClick={handleUpload}
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <Upload className="h-5 w-5 mr-2" />
+                            Tải lên video
+                        </button>
+                    )}
 
                     {uploading && (
                         <div className="space-y-2">

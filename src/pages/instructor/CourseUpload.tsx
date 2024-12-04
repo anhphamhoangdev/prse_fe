@@ -322,7 +322,7 @@ const UploadCourse: React.FC = () => {
 
 
             // Redirect to course edit page
-            navigate(`/instructor/uploads`);
+            navigate(`/instructor/courses`);
 
         } catch (error) {
             console.error('Error creating course:', error);

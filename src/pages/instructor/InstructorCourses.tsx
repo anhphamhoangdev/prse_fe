@@ -111,7 +111,7 @@ const InstructorCourses: React.FC = () => {
             {totalPages > 1 && (
                 <div className="mb-3 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="text-sm text-gray-600">
-                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length) + ' UploadStatusPage'}
+                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length) + ' '}
                         trong tổng số {filteredCourses.length} khóa học
                     </div>
                     <Pagination

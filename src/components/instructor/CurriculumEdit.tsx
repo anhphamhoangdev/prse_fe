@@ -14,6 +14,8 @@ import {
 import {ChapterInstructorEdit, CourseInstructorEdit, LessonInstructorEdit} from "../../types/course";
 import {Link} from "react-router-dom";
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd';
+import {requestPostWithAuth} from "../../utils/request";
+import {ENDPOINTS} from "../../constants/endpoint";
 
 
 export interface CurriculumEditProps {
@@ -24,7 +26,6 @@ export interface CurriculumEditProps {
 
 const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChange, course}) => {
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
-    const [editingChapter, setEditingChapter] = useState<number | null>(null);
 
     const getLessonIcon = (type: LessonInstructorEdit['type']): JSX.Element => {
         switch (type) {
@@ -82,14 +83,22 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
         }
     };
 
-    const handleAddChapter = (): void => {
+    const handleAddChapter = async (): Promise<void> => {
+
         const newChapter: ChapterInstructorEdit = {
             id: Date.now(),
             title: 'Chương mới',
             lessons: [],
             orderIndex: chapters.length
         };
-        onChaptersChange([...chapters, newChapter]);
+
+        const response = await requestPostWithAuth<{ chapter: ChapterInstructorEdit }>(
+            `${ENDPOINTS.INSTRUCTOR.COURSES}/${course?.id}/curriculum/chapters`,
+            newChapter
+        );
+
+
+        onChaptersChange([...chapters, response.chapter]);
     };
 
     const handleUpdateChapter = (chapterId: number, updates: Partial<ChapterInstructorEdit>): void => {
@@ -146,28 +155,17 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
                                                         <GripVertical className="w-5 h-5 text-gray-400 cursor-move"/>
                                                     </div>
 
-                                                    {editingChapter === chapter.id ? (
-                                                        <input
-                                                            type="text"
-                                                            value={chapter.title}
-                                                            onChange={(e) => handleUpdateChapter(chapter.id, {title: e.target.value})}
-                                                            onBlur={() => setEditingChapter(null)}
-                                                            className="flex-grow px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ml-2"
-                                                            autoFocus
-                                                        />
-                                                    ) : (
-                                                        <div className="flex-grow ml-2">
-                                                            <span
-                                                                className="font-medium text-gray-900 cursor-pointer hover:text-blue-600"
-                                                                onClick={() => setEditingChapter(chapter.id)}
-                                                            >
-                                                                {chapter.title}
-                                                            </span>
+                                                    <div className="flex-grow ml-2">
+                                                        <Link
+                                                            to={`/instructor/course/${course?.id}/chapter/${chapter.id}`}
+                                                            className="font-medium text-gray-900 hover:text-blue-600"
+                                                        >
+                                                            {chapter.title}
                                                             <span className="ml-2 text-sm text-blue-600">
-                                                                ({chapter.lessons.length} bài học)
-                                                            </span>
-                                                        </div>
-                                                    )}
+            ({chapter.lessons.length} bài học)
+        </span>
+                                                        </Link>
+                                                    </div>
 
                                                     <div className="flex items-center gap-2">
                                                         <Link

@@ -7,11 +7,12 @@ import {Link} from "react-router-dom";
 import AddLessonModal from "./AddLessonModal";
 
 interface ChapterLessonsProps {
-    chapter: ChapterInstructorEdit;
-    lessons: LessonInstructorEdit[];
-    errorMessage: string;
-    onLessonsChange: (lessons: LessonInstructorEdit[]) => void;
-    courseId: string;
+    chapter: ChapterInstructorEdit,
+    lessons: LessonInstructorEdit[],
+    errorMessage: string,
+    onLessonsChange: (lessons: LessonInstructorEdit[]) => void,
+    courseId: string,
+    onChapterUpdate?: any
 }
 
 const ChapterLessons: React.FC<ChapterLessonsProps> = ({
@@ -19,24 +20,76 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
                                                            lessons,
                                                            errorMessage,
                                                            onLessonsChange,
-                                                           courseId
+                                                           courseId,
+                                                           onChapterUpdate
                                                        }) => {
     const [editingLesson, setEditingLesson] = useState<number | null>(null);
     const [isAddLessonModalOpen, setIsAddLessonModalOpen] = useState(false);
+    const [isEditingChapter, setIsEditingChapter] = useState(false);
+
+    const [editedChapter, setEditedChapter] = useState(chapter);
+
+
+    const handleUpdateChapterInfo = async (updates: Partial<ChapterInstructorEdit>) => {
+        try {
+            await putWithAuth(
+                `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapter.id}`,
+                {chapter: updates}
+            );
+
+            await fetchLessons();
+            setIsEditingChapter(false);
+            onChapterUpdate(courseId, chapter.id);
+        } catch (error) {
+            console.error('Error updating chapter:', error);
+        }
+    };
+
+    // Add new handler for input changes
+    const handleInputChange = (field: keyof ChapterInstructorEdit, value: any) => {
+        setEditedChapter(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    // Add handler for save button
+    const handleSaveChanges = () => {
+        handleUpdateChapterInfo(editedChapter);
+    };
+
+    // When entering edit mode, initialize editedChapter with current chapter data
+    const startEditing = () => {
+        setEditedChapter(chapter);
+        setIsEditingChapter(true);
+    };
+
+    // Reset changes when canceling
+    const cancelEditing = () => {
+        setEditedChapter(chapter);
+        setIsEditingChapter(false);
+    };
 
     const getLessonIcon = (type: LessonInstructorEdit['type']): JSX.Element => {
         switch (type) {
-            case 'video': return <Play className="w-4 h-4" />;
-            case 'text': return <FileText className="w-4 h-4" />;
-            case 'code': return <Code className="w-4 h-4" />;
-            case 'quiz': return <BookOpen className="w-4 h-4" />;
-            default: return <FileText className="w-4 h-4" />;
+            case 'video':
+                return <Play className="w-4 h-4"/>;
+            case 'text':
+                return <FileText className="w-4 h-4"/>;
+            case 'code':
+                return <Code className="w-4 h-4"/>;
+            case 'quiz':
+                return <BookOpen className="w-4 h-4"/>;
+            default:
+                return <FileText className="w-4 h-4"/>;
         }
     };
 
     const fetchLessons = async () => {
         try {
-            const response = await requestWithAuth<{chapter : ChapterInstructorEdit}>(`${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapter.id}`);
+            const response = await requestWithAuth<{
+                chapter: ChapterInstructorEdit
+            }>(`${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapter.id}`);
             console.log(response.chapter.lessons)
             onLessonsChange(response.chapter.lessons);
         } catch (error) {
@@ -48,12 +101,12 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
         try {
             await putWithAuth(
                 `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapters/${chapter.id}/lessons/${lessonId}`,
-                { lesson: updates }
+                {lesson: updates}
             );
 
             const updatedLessons = lessons.map(lesson =>
                 lesson.id === lessonId
-                    ? { ...lesson, ...updates }
+                    ? {...lesson, ...updates}
                     : lesson
             );
 
@@ -69,6 +122,78 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
 
     return (
         <div className="max-w-4xl mx-auto">
+
+
+            {/* Add Chapter Information Section */}
+            <div className="mb-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="p-6">
+                    <h2 className="text-lg font-semibold mb-4">Thông tin chương</h2>
+
+                    {isEditingChapter ? (
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tiêu đề
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editedChapter.title}
+                                    onChange={(e) => handleInputChange('title', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Thứ tự
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editedChapter.orderIndex}
+                                    onChange={(e) => handleInputChange('orderIndex', parseInt(e.target.value))}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={cancelEditing}
+                                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleSaveChanges}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                >
+                                    Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <div className="text-sm text-gray-500">Tiêu đề</div>
+                                    <div className="font-medium">{chapter.title}</div>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-500">Thứ tự</div>
+                                    <div className="font-medium">{chapter.orderIndex}</div>
+                                </div>
+                                <button
+                                    onClick={startEditing}
+                                    className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                >
+                                    Chỉnh sửa
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+
             <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Link
@@ -108,7 +233,7 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
                                     <input
                                         type="text"
                                         value={lesson.title}
-                                        onChange={(e) => handleUpdateLesson(lesson.id, { title: e.target.value })}
+                                        onChange={(e) => handleUpdateLesson(lesson.id, {title: e.target.value})}
                                         className="flex-grow px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                         autoFocus
                                     />
@@ -151,7 +276,8 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
                                         <span className="text-gray-900 font-medium">
                                             {lesson.title}
                                         </span>
-                                        <span className={`text-sm ${lesson.publish ? 'text-green-500' : 'text-gray-500'}`}>
+                                        <span
+                                            className={`text-sm ${lesson.publish ? 'text-green-500' : 'text-gray-500'}`}>
                                             ({lesson.publish ? 'Đã xuất bản' : 'Nháp'})
                                         </span>
                                     </div>

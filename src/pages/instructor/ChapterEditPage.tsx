@@ -12,6 +12,39 @@ const ChapterEditPage: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [pageLoading, setPageLoading] = useState(true);
 
+    const fetchChapterData = async (courseId: string, chapterId: string) => {
+        try {
+            const response = await requestWithAuth<{ chapter: ChapterInstructorEdit }>(
+                `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}`
+            );
+            setChapter(response.chapter);
+            return response.chapter;
+        } catch (error) {
+            console.error('Error fetching chapter data:', error);
+            throw error;
+        }
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!courseId || !chapterId) return;
+
+            setPageLoading(true);
+            try {
+                const chapter = await fetchChapterData(courseId, chapterId);
+                setChapter(chapter);
+                setLessons(chapter.lessons);
+            } catch (error) {
+                setErrorMessage('Không thể tải thông tin chương học. Vui lòng thử lại sau.');
+            } finally {
+                setPageLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [courseId, chapterId]);
+
+
     useEffect(() => {
         const fetchData = async () => {
             if (!courseId || !chapterId) return;
@@ -64,6 +97,7 @@ const ChapterEditPage: React.FC = () => {
                 errorMessage={errorMessage}
                 onLessonsChange={handleLessonsChange}
                 courseId={courseId!}
+                onChapterUpdate={fetchChapterData} // Thêm prop onChapterUpdate
             />
         </div>
     );
