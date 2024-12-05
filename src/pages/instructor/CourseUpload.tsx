@@ -267,6 +267,7 @@ const UploadCourse: React.FC = () => {
         if (!step4Valid) {
             setCurrentStep(4);
             setIsLoading(false); // Start loading
+            alert('Vui lòng chọn ảnh và video preview cho khoá học !')
             return;
         }
 
