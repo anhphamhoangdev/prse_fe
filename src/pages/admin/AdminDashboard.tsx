@@ -1,9 +1,11 @@
-import React from 'react';
-import { TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award, TrendingDown} from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     PieChart, Pie, Cell
 } from 'recharts';
+import {requestAdminWithAuth, requestWithAuth} from "../../utils/request";
+import {ENDPOINTS} from "../../constants/endpoint";
 
 const revenueData = [
     { month: 'T1', revenue: 35000000 },
@@ -31,7 +33,59 @@ const courseDistributionData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 
+interface OverviewResponse {
+    totalUsers: number;
+    totalCourses: number;
+    totalInstructors: number;
+    totalRevenue: number;
+    userGrowthRate: number;
+    courseGrowthRate: number;
+    instructorGrowthRate: number;
+    revenueGrowthRate: number;
+}
+
 export const AdminDashboard = () => {
+
+    const [overviewData, setOverviewData] = useState<OverviewResponse>({
+        totalUsers: 0,
+        totalCourses: 0,
+        totalInstructors: 0,
+        totalRevenue: 0,
+        userGrowthRate: 0,
+        courseGrowthRate: 0,
+        instructorGrowthRate: 0,
+        revenueGrowthRate: 0
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    function formatCurrency(amount: number): string {
+        if (amount >= 1000000) {
+            return `${(amount / 1000000).toFixed(1)}M VND`;
+        }
+        if (amount >= 1000) {
+            return `${(amount / 1000).toFixed(1)}K VND`;
+        }
+        return `${amount} VND`;
+    }
+
+    useEffect(() => {
+        const loadOverview = async () => {
+            try {
+                setLoading(true);
+                const response  = await requestAdminWithAuth<OverviewResponse>(ENDPOINTS.ADMIN.OVERVIEW);
+                setOverviewData(response);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Error loading overview data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadOverview();
+    }, []);
+
+
     return (
         <div className="p-6 space-y-6">
             {/* Overview Stats */}
@@ -41,15 +95,23 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Tổng người dùng</p>
-                            <p className="text-2xl font-bold text-gray-900">2,543</p>
+                            <p className="text-2xl font-bold text-gray-900">{overviewData.totalUsers}</p>
                         </div>
                         <div className="bg-blue-100 p-3 rounded-lg">
-                            <Users className="w-6 h-6 text-blue-600" />
+                            <Users className="w-6 h-6 text-blue-600"/>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center text-sm text-green-600">
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        <span>+12.5% so với tháng trước</span>
+                    <div
+                        className={`mt-4 flex items-center text-sm ${overviewData.userGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {overviewData.userGrowthRate >= 0 ? (
+                            <TrendingUp className="w-4 h-4 mr-1"/>
+                        ) : (
+                            <TrendingDown className="w-4 h-4 mr-1"/>
+                        )}
+                        <span>
+                        {overviewData.userGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.userGrowthRate.toFixed(1)}% so với tháng trước
+                        </span>
                     </div>
                 </div>
 
@@ -58,15 +120,23 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Số khóa học</p>
-                            <p className="text-2xl font-bold text-gray-900">152</p>
+                            <p className="text-2xl font-bold text-gray-900">${overviewData.totalCourses}</p>
                         </div>
                         <div className="bg-purple-100 p-3 rounded-lg">
-                            <BookOpen className="w-6 h-6 text-purple-600" />
+                            <BookOpen className="w-6 h-6 text-purple-600"/>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center text-sm text-green-600">
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        <span>+5.2% so với tháng trước</span>
+                    <div
+                        className={`mt-4 flex items-center text-sm ${overviewData.courseGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {overviewData.courseGrowthRate >= 0 ? (
+                            <TrendingUp className="w-4 h-4 mr-1"/>
+                        ) : (
+                            <TrendingDown className="w-4 h-4 mr-1"/>
+                        )}
+                        <span>
+                        {overviewData.courseGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.courseGrowthRate.toFixed(1)}% so với tháng trước
+                        </span>
                     </div>
                 </div>
 
@@ -75,15 +145,23 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Doanh thu</p>
-                            <p className="text-2xl font-bold text-gray-900">45.2M VND</p>
+                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(overviewData.totalRevenue)}</p>
                         </div>
                         <div className="bg-green-100 p-3 rounded-lg">
-                            <DollarSign className="w-6 h-6 text-green-600" />
+                            <DollarSign className="w-6 h-6 text-green-600"/>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center text-sm text-green-600">
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        <span>+8.1% so với tháng trước</span>
+                    <div
+                        className={`mt-4 flex items-center text-sm ${overviewData.revenueGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {overviewData.revenueGrowthRate >= 0 ? (
+                            <TrendingUp className="w-4 h-4 mr-1"/>
+                        ) : (
+                            <TrendingDown className="w-4 h-4 mr-1"/>
+                        )}
+                        <span>
+                        {overviewData.revenueGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.revenueGrowthRate.toFixed(1)}% so với tháng trước
+                        </span>
                     </div>
                 </div>
 
@@ -92,15 +170,23 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Giảng viên</p>
-                            <p className="text-2xl font-bold text-gray-900">48</p>
+                            <p className="text-2xl font-bold text-gray-900">${overviewData.totalInstructors}</p>
                         </div>
                         <div className="bg-orange-100 p-3 rounded-lg">
-                            <Award className="w-6 h-6 text-orange-600" />
+                            <Award className="w-6 h-6 text-orange-600"/>
                         </div>
                     </div>
-                    <div className="mt-4 flex items-center text-sm text-green-600">
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        <span>+3 giảng viên mới</span>
+                    <div
+                        className={`mt-4 flex items-center text-sm ${overviewData.instructorGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {overviewData.instructorGrowthRate >= 0 ? (
+                            <TrendingUp className="w-4 h-4 mr-1"/>
+                        ) : (
+                            <TrendingDown className="w-4 h-4 mr-1"/>
+                        )}
+                        <span>
+                        {overviewData.instructorGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.instructorGrowthRate.toFixed(1)}% so với tháng trước
+                        </span>
                     </div>
                 </div>
             </div>
@@ -112,7 +198,7 @@ export const AdminDashboard = () => {
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Vấn đề cần xử lý</h2>
                     <div className="space-y-4">
                         <div className="flex items-start p-4 bg-red-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3" />
+                            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3"/>
                             <div>
                                 <h3 className="text-sm font-medium text-red-900">3 báo cáo vi phạm mới</h3>
                                 <p className="text-sm text-red-600">Cần kiểm tra và xử lý</p>

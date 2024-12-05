@@ -72,6 +72,8 @@ export const ENDPOINTS = {
     ADMIN: {
         PROFILE: '/admin/profile',
         LOGIN: '/admin/login',
+        OVERVIEW: '/admin/overview',
+        STUDENTS: '/admin/students',
     }
 
 

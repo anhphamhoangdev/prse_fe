@@ -422,3 +422,50 @@ export async function putWithAuth<T>(endpoint: string, data: any): Promise<T> {
     }
     return jsonResponse.data;
 }
+export async function putAdminWithAuth<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = sessionStorage.getItem("adminToken");
+    if (!token) {
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem("adminToken");
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    if(response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if(response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to update ${url}: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // Check response code từ API
+    if (jsonResponse.code === 0) {
+        throw new Error(jsonResponse.error_message);
+    }
+    return jsonResponse.data;
+}
