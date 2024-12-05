@@ -266,6 +266,7 @@ const UploadCourse: React.FC = () => {
 
         if (!step4Valid) {
             setCurrentStep(4);
+            setIsLoading(false); // Start loading
             return;
         }
 
