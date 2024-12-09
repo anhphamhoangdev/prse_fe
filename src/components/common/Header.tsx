@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {Link, useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {
     Search, Heart, ShoppingCart, User, LogOut, BookOpen,
-    ChevronDown, Wallet, Award, GraduationCap, ArrowRight
+    ChevronDown, Wallet, Award, GraduationCap, ArrowRight, Bot
 } from "lucide-react";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {requestWithAuth} from "../../utils/request";
@@ -191,8 +191,10 @@ export const Header = () => {
                             className="w-10 h-10 object-contain"
                         />
                         <span className="text-2xl sm:text-3xl font-bold">
-                            <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Easy</span>
-                            <span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
+                            <span
+                                className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Easy</span>
+                            <span
+                                className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
                         </span>
                     </Link>
 
@@ -205,16 +207,39 @@ export const Header = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Tìm kiếm khóa học..."
                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50
-                                         focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-                                         transition-all duration-300 pl-11"
+                     focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                     transition-all duration-300 pl-11 pr-24"
                             />
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                            <Search
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors"/>
+
+                            {/* AI Advisor Button */}
+                            <Link
+                                to="/advisor-chat"
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2
+                       flex items-center gap-1.5 px-3 py-1.5
+                       bg-gradient-to-r from-blue-500 to-blue-600
+                       text-white rounded-lg
+                       hover:from-blue-600 hover:to-blue-700
+                       transition-all duration-300
+                       shadow-sm hover:shadow-md"
+                            >
+                                <Bot className="w-3.5 h-3.5"/>
+                                <span className="text-xs font-medium">AI Tư vấn</span>
+                                <div className="relative flex h-1.5 w-1.5">
+                                    <span
+                                        className="animate-ping absolute inline-flex h-1.5 w-1.5 rounded-full bg-blue-200 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                                </div>
+                            </Link>
                         </form>
                     </div>
+
 
                     {/* Actions */}
                     <div className="flex items-center space-x-1 sm:space-x-4">
                         {!isAuthChecking && (
+
                             isLoggedIn ? (
                                 <>
                                     {/*/!* Wishlist *!/*/}
@@ -228,10 +253,13 @@ export const Header = () => {
                                     {/*</Link>*/}
 
                                     {/* Cart */}
-                                    <Link to="/cart" className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
-                                        <ShoppingCart className="w-6 h-6 text-slate-600 hover:text-blue-500 transition-colors" />
+                                    <Link to="/cart"
+                                          className="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                        <ShoppingCart
+                                            className="w-6 h-6 text-slate-600 hover:text-blue-500 transition-colors"/>
                                         {cartCount > 0 && (
-                                            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                            <span
+                                                className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
                                                 {cartCount}
                                             </span>
                                         )}
@@ -250,25 +278,27 @@ export const Header = () => {
                                                     className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
                                                 />
                                             ) : (
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <User className="w-5 h-5 text-blue-600" />
+                                                <div
+                                                    className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <User className="w-5 h-5 text-blue-600"/>
                                                 </div>
                                             )}
-                                            <ChevronDown className="w-4 h-4 text-slate-600" />
+                                            <ChevronDown className="w-4 h-4 text-slate-600"/>
                                         </button>
 
                                         {isDropdownOpen && (
-                                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg py-2 border border-slate-200">
+                                            <div
+                                                className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg py-2 border border-slate-200">
                                                 <div className="px-4 py-3 border-b border-slate-100">
                                                     <p className="text-sm font-medium text-slate-900">{user?.fullName}</p>
                                                     <p className="text-sm text-slate-500">{user?.email}</p>
                                                     <div className="mt-2 flex items-center justify-between text-xs">
                                                         <div className="flex items-center text-blue-600">
-                                                            <Wallet className="w-4 h-4 mr-1" />
+                                                            <Wallet className="w-4 h-4 mr-1"/>
                                                             {user?.money.toLocaleString()} VND
                                                         </div>
                                                         <div className="flex items-center text-amber-600">
-                                                            <Award className="w-4 h-4 mr-1" />
+                                                            <Award className="w-4 h-4 mr-1"/>
                                                             {user?.point} điểm
                                                         </div>
                                                     </div>
@@ -276,13 +306,13 @@ export const Header = () => {
 
                                                 <Link to="/profile"
                                                       className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                                                    <User className="w-4 h-4 mr-2" />
+                                                    <User className="w-4 h-4 mr-2"/>
                                                     Tài khoản của tôi
                                                 </Link>
 
                                                 <Link to="/my-courses"
                                                       className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                                                    <BookOpen className="w-4 h-4 mr-2" />
+                                                    <BookOpen className="w-4 h-4 mr-2"/>
                                                     Khóa học của tôi
                                                 </Link>
 
@@ -292,18 +322,20 @@ export const Header = () => {
                                                         onClick={handleSwitchToInstructor}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 group"
                                                     >
-                                                        <GraduationCap className="w-4 h-4 mr-2" />
+                                                        <GraduationCap className="w-4 h-4 mr-2"/>
                                                         <span className="flex-1 text-left">Chuyển sang Instructor</span>
-                                                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <ArrowRight
+                                                            className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"/>
                                                     </button>
                                                 ) : (
                                                     <button
                                                         onClick={handleBecomeInstructor}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 group"
                                                     >
-                                                        <GraduationCap className="w-4 h-4 mr-2" />
+                                                        <GraduationCap className="w-4 h-4 mr-2"/>
                                                         <span className="flex-1 text-left">Trở thành Instructor</span>
-                                                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <ArrowRight
+                                                            className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"/>
                                                     </button>
                                                 )}
 
@@ -314,7 +346,7 @@ export const Header = () => {
                                                     onClick={handleLogout}
                                                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                                 >
-                                                    <LogOut className="w-4 h-4 mr-2" />
+                                                    <LogOut className="w-4 h-4 mr-2"/>
                                                     Đăng xuất
                                                 </button>
                                             </div>
@@ -350,10 +382,30 @@ export const Header = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Tìm kiếm khóa học..."
                             className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50
-                                     focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-                                     transition-all duration-300 pl-11"
+                     focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                     transition-all duration-300 pl-11 pr-24"
                         />
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"/>
+
+                        {/* Mobile AI Advisor Button */}
+                        <Link
+                            to="/advisor-chat"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2
+                       flex items-center gap-1.5 px-3 py-1.5
+                       bg-gradient-to-r from-blue-500 to-blue-600
+                       text-white rounded-lg
+                       hover:from-blue-600 hover:to-blue-700
+                       transition-all duration-300
+                       shadow-sm hover:shadow-md"
+                        >
+                            <Bot className="w-3.5 h-3.5"/>
+                            <span className="text-xs font-medium">AI Tư vấn</span>
+                            <div className="relative flex h-1.5 w-1.5">
+                                <span
+                                    className="animate-ping absolute inline-flex h-1.5 w-1.5 rounded-full bg-blue-200 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                            </div>
+                        </Link>
                     </form>
                 </div>
             </div>

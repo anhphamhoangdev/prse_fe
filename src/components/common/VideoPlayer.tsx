@@ -8,26 +8,54 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, className = '' }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    // Prevent right click
+    // Hàm kiểm tra và lấy YouTube video ID
+    const getYouTubeVideoId = (url: string): string | null => {
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu.be\/|youtube.com\/embed\/)([^#&?]*).*/,
+            /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
+        ];
+
+        for (let pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) return match[1];
+        }
+        return null;
+    };
+
+    const youtubeId = getYouTubeVideoId(url);
+
+    // Nếu là YouTube video
+    if (youtubeId) {
+        return (
+            <div className="relative w-full aspect-video bg-black">
+                <iframe
+                    className={`absolute inset-0 w-full h-full ${className}`}
+                    src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video player"
+                    style={{ border: 0 }}
+                />
+            </div>
+        );
+    }
+
+    // Nếu là video thông thường
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
     };
 
-    // Handle keyboard shortcuts
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        // Prevent Picture-in-Picture
         if (e.key === 'p' || e.key === 'P') {
             e.preventDefault();
         }
     };
 
     return (
-        <div className="relative w-full aspect-video bg-black"> {/* Thêm bg-black để tạo viền đen */}
+        <div className="relative w-full aspect-video bg-black">
             <video
                 ref={videoRef}
                 className={`absolute inset-0 w-full h-full object-contain ${className}`}
-                // Thay object-cover bằng object-contain để giữ nguyên tỷ lệ video
-                // và thêm position absolute để video nằm giữa container
                 controls
                 autoPlay
                 crossOrigin="anonymous"

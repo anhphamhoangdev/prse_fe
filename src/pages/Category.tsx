@@ -226,6 +226,7 @@ export function Category() {
                                     displayType='category'
                                     onAddToCartSuccess={handleAddToCartSuccess}
                                     onAddToCartError={handleAddToCartError}
+                                    gridCols='three'
                                 />
                                 {courseData.totalPages > 1 && (
                                     <Pagination

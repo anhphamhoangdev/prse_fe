@@ -10,6 +10,8 @@ import {getBasicDetailCourse, getCourseCurriculum, getCourseFeedbacks} from "../
 import {CourseNotFound} from "../../components/course/course-detail/CourseNotFound";
 import CourseContentLoading from "../../components/course/course-detail/CourseContentLoading";
 import {getLessonPath} from "../../types/lesson";
+import {requestPostWithAuth} from "../../utils/request";
+import {useNotification} from "../../components/notification/NotificationProvider";
 
 
 const handleLessonClick = (chapterId: number, lessonId: number) => {
@@ -53,6 +55,7 @@ const CourseDetail: React.FC = () => {
         id: 1,
         title: "Huỷ diệt Java Spring Boot",
         description: "Làm quen với lập trình Back-end bằng Spring Boot từ cơ bản đến nâng cao. Xây dựng RESTful API, xử lý bất đồng bộ, tối ưu hiệu suất và triển khai ứng dụng thực tế.",
+        shortDescription: "Làm quen với lập trình Back-end bằng Spring Boot từ cơ bản đến nâng cao.",
         imageUrl: "https://files.fullstack.edu.vn/f8-prod/courses/7.png",
         language: "Tiếng Việt",
         originalPrice: 0,
@@ -150,6 +153,10 @@ const CourseDetail: React.FC = () => {
         hasMore: true
     });
     const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
+
+
+    // some
+    const { showNotification } = useNotification();
 
 
     // fetchBasicInfo
@@ -280,24 +287,69 @@ const CourseDetail: React.FC = () => {
         loadCurriculum();
     }, [activeTab, curriculum, id]);
 
+    const fetchFeedbacks = async (courseId: number, page: number) => {
+        setIsLoadingFeedbacks(true);
+        try {
+            console.log(`[CourseDetail] Fetching feedbacks for page ${page}`);
+            const data = await getCourseFeedbacks(courseId, page);
+            return data;
+        } catch (error) {
+            console.error('[CourseDetail] Error loading feedbacks:', error);
+            throw error;
+        } finally {
+            setIsLoadingFeedbacks(false);
+        }
+    };
+
     const handleSubmitFeedback = async (rating: number, comment: string) => {
         if (!id) return;
 
         try {
-            // await courseService.submitFeedback(Number(id), rating, comment);
-            // Reload feedbacks after submission
-            // const data = await courseService.getCourseFeedbacks(Number(id), 1);
-            // setFeedbacks(data.items);
-            // setFeedbackMeta({
-            //     total: data.total,
-            //     page: 2,
-            //     hasMore: data.hasMore
-            // });
+            const feedbackData = {
+                courseId: Number(id),
+                rating: rating,
+                comment: comment.trim()
+            };
+
+            await requestPostWithAuth<void>(
+                '/course/feedback',
+                feedbackData
+            );
+
+            // Refresh feedback list after successful submission
+            const data = await fetchFeedbacks(Number(id), 1);
+
+            if (data) {
+                setFeedbacks(data.items);
+                setFeedbackMeta({
+                    total: data.total,
+                    currentPage: 2, // Set to next page
+                    hasMore: data.hasMore
+                });
+                showNotification(
+                    'success',
+                    'Thành công',
+                    'Đánh giá của bạn đã được gửi thành công'
+                );
+            } else {
+                console.log('[CourseDetail] No feedbacks found');
+                setFeedbacks([]);
+                setFeedbackMeta({
+                    total: 0,
+                    currentPage: 1,
+                    hasMore: false
+                });
+            }
+
         } catch (error) {
-            console.error('Failed to submit feedback:', error);
+            console.error('[CourseDetail] Failed to submit feedback:', error);
+            showNotification(
+                'error',
+                'Lỗi',
+                error instanceof Error ? error.message : 'Không thể gửi đánh giá. Vui lòng thử lại sau.'
+            );
         }
     };
-
 
     // start learning
     const findNextLesson = (chapters: Chapter[]): {

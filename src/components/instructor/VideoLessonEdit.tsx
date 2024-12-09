@@ -4,6 +4,8 @@ import { requestWithAuth, putWithAuth, requestPostFormDataWithAuth } from '../..
 import { ENDPOINTS } from '../../constants/endpoint';
 import { formatDuration } from "../../utils/formatSecondToHour";
 import { AlertCircle, Upload, Video, CheckCircle2 } from 'lucide-react';
+import VideoUploadStatus from "./VideoUploadStatus";
+import {VideoPlayer} from "../common/VideoPlayer";
 
 interface Lesson {
     id: number;
@@ -34,6 +36,8 @@ interface VideoPreview {
     url: string;
 }
 
+
+
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
 
 const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
@@ -47,15 +51,43 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
     const [isPublish, setIsPublish] = useState(lesson.isPublish);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [uploadStatus, setUploadStatus] = useState<boolean | null>(null);
+
+
     useEffect(() => {
-        fetchVideoLesson();
-        return () => {
-            // Cleanup preview URL when component unmounts
-            if (selectedVideo) {
-                URL.revokeObjectURL(selectedVideo.url);
+        const checkUploadStatus = async () => {
+            try {
+                const response = await requestWithAuth<{ isUploading: boolean, progress: number }>(
+                    `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}/lesson/${lesson.id}/video/upload-status`
+                );
+                setUploadStatus(response.isUploading);
+                setProgress(response.progress);
+
+                // Nếu đang upload, poll status mỗi 2 giây
+                if (response.isUploading) {
+                    setTimeout(checkUploadStatus, 2000);
+                } else {
+                    // Nếu không còn upload nữa, fetch video lesson
+                    await fetchVideoLesson();
+                }
+            } catch (err) {
+                console.error('Error checking upload status:', err);
+                setError('Không thể kiểm tra trạng thái tải lên');
             }
         };
-    }, [lesson.id]);
+
+        checkUploadStatus();
+    }, [lesson.id, uploading]);
+
+    // useEffect(() => {
+    //     fetchVideoLesson();
+    //     return () => {
+    //         // Cleanup preview URL when component unmounts
+    //         if (selectedVideo) {
+    //             URL.revokeObjectURL(selectedVideo.url);
+    //         }
+    //     };
+    // }, [lesson.id]);
 
     const fetchVideoLesson = async () => {
         try {
@@ -130,6 +162,7 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
 
             clearInterval(uploadInterval);
             setProgress(100);
+            setUploading(true);
             await fetchVideoLesson();
 
             // Cleanup
@@ -147,6 +180,11 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
         }
     };
 
+    if (uploadStatus) {
+        return <VideoUploadStatus progress={progress}   />;
+    }
+
+
     if (loading) {
         return (
             <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200">
@@ -156,6 +194,7 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
             </div>
         );
     }
+
 
     return (
         <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200">
@@ -192,10 +231,8 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
                     {videoLesson || selectedVideo ? (
                         <div className="space-y-4">
                             <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                                <video
-                                    controls
-                                    className="w-full aspect-video bg-black"
-                                    src={selectedVideo ? selectedVideo.url : videoLesson?.videoUrl}
+                                <VideoPlayer
+                                    url={selectedVideo ? selectedVideo.url : videoLesson?.videoUrl || ''}
                                 />
                             </div>
                             {videoLesson && !selectedVideo && (

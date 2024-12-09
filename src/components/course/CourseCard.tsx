@@ -8,7 +8,7 @@ interface CourseCardProps {
     course: Course;
     onAddToCart: (course: Course) => void;
     onBuyNow: (course: Course) => void;
-    hideActions?: boolean; // thêm prop mới
+    hideActions?: boolean;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({
@@ -23,48 +23,72 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         navigate(`/course-detail/${course.id}`);
     };
 
+    const formatNumber = (num: number): string => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
     return (
         <div
-            className="border flex flex-col justify-between relative h-full bg-white rounded-lg transform transition duration-500 hover:scale-105 hover:shadow-xl cursor-pointer"
+            className="border border-gray-200/70 flex flex-col justify-between relative h-full bg-white rounded-xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-blue-200 cursor-pointer group"
             onClick={handleCardClick}
         >
-            <img src={course.imageUrl} alt={course.title} className="w-full h-40 object-cover rounded-t-lg"/>
-            <div className="p-4">
-                <h4 className="text font-bold mb-2 h-20 overflow-hidden course-title">
+            <div className="relative overflow-hidden rounded-t-xl">
+                <img
+                    src={course.imageUrl}
+                    alt={course.title}
+                    className="w-full h-40 object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"/>
+            </div>
+
+            <div className="p-5">
+                <h4 className="text-gray-900 font-bold mb-3 h-20 overflow-hidden course-title group-hover:text-blue-600 transition-colors duration-300 leading-snug">
                     {course.title}
                 </h4>
-                <div className="flex items-center mb-2">
-                    <i className="fas fa-user mr-2"></i>
-                    <span>{course.totalStudents}</span>
-                    <i className="fas fa-eye ml-4 mr-2"></i>
-                    <span>{course.totalViews}</span>
-                </div>
-                <div className="flex items-center mb-2">
-                    <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => {
-                            const starClass = i < Math.floor(course.averageRating) ? 'fas fa-star text-yellow-400' :
-                                i < course.averageRating ? 'fas fa-star-half-alt text-yellow-400' : 'far fa-star text-gray-400';
-                            return <i key={i} className={starClass}></i>;
-                        })}
+
+                <div className="flex items-center justify-between mb-3 text-gray-500 bg-gray-50/80 p-2 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-1.5">
+                            <i className="fas fa-user-graduate text-blue-600/80"></i>
+                            <span className="text-sm font-medium">{formatNumber(course.totalStudents)}</span>
+                        </div>
+                        <div className="flex items-center space-x-1.5">
+                            <i className="fas fa-eye text-blue-600/80"></i>
+                            <span className="text-sm font-medium">{formatNumber(course.totalViews)}</span>
+                        </div>
                     </div>
-                    <span className="ml-2">{course.averageRating.toFixed(1)}</span>
                 </div>
 
-                {/* Chỉ hiện phần giá và nút mua khi không phải khóa học đã enroll */}
+                <div className="flex items-center mb-3 bg-blue-50/50 p-2.5 rounded-lg group-hover:bg-blue-50 transition-colors duration-300">
+                    <div className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => {
+                            const starClass = i < Math.floor(course.averageRating) ? 'fas fa-star text-yellow-400' :
+                                i < course.averageRating ? 'fas fa-star-half-alt text-yellow-400' : 'far fa-star text-gray-300';
+                            return <i key={i} className={`${starClass} text-base transition-transform duration-300 hover:scale-110`}></i>;
+                        })}
+                        <span className="ml-2 text-blue-700 font-semibold bg-blue-100/50 px-2 py-0.5 rounded">
+                            {course.averageRating.toFixed(1)}
+                        </span>
+                    </div>
+                </div>
+
                 {!hideActions ? (
-                    <div className="font-bold mb-2 flex justify-between items-center">
-                        <div>
-                            {course.isDiscount ? (
+                    <div className="font-bold flex justify-between items-center">
+                        <div className="flex flex-col">
+                            {course.discountPrice && course.discountPrice < course.originalPrice ? (
                                 <>
-                                    <span className="line-through text-gray-500 mr-1">
+                                    <span className="line-through text-gray-400 text-sm mb-1">
                                         {formatCurrency(course.originalPrice)}
                                     </span>
-                                    <span className="text-red-600 font-bold">
+                                    <span className="bg-red-50 text-red-500 font-bold px-3 py-1 rounded-lg shadow-sm group-hover:shadow-md transition-all duration-300">
                                         {formatCurrency(course.discountPrice)}
                                     </span>
                                 </>
                             ) : (
-                                <span className={course.originalPrice <= 0 ? "text-orange-600" : ""}>
+                                <span className={`px-3 py-1 rounded-lg shadow-sm group-hover:shadow-md transition-all duration-300 
+                                    ${course.originalPrice <= 0
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "bg-gray-50 text-gray-700"}`}>
                                     {formatCurrency(course.originalPrice)}
                                 </span>
                             )}
@@ -72,56 +96,45 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
                         <div className="flex space-x-2">
                             <button
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors group relative"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md group/btn relative hover:scale-105"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onAddToCart(course);
                                 }}
                             >
-                                <i className="fas fa-shopping-cart text-sm"></i>
+                                <i className="fas fa-shopping-cart text-sm group-hover/btn:scale-110 transition-transform duration-300"></i>
                                 <span
-                                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover/btn:opacity-100 transition-all duration-300 whitespace-nowrap">
                                     Thêm vào giỏ hàng
                                 </span>
                             </button>
-                            {/*<button*/}
-                            {/*    className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600 transition-colors group relative"*/}
-                            {/*    onClick={(e) => {*/}
-                            {/*        e.stopPropagation();*/}
-                            {/*        onBuyNow(course);*/}
-                            {/*    }}*/}
-                            {/*>*/}
-                            {/*    <i className="fas fa-bolt text-sm"></i>*/}
-                            {/*    <span*/}
-                            {/*        className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">*/}
-                            {/*        Buy Now*/}
-                            {/*    </span>*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                 ) : (
-                    // Hiển thị nút "Tiếp tục học" cho khóa học đã enroll
                     <div className="flex justify-end">
                         <button
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors group relative"
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md group/btn relative hover:scale-105"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/course-detail/${course.id}`);
                             }}
                         >
-                            <i className="fas fa-play text-sm"></i>
+                            <i className="fas fa-play text-sm group-hover/btn:scale-110 transition-transform duration-300"></i>
                             <span
-                                className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Vào học
-            </span>
+                                className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover/btn:opacity-100 transition-all duration-300 whitespace-nowrap">
+                                Vào học
+                            </span>
                         </button>
                     </div>
                 )}
             </div>
 
             {course.isHot && (
-                <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 text-xs rounded-tr-lg">
-                    Hot
+                <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 text-white px-3 py-1.5 text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm animate-pulse">
+                    <span className="flex items-center gap-1.5">
+                        Hot
+                        <i className="fas fa-fire-flame-curved animate-bounce"></i>
+                    </span>
                 </div>
             )}
         </div>

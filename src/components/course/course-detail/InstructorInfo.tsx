@@ -11,7 +11,7 @@ export const InstructorInfo: React.FC<InstructorInfoProps> = ({ instructor }) =>
             <img
                 src={instructor.avatarUrl}
                 alt={instructor.fullName}
-                className="w-12 h-12 rounded-full border-2 border-blue-600"
+                className="w-12 h-12 rounded-full border-2 border-blue-600 object-cover"
             />
             <div>
                 <div className="font-medium text-white">{instructor.fullName}</div>

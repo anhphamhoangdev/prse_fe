@@ -147,6 +147,7 @@ export function Search() {
                             displayType='search'
                             onAddToCartSuccess={handleAddToCartSuccess}
                             onAddToCartError={handleAddToCartError}
+                            gridCols='three'
                         />
 
                         {searchResults.totalPages > 1 && (

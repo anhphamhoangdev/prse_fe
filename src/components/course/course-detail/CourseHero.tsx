@@ -89,7 +89,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                             ))}
                         </div>
                         <h1 className="text-4xl font-bold mb-4">{courseData.title}</h1>
-                        <p className="text-gray-300 mb-6">{courseData.description}</p>
+                        <p className="text-gray-300 mb-6">{courseData.shortDescription}</p>
 
                         <InstructorInfo instructor={courseData.instructor}/>
                         <CourseStats courseData={courseData}/>

@@ -16,9 +16,11 @@ interface CourseHomeSectionProps {
     onPageChange?: (page: number) => void;
     onAddToCartSuccess?: () => void;
     onAddToCartError?: (message: string) => void;
-    hideActions?: boolean; // thêm prop mới này,
+    hideActions?: boolean;
     totalElements?: number;
-    viewAllLink?: string;  // Thêm prop này
+    viewAllLink?: string;
+    gridCols?: 'three' | 'four';
+
 }
 
 export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
@@ -35,6 +37,7 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
                                                                         hideActions = false,
                                                                         totalElements,
                                                                         viewAllLink,
+                                                                        gridCols = 'four'
                                                                     }) => {
     const [showAll, setShowAll] = React.useState(false);
 
@@ -101,17 +104,17 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
             </div>
 
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${
-                displayType === 'home'
+                gridCols === 'four'
                     ? 'md:grid-cols-3 lg:grid-cols-4'
-                    : 'md:grid-cols-3 lg:grid-cols-4'  // category và search chỉ có 3 cột
-            } gap-4 gap-y-5`}
-            >
+                    : 'md:grid-cols-3'
+            } gap-4 gap-y-5`}>
                 {displayedCourses.map((course) => (
-                    <CourseCard key={course.id}
-                                course={course}
-                                onAddToCart={handleAddToCart}
-                                onBuyNow={handleBuyNow}
-                                hideActions={hideActions}
+                    <CourseCard
+                        key={course.id}
+                        course={course}
+                        onAddToCart={handleAddToCart}
+                        onBuyNow={handleBuyNow}
+                        hideActions={hideActions}
                     />
                 ))}
             </div>
@@ -132,7 +135,8 @@ export const CourseHomeSection: React.FC<CourseHomeSectionProps> = ({
                 <Pagination
                     currentPage={currentPage || 1}
                     totalPages={totalPages}
-                    onPageChange={onPageChange || (() => {})}
+                    onPageChange={onPageChange || (() => {
+                    })}
                 />
             ) : null}
         </div>

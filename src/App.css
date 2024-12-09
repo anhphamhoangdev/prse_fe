@@ -1,0 +1,63 @@
+/* Thêm vào file CSS của bạn */
+.course-content {
+    /* Giữ nguyên styles từ TinyMCE */
+    h1 {
+        font-size: 2.25rem !important;
+        font-weight: 800 !important;
+        line-height: 1.1111111 !important;
+        margin-top: 2em !important;
+        margin-bottom: 0.8888889em !important;
+        color: #111827 !important;
+    }
+
+    h2 {
+        font-size: 1.875rem !important;
+        font-weight: 700 !important;
+        line-height: 1.3333333 !important;
+        margin-top: 2em !important;
+        margin-bottom: 1em !important;
+        color: #111827 !important;
+    }
+
+    h3 {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        line-height: 1.6 !important;
+        margin-top: 1.6em !important;
+        margin-bottom: 0.6em !important;
+        color: #111827 !important;
+    }
+
+    h4 {
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
+        line-height: 1.5 !important;
+        margin-top: 1.5em !important;
+        margin-bottom: 0.5em !important;
+        color: #111827 !important;
+    }
+
+    p {
+        margin-top: 1.25em !important;
+        margin-bottom: 1.25em !important;
+    }
+
+    img {
+        margin-top: 2em !important;
+        margin-bottom: 2em !important;
+        border-radius: 0.375rem !important;
+    }
+
+    blockquote {
+        font-weight: 500 !important;
+        font-style: italic !important;
+        color: #111827 !important;
+        border-left-width: 0.25rem !important;
+        border-left-color: #e5e7eb !important;
+        margin-top: 1.6em !important;
+        margin-bottom: 1.6em !important;
+        padding-left: 1em !important;
+    }
+
+
+}

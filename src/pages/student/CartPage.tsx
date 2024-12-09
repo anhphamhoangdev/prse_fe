@@ -318,6 +318,8 @@ export function CartPage() {
             setIsRemoving(true);
             await removeFromCart(itemId);
             await fetchCart();
+
+            window.dispatchEvent(new CustomEvent('cartUpdated'));
         } catch (err) {
             setError("Đã có lỗi xảy ra khi xóa khóa học");
         } finally {

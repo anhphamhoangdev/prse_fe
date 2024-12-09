@@ -32,6 +32,7 @@ import StudentManagement from "./pages/admin/StudentManagement";
 import CourseEdit from "./pages/instructor/CourseEdit";
 import ChapterEditPage from "./pages/instructor/ChapterEditPage";
 import LessonEdit from "./pages/instructor/LessonEdit";
+import {AdvisorChat} from "./pages/AdvisorChat";
 
 function App() {
     return (
@@ -44,7 +45,7 @@ function App() {
                     <Route path="/search" element={<Search />} />
                     <Route path="/category/:categoryId" element={<Category />} />
                     <Route path="/course-detail/:id" element={<CourseDetail />} />
-                    <Route path="/course-detail/1/1" element={<VideoLesson />} />
+                    <Route path="/advisor-chat" element={<AdvisorChat/>} />
 
                     <Route path='activate/:email/:activateCode' element={<ActivateAccount/>}></Route>
                     <Route path='profile' element={<Profile/>}></Route>

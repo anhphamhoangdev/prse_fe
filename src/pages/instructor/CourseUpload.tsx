@@ -8,6 +8,7 @@ import {requestPostFormDataWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {Category} from "../../models/Category";
 import {getCategories} from "../../services/categoryService";
+import {RichTextEditor} from "../../components/common/RichTextEditor";
 
 interface CourseResponse {
     id: number;
@@ -151,21 +152,29 @@ const UploadCourse: React.FC = () => {
     };
 
     const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | { target: { name: string; value: string; type?: string } }
     ) => {
         const { name, value, type } = e.target;
+
+        // Xử lý checkbox
         if (type === "checkbox") {
             const checked = (e.target as HTMLInputElement).checked;
             setFormData({ ...formData, [name]: checked });
-        } else if (name === "originalPrice") {
+        }
+        // Xử lý originalPrice
+        else if (name === "originalPrice") {
             const numericValue = unformatNumber(value);
             if (!isNaN(numericValue)) {
                 setFormData({ ...formData, [name]: numericValue });
                 setFormattedPrice(formatNumber(numericValue));
             }
-        } else {
+        }
+        // Xử lý các trường hợp còn lại (bao gồm cả RichTextEditor)
+        else {
             setFormData({ ...formData, [name]: value });
         }
+
+        // Xóa lỗi nếu có
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' });
         }
@@ -475,16 +484,21 @@ const UploadCourse: React.FC = () => {
                                            className="block text-sm font-medium text-gray-700 mb-1">
                                         Mô Tả Khóa Học
                                     </label>
-                                    <textarea
-                                        rows={5}
-                                        name="description"
+                                    <RichTextEditor
                                         id="description"
+                                        name="description"
                                         value={formData.description}
-                                        onChange={handleChange}
-                                        className="block w-full border border-gray-300 rounded-lg shadow-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out sm:text-sm hover:border-gray-400 p-3"
-                                        placeholder="Viết mô tả thú vị về khóa học của bạn"
-                                        required
-                                    />
+                                        onChange={(content) => {
+                                        // Cập nhật handleChange để xử lý rich text
+                                        handleChange({
+                                            target: {
+                                                name: 'description',
+                                                value: content
+                                            }
+                                        });
+                                    }}
+                                        error={errors.description}
+                                        />
                                     {renderError('description')}
                                 </div>
 

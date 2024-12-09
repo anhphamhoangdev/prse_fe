@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Star, ThumbsUp, Calendar, MessageCircle } from "lucide-react";
 import type { FeedbackData } from '../../../types/course';
+import {request, requestGetWithOptionalAuth, requestWithAuth} from "../../../utils/request";
+import {RatingStatistics} from "./RatingStatistics";
 
 interface CourseFeedbackProps {
     feedbacks: FeedbackData[];
+    courseId: number;
     isEnrolled: boolean;
     hasMoreFeedbacks: boolean;
     isLoadingMore?: boolean;
     onLoadMoreFeedbacks: () => void;
     onSubmitFeedback: (rating: number, comment: string) => void;
     isLoadingFeedback?: boolean;
+}
+
+interface AllFeedbacksResponse {
+    code: number;
+    error_message: Record<string, any>;
+    data: {
+        feedbacks: FeedbackData[];
+    };
 }
 
 export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
@@ -19,12 +30,53 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                                                                   isLoadingMore = false,
                                                                   onLoadMoreFeedbacks,
                                                                   onSubmitFeedback,
-                                                                  isLoadingFeedback = false
+                                                                  isLoadingFeedback = false,
+                                                                    courseId
                                                               }) => {
+
+    // statistics
+    const [allFeedbacks, setAllFeedbacks] = useState<FeedbackData[]>([]);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+    useEffect(() => {
+        const loadAllFeedbacks = async () => {
+            try {
+                const response = await request<AllFeedbacksResponse>(`/course/${courseId}/all-feedbacks`);
+                if(response.code === 1)
+                {
+                    setAllFeedbacks(response.data.feedbacks)
+                }
+            } catch (error) {
+                console.error('Failed to load feedback statistics:', error);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        loadAllFeedbacks();
+    }, []);
+
+
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [hoveredStar, setHoveredStar] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const refreshAllFeedbacks = async () => {
+        try {
+            const response = await request<AllFeedbacksResponse>(`/course/${courseId}/all-feedbacks`);
+            if(response.code === 1) {
+                setAllFeedbacks(response.data.feedbacks)
+            }
+        } catch (error) {
+            console.error('Failed to refresh feedback statistics:', error);
+        }
+    };
+
+// Initial load
+    useEffect(() => {
+        refreshAllFeedbacks();
+    }, [courseId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,12 +85,15 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
             await onSubmitFeedback(rating, comment);
             setRating(5);
             setComment('');
+            // Gọi trực tiếp hàm refresh
+            await refreshAllFeedbacks();
         } catch (error) {
             console.error('Failed to submit feedback:', error);
         } finally {
             setIsSubmitting(false);
         }
     };
+
 
     const getRatingLabel = (rating: number) => {
         switch(rating) {
@@ -66,46 +121,15 @@ export const CourseFeedback: React.FC<CourseFeedbackProps> = ({
                 )}
             </div>
 
-            {/* Rating Statistics */}
-            <div className="bg-gray-50 rounded-xl p-6 mb-8 transition-transform duration-300 transform hover:scale-105">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center">
-                        <div className="text-4xl font-bold text-gray-900">{4.5}</div>
-                        <div className="flex justify-center my-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                    key={star}
-                                    className="w-5 h-5 transition-transform duration-200"
-                                    fill={star <= 4.5 ? "#FFD700" : "none"}
-                                    color={star <= 4.5 ? "#FFD700" : "#D1D5DB"}
-                                />
-                            ))}
-                        </div>
-                        <div className="text-sm text-gray-500">{feedbacks.length} đánh giá</div>
-                    </div>
-                    <div className="col-span-2">
-                        {[5, 4, 3, 2, 1].map((num) => (
-                            <div key={num} className="flex items-center gap-2 mb-2">
-                                <div className="text-sm font-medium w-3">{num}</div>
-                                <Star className="w-4 h-4 transition-transform duration-200" fill="#FFD700" color="#FFD700" />
-                                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-yellow-400 rounded-full transition-all duration-300"
-                                        style={{ width: `${(feedbacks.filter(f => Math.floor(f.rating) === num).length / feedbacks.length) * 100}%` }}
-                                    />
-                                </div>
-                                <div className="text-sm text-gray-500 w-10">
-                                    {feedbacks.filter(f => Math.floor(f.rating) === num).length}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <RatingStatistics
+                isLoading={isLoadingStats}
+                allFeedbacks={allFeedbacks}
+            />
 
             {/* Feedback Form */}
             {isEnrolled && (
-                <form id="feedback-form" onSubmit={handleSubmit} className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-100 transition-transform duration-300 transform hover:shadow-lg">
+                <form id="feedback-form" onSubmit={handleSubmit}
+                      className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-100 transition-transform duration-300 transform hover:shadow-lg">
                     <h3 className="text-lg font-semibold mb-4 text-gray-900">Chia sẻ trải nghiệm của bạn</h3>
                     <div className="mb-6">
                         <div className="flex items-center gap-4 mb-2">

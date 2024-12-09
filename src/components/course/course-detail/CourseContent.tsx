@@ -241,21 +241,40 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                 navigate(`${baseCoursePath}/${chapterId}/${lesson.id}`);
         }
     }, [isEnrolled, courseId, navigate, onLessonClick]);
+
     const renderChapterProgress = (chapter: Chapter) => {
-        if (!isEnrolled || !chapter.progress) return null;
+        if (!isEnrolled || !chapter.lessons) return null;
+
+        // Calculate progress based on completed lessons
+        const totalLessons = chapter.lessons.length;
+        const completedLessons = chapter.lessons.filter(
+            lesson => lesson.progress?.status === 'completed'
+        ).length;
+
+        const progressPercent = totalLessons > 0
+            ? Math.round((completedLessons / totalLessons) * 100)
+            : 0;
+
+        // Determine status based on completed lessons
+        let status = 'Not Started';
+        if (progressPercent === 100) {
+            status = 'completed';
+        } else if (progressPercent > 0) {
+            status = 'in_progress';
+        }
 
         return (
             <div className="flex items-center space-x-2">
-                <div className={`px-2 py-1 rounded-full text-xs ${getProgressColor(chapter.progress.status || 'Not Started')}`}>
-                    {chapter.progress.status === 'completed'
+                <div className={`px-2 py-1 rounded-full text-xs ${getProgressColor(status)}`}>
+                    {status === 'completed'
                         ? 'Completed'
-                        : chapter.progress.status === 'in_progress'
+                        : status === 'in_progress'
                             ? 'In Progress'
                             : 'Not Started'}
                 </div>
                 <span className="text-sm text-gray-500">
-                    {chapter.progress?.progressPercent !== null && chapter.progress.progressPercent > 0 ? `${chapter.progress.progressPercent}%` : '0%'}
-                </span>
+                {progressPercent}%
+            </span>
             </div>
         );
     };

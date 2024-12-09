@@ -74,6 +74,8 @@ export const ENDPOINTS = {
         LOGIN: '/admin/login',
         OVERVIEW: '/admin/overview',
         STUDENTS: '/admin/students',
+        REVENUE: '/admin/revenue',
+        CATEGORY_DISTRIBUTION: '/admin/category-distribution',
     }
 
 

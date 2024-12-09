@@ -107,6 +107,7 @@ export interface CourseBasicDTO {
     id: number;
     title: string;
     description: string;
+    shortDescription: string;
     totalStudents: number;
     totalViews: number;
     language: string;

@@ -2,25 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award, TrendingDown} from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-    PieChart, Pie, Cell
+    PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, Area
 } from 'recharts';
 import {requestAdminWithAuth, requestWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
+import CourseDistribution from "../../components/admin/CourseDistribution";
 
-const revenueData = [
-    { month: 'T1', revenue: 35000000 },
-    { month: 'T2', revenue: 42000000 },
-    { month: 'T3', revenue: 38000000 },
-    { month: 'T4', revenue: 45000000 },
-    { month: 'T5', revenue: 52000000 },
-    { month: 'T6', revenue: 49000000 },
-    { month: 'T7', revenue: 58000000 },
-    { month: 'T8', revenue: 63000000 },
-    { month: 'T9', revenue: 59000000 },
-    { month: 'T10', revenue: 66000000 },
-    { month: 'T11', revenue: 72000000 },
-    { month: 'T12', revenue: 85000000 },
-];
 
 const courseDistributionData = [
     { name: 'Công nghệ thông tin', value: 35 },
@@ -44,6 +31,24 @@ interface OverviewResponse {
     revenueGrowthRate: number;
 }
 
+interface RevenueStatistic {
+    month: string;
+    revenue: number;
+}
+
+interface RevenueData {
+    revenue_statistics: RevenueStatistic[];
+}
+
+interface CategoryDistribution{
+    name: string;
+    value: number;
+}
+
+interface CategoryDistributionData{
+    category_distribution: CategoryDistribution[];
+}
+
 export const AdminDashboard = () => {
 
     const [overviewData, setOverviewData] = useState<OverviewResponse>({
@@ -58,6 +63,10 @@ export const AdminDashboard = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [monthsCount, setMonthsCount] = useState(6);
+    const [revenueData, setRevenueData] = useState<RevenueStatistic[]>([]);
+    const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistribution[]>([]);
+
 
     function formatCurrency(amount: number): string {
         if (amount >= 1000000) {
@@ -85,6 +94,36 @@ export const AdminDashboard = () => {
         loadOverview();
     }, []);
 
+    useEffect(() => {
+        const fetchRevenueData = async () => {
+            try {
+                const response = await requestAdminWithAuth<RevenueData>(
+                    `${ENDPOINTS.ADMIN.REVENUE}?monthsCount=${monthsCount}`
+                );
+                setRevenueData(response.revenue_statistics);
+            } catch (error) {
+                console.error('Error fetching revenue data:', error);
+            }
+        };
+
+        fetchRevenueData();
+    }, [monthsCount]);
+
+
+    useEffect(() => {
+        const fetchCategoryDistributionData = async () => {
+            try {
+                const response = await requestAdminWithAuth<CategoryDistributionData>(
+                    `${ENDPOINTS.ADMIN.CATEGORY_DISTRIBUTION}`
+                );
+                setCategoryDistribution(response.category_distribution);
+            } catch (error) {
+                console.error('Error fetching category distribution data:', error);
+            }
+        };
+
+        fetchCategoryDistributionData();
+    }, [monthsCount]);
 
     return (
         <div className="p-6 space-y-6">
@@ -109,7 +148,7 @@ export const AdminDashboard = () => {
                             <TrendingDown className="w-4 h-4 mr-1"/>
                         )}
                         <span>
-                        {overviewData.userGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.userGrowthRate >= 0 ? '+' : ''}
                             {overviewData.userGrowthRate.toFixed(1)}% so với tháng trước
                         </span>
                     </div>
@@ -120,7 +159,7 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Số khóa học</p>
-                            <p className="text-2xl font-bold text-gray-900">${overviewData.totalCourses}</p>
+                            <p className="text-2xl font-bold text-gray-900">{overviewData.totalCourses}</p>
                         </div>
                         <div className="bg-purple-100 p-3 rounded-lg">
                             <BookOpen className="w-6 h-6 text-purple-600"/>
@@ -134,7 +173,7 @@ export const AdminDashboard = () => {
                             <TrendingDown className="w-4 h-4 mr-1"/>
                         )}
                         <span>
-                        {overviewData.courseGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.courseGrowthRate >= 0 ? '+' : ''}
                             {overviewData.courseGrowthRate.toFixed(1)}% so với tháng trước
                         </span>
                     </div>
@@ -159,7 +198,7 @@ export const AdminDashboard = () => {
                             <TrendingDown className="w-4 h-4 mr-1"/>
                         )}
                         <span>
-                        {overviewData.revenueGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.revenueGrowthRate >= 0 ? '+' : ''}
                             {overviewData.revenueGrowthRate.toFixed(1)}% so với tháng trước
                         </span>
                     </div>
@@ -170,7 +209,7 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Giảng viên</p>
-                            <p className="text-2xl font-bold text-gray-900">${overviewData.totalInstructors}</p>
+                            <p className="text-2xl font-bold text-gray-900">{overviewData.totalInstructors}</p>
                         </div>
                         <div className="bg-orange-100 p-3 rounded-lg">
                             <Award className="w-6 h-6 text-orange-600"/>
@@ -184,7 +223,7 @@ export const AdminDashboard = () => {
                             <TrendingDown className="w-4 h-4 mr-1"/>
                         )}
                         <span>
-                        {overviewData.instructorGrowthRate >= 0 ? '+' : ''}
+                            {overviewData.instructorGrowthRate >= 0 ? '+' : ''}
                             {overviewData.instructorGrowthRate.toFixed(1)}% so với tháng trước
                         </span>
                     </div>
@@ -205,7 +244,7 @@ export const AdminDashboard = () => {
                             </div>
                         </div>
                         <div className="flex items-start p-4 bg-yellow-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" />
+                            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3"/>
                             <div>
                                 <h3 className="text-sm font-medium text-yellow-900">5 yêu cầu rút tiền</h3>
                                 <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
@@ -240,57 +279,93 @@ export const AdminDashboard = () => {
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Chart giữ nguyên */}
+                {/* Revenue Chart */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Thống kê doanh thu</h2>
-                    <div className="w-full h-[300px] flex justify-center">
-                        <BarChart
-                            width={600} // Change to a percentage or a smaller fixed size
-                            height={300}
-                            data={revenueData}
-                            // Adding responsive behavior
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-semibold text-gray-900">Thống kê doanh thu</h2>
+                        <select
+                            className="px-3 py-2 border rounded-lg text-sm"
+                            value={monthsCount === 6 ? "6 tháng gần nhất" : "12 tháng gần nhất"}
+                            onChange={(e) => {
+                                const value = e.target.value === "6 tháng gần nhất" ? 6 : 12;
+                                setMonthsCount(value);
+                            }}
                         >
-                            <CartesianGrid strokeDasharray="3 3"/>
-                            <XAxis dataKey="month"/>
-                            <YAxis tickFormatter={(value) => `${value / 1000000}M`}/>
-                            <Tooltip formatter={(value) => `${value.toLocaleString()} VND`} />
-                            <Legend />
-                            <Bar dataKey="revenue" fill="#0088FE" name="Doanh thu" />
-                        </BarChart>
+                            <option value="6 tháng gần nhất">6 tháng gần nhất</option>
+                            <option value="12 tháng gần nhất">12 tháng gần nhất</option>
+                        </select>
                     </div>
-                </div>
-                {/* Điều chỉnh Course Distribution Chart */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Phân bố khóa học</h2>
-                    <div className="flex justify-center">
-                        <PieChart width={400} height={300}>
-                            <Pie
-                                data={courseDistributionData}
-                                cx={200} // Center the pie chart horizontally
-                                cy={150} // Center the pie chart vertically
-                                labelLine={true}
-                                outerRadius={80}
-                                label={({name, percent}) => `${(percent * 100).toFixed(0)}%`}
-                                fill="#8884d8"
-                                dataKey="value"
+                    <div className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                                data={revenueData}
+                                margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
                             >
-                                {courseDistributionData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]}/>
-                                ))}
-                            </Pie>
-                            <Tooltip formatter={(value, name) => [`${value} khóa học`, name]} />
-                            <Legend
-                                layout="vertical"
-                                align="right" // Align legend to the right to avoid overlap
-                                verticalAlign="middle"
-                                wrapperStyle={{
-                                    paddingLeft: "20px",
-                                    paddingTop: "10px",
-                                }}
-                            />
-                        </PieChart>
+                                <defs>
+                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0.1}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                    stroke="#e5e7eb"
+                                />
+                                <XAxis
+                                    dataKey="month"
+                                    tick={{ fill: '#6b7280' }}
+                                    axisLine={{ stroke: '#e5e7eb' }}
+                                    tickLine={false}
+                                />
+                                <YAxis
+                                    tick={{ fill: '#6b7280' }}
+                                    tickFormatter={(value) => `${value / 1000000}M`}
+                                    axisLine={{ stroke: '#e5e7eb' }}
+                                    tickLine={false}
+                                />
+                                <Tooltip
+                                    formatter={(value) => [`${value.toLocaleString()} VND`, 'Doanh thu']}
+                                    contentStyle={{
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        padding: '10px',
+                                        border: '1px solid #e5e7eb',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    }}
+                                    cursor={{ stroke: '#2563eb', strokeDasharray: '5 5' }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="none"
+                                    fill="url(#colorRevenue)"
+                                    animationDuration={1500}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#2563eb"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#ffffff', stroke: '#2563eb', strokeWidth: 2, r: 4 }}
+                                    activeDot={{
+                                        fill: '#2563eb',
+                                        stroke: '#ffffff',
+                                        strokeWidth: 2,
+                                        r: 7,
+                                    }}
+                                    animationDuration={1500}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
+
+                {/* Course Distribution Chart */}
+                {/*<div className="bg-white rounded-xl shadow-lg p-6">*/}
+                    <CourseDistribution data={categoryDistribution}/>
+
+                {/*</div>*/}
             </div>
         </div>
     );

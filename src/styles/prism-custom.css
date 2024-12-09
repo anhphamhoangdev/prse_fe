@@ -1,0 +1,138 @@
+/* Custom theme for Prism.js using a dark background and modern color palette */
+code[class*="language-"],
+pre[class*="language-"] {
+    color: #e5e7eb; /* cool gray-200 */
+    background: #111827; /* gray-900 */
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.8;
+    tab-size: 4;
+    hyphens: none;
+    border-radius: 0.5rem;
+    padding: 1.5em;
+    margin: 1em 0;
+    overflow: auto;
+    max-height: 600px;
+}
+
+/* Cải thiện scrollbar cho code block */
+pre[class*="language-"]::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb {
+    background: #4b5563; /* gray-600 */
+    border-radius: 4px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-track {
+    background: #111827; /* gray-900 */
+}
+
+/* Tokens */
+.token {
+    margin: 0;
+    padding: 0;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #6b7280; /* gray-500 */
+    font-style: italic;
+    font-size: 0.95em;
+}
+
+.token.namespace {
+    opacity: 0.8;
+}
+
+.token.string,
+.token.attr-value {
+    color: #34d399; /* emerald-400 */
+    font-weight: 500;
+}
+
+.token.punctuation {
+    color: #e5e7eb; /* cool gray-200 */
+}
+
+.token.operator {
+    color: #60a5fa; /* blue-400 */
+}
+
+.token.boolean,
+.token.number {
+    color: #f87171; /* red-400 */
+    font-weight: 500;
+}
+
+.token.property {
+    color: #60a5fa; /* blue-400 */
+}
+
+.token.tag {
+    color: #f472b6; /* pink-400 */
+    font-weight: 600;
+}
+
+.token.keyword {
+    color: #a78bfa; /* violet-400 */
+    font-weight: 600;
+}
+
+.token.function {
+    color: #60a5fa; /* blue-400 */
+    font-weight: 500;
+}
+
+.token.class-name {
+    color: #facc15; /* yellow-400 */
+    font-weight: 600;
+}
+
+.token.variable {
+    color: #f472b6; /* pink-400 */
+}
+
+/* Cải thiện line highlighting */
+.line-highlight {
+    background: rgba(255, 255, 255, 0.08);
+    margin: 2px 0;
+}
+
+/* Cải thiện container styling */
+pre[class*="language-"] {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    margin: 1.5rem 0;
+    border: 1px solid #374151; /* gray-700 */
+    position: relative;
+}
+
+/* Hiệu ứng hover mượt mà hơn */
+pre[class*="language-"]:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease-in-out;
+    border-color: #4b5563; /* gray-600 */
+}
+
+/* Thêm padding cho code bên trong pre */
+pre[class*="language-"] > code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+    white-space: pre;
+    word-break: normal;
+    word-spacing: normal;
+    word-wrap: normal;
+    line-height: inherit;
+    tab-size: 4;
+    hyphens: none;
+}
