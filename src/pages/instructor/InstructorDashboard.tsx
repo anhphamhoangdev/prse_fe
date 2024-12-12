@@ -7,7 +7,7 @@ import {
 import { InstructorData, UserData } from "../../types/users";
 import { requestWithAuth } from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area} from 'recharts';
 import {InstructorContext} from "../../layouts/InstructorLayout";
 import {formatTimeAgo} from "../../utils/formatLocalDateTimeToVN";
 
@@ -212,18 +212,86 @@ export const InstructorDashboard: React.FC = () => {
                     </div>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={revenueData}>
-                                <CartesianGrid strokeDasharray="3 3"/>
-                                <XAxis dataKey="month"/>
-                                <YAxis/>
-                                <Tooltip/>
+                            <LineChart
+                                data={revenueData}
+                                margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
+                            >
+                                <defs>
+                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0.1}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                    stroke="#e5e7eb"
+                                />
+                                <XAxis
+                                    dataKey="month"
+                                    tick={{ fill: '#6b7280' }}
+                                    axisLine={{ stroke: '#e5e7eb' }}
+                                    tickLine={false}
+                                />
+                                <YAxis
+                                    label={{
+                                        value: "Doanh thu (VNĐ)",
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                        style: {
+                                            textAnchor: 'middle',
+                                            fontSize: 13,
+                                            fill: '#666'
+                                        },
+                                        offset: 5,
+                                        dx: -10
+                                    }}
+                                    tick={{ fill: '#6b7280' }}
+                                    tickFormatter={(value) => {
+                                        if (value === 0) return '0';
+                                        if (value < 1000000) {
+                                            return new Intl.NumberFormat('vi-VN', {
+                                                maximumFractionDigits: 1,
+                                                notation: 'compact',
+                                                compactDisplay: 'short'
+                                            }).format(value);
+                                        }
+                                        return `${(value/1000000).toFixed(1)}M`;
+                                    }}
+                                    axisLine={{ stroke: '#e5e7eb' }}
+                                    tickLine={false}
+                                />
+                                <Tooltip
+                                    formatter={(value) => [`${value.toLocaleString()} VND`, 'Doanh thu']}
+                                    contentStyle={{
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        padding: '10px',
+                                        border: '1px solid #e5e7eb',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    }}
+                                    cursor={{ stroke: '#2563eb', strokeDasharray: '5 5' }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="none"
+                                    fill="url(#colorRevenue)"
+                                    animationDuration={1500}
+                                />
                                 <Line
                                     type="monotone"
                                     dataKey="revenue"
-                                    stroke="#6366f1"
-                                    strokeWidth={2}
-                                    dot={{ r: 4 }}
-                                    activeDot={{ r: 6 }}
+                                    stroke="#2563eb"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#ffffff', stroke: '#2563eb', strokeWidth: 2, r: 4 }}
+                                    activeDot={{
+                                        fill: '#2563eb',
+                                        stroke: '#ffffff',
+                                        strokeWidth: 2,
+                                        r: 7,
+                                    }}
+                                    animationDuration={1500}
                                 />
                             </LineChart>
                         </ResponsiveContainer>

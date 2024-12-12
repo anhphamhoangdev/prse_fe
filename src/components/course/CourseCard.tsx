@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import "./style.css";
 import {Course} from "../../models/Course";
 import {formatCurrency} from "../../utils/formatCurrency";
+import {formatNumber} from "../../utils/formatNumber";
 
 interface CourseCardProps {
     course: Course;
@@ -23,9 +24,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         navigate(`/course-detail/${course.id}`);
     };
 
-    const formatNumber = (num: number): string => {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    };
 
     return (
         <div

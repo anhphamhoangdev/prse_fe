@@ -1,6 +1,12 @@
 import React from "react";
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import {Link} from "react-router-dom";
 
+
+const openInNewTab = (url: string) => {
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (newWindow) newWindow.opener = null;
+}
 export const Footer = () => (
     <footer className="bg-slate-900 text-gray-300 py-8 mt-8 w-full border-t border-slate-800">
         <div className="container mx-auto px-4 max-w-5xl">
@@ -75,8 +81,8 @@ export const Footer = () => (
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-xs">
                     <p>&copy; {new Date().getFullYear()} EasyEdu.vn. Tất cả quyền được bảo lưu.</p>
                     <div className="flex items-center gap-6">
-                        <a href="#" className="hover:text-blue-300 transition-colors duration-300">Điều khoản</a>
-                        <a href="#" className="hover:text-blue-300 transition-colors duration-300">Chính sách</a>
+                        <Link to='/terms' className="hover:text-blue-300 transition-colors duration-300">Điều khoản</Link>
+                        <Link to='/policies' className="hover:text-blue-300 transition-colors duration-300">Chính sách</Link>
                     </div>
                 </div>
             </div>

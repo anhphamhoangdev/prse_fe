@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award, TrendingDown} from 'lucide-react';
+import {TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award, TrendingDown, CheckCircle} from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, Area
@@ -140,17 +140,31 @@ export const AdminDashboard = () => {
                             <Users className="w-6 h-6 text-blue-600"/>
                         </div>
                     </div>
-                    <div
-                        className={`mt-4 flex items-center text-sm ${overviewData.userGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {overviewData.userGrowthRate >= 0 ? (
-                            <TrendingUp className="w-4 h-4 mr-1"/>
+                    <div className={`mt-4 flex items-center text-sm ${
+                        overviewData.userGrowthRate > 0
+                            ? 'text-green-600'
+                            : overviewData.userGrowthRate < 0
+                                ? 'text-red-600'
+                                : 'text-blue-600'  
+                    }`}>
+                        {overviewData.userGrowthRate === 0 ? (
+                            <>
+                                <CheckCircle className="w-4 h-4 mr-1"/>
+                                <span>Ổn định so với tháng trước</span>
+                            </>
                         ) : (
-                            <TrendingDown className="w-4 h-4 mr-1"/>
+                            <>
+                                {overviewData.userGrowthRate > 0 ? (
+                                    <TrendingUp className="w-4 h-4 mr-1"/>
+                                ) : (
+                                    <TrendingDown className="w-4 h-4 mr-1"/>
+                                )}
+                                <span>
+                                    {overviewData.userGrowthRate > 0 ? '+' : ''}
+                                                        {overviewData.userGrowthRate.toFixed(1)}% so với tháng trước
+                                </span>
+                            </>
                         )}
-                        <span>
-                            {overviewData.userGrowthRate >= 0 ? '+' : ''}
-                            {overviewData.userGrowthRate.toFixed(1)}% so với tháng trước
-                        </span>
                     </div>
                 </div>
 
@@ -165,17 +179,31 @@ export const AdminDashboard = () => {
                             <BookOpen className="w-6 h-6 text-purple-600"/>
                         </div>
                     </div>
-                    <div
-                        className={`mt-4 flex items-center text-sm ${overviewData.courseGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {overviewData.courseGrowthRate >= 0 ? (
-                            <TrendingUp className="w-4 h-4 mr-1"/>
+                    <div className={`mt-4 flex items-center text-sm ${
+                        overviewData.courseGrowthRate > 0
+                            ? 'text-green-600'
+                            : overviewData.courseGrowthRate < 0
+                                ? 'text-red-600'
+                                : 'text-blue-600'
+                    }`}>
+                        {overviewData.courseGrowthRate === 0 ? (
+                            <>
+                                <CheckCircle className="w-4 h-4 mr-1"/>
+                                <span>Ổn định so với tháng trước</span>
+                            </>
                         ) : (
-                            <TrendingDown className="w-4 h-4 mr-1"/>
+                            <>
+                                {overviewData.courseGrowthRate > 0 ? (
+                                    <TrendingUp className="w-4 h-4 mr-1"/>
+                                ) : (
+                                    <TrendingDown className="w-4 h-4 mr-1"/>
+                                )}
+                                <span>
+                                    {overviewData.courseGrowthRate > 0 ? '+' : ''}
+                                    {overviewData.courseGrowthRate.toFixed(1)}% so với tháng trước
+                                </span>
+                            </>
                         )}
-                        <span>
-                            {overviewData.courseGrowthRate >= 0 ? '+' : ''}
-                            {overviewData.courseGrowthRate.toFixed(1)}% so với tháng trước
-                        </span>
                     </div>
                 </div>
 
@@ -190,17 +218,31 @@ export const AdminDashboard = () => {
                             <DollarSign className="w-6 h-6 text-green-600"/>
                         </div>
                     </div>
-                    <div
-                        className={`mt-4 flex items-center text-sm ${overviewData.revenueGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {overviewData.revenueGrowthRate >= 0 ? (
-                            <TrendingUp className="w-4 h-4 mr-1"/>
+                    <div className={`mt-4 flex items-center text-sm ${
+                        overviewData.revenueGrowthRate > 0
+                            ? 'text-green-600'
+                            : overviewData.revenueGrowthRate < 0
+                                ? 'text-red-600'
+                                : 'text-blue-600'
+                    }`}>
+                        {overviewData.revenueGrowthRate === 0 ? (
+                            <>
+                                <CheckCircle className="w-4 h-4 mr-1"/>
+                                <span>Ổn định so với tháng trước</span>
+                            </>
                         ) : (
-                            <TrendingDown className="w-4 h-4 mr-1"/>
+                            <>
+                                {overviewData.revenueGrowthRate > 0 ? (
+                                    <TrendingUp className="w-4 h-4 mr-1"/>
+                                ) : (
+                                    <TrendingDown className="w-4 h-4 mr-1"/>
+                                )}
+                                <span>
+                                    {overviewData.revenueGrowthRate > 0 ? '+' : ''}
+                                    {overviewData.revenueGrowthRate.toFixed(1)}% so với tháng trước
+                                </span>
+                            </>
                         )}
-                        <span>
-                            {overviewData.revenueGrowthRate >= 0 ? '+' : ''}
-                            {overviewData.revenueGrowthRate.toFixed(1)}% so với tháng trước
-                        </span>
                     </div>
                 </div>
 
@@ -215,17 +257,31 @@ export const AdminDashboard = () => {
                             <Award className="w-6 h-6 text-orange-600"/>
                         </div>
                     </div>
-                    <div
-                        className={`mt-4 flex items-center text-sm ${overviewData.instructorGrowthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {overviewData.instructorGrowthRate >= 0 ? (
-                            <TrendingUp className="w-4 h-4 mr-1"/>
+                    <div className={`mt-4 flex items-center text-sm ${
+                        overviewData.instructorGrowthRate > 0
+                            ? 'text-green-600'
+                            : overviewData.instructorGrowthRate < 0
+                                ? 'text-red-600'
+                                : 'text-blue-600'
+                    }`}>
+                        {overviewData.instructorGrowthRate === 0 ? (
+                            <>
+                                <CheckCircle className="w-4 h-4 mr-1"/>
+                                <span>Ổn định so với tháng trước</span>
+                            </>
                         ) : (
-                            <TrendingDown className="w-4 h-4 mr-1"/>
+                            <>
+                                {overviewData.instructorGrowthRate > 0 ? (
+                                    <TrendingUp className="w-4 h-4 mr-1"/>
+                                ) : (
+                                    <TrendingDown className="w-4 h-4 mr-1"/>
+                                )}
+                                <span>
+                                    {overviewData.instructorGrowthRate > 0 ? '+' : ''}
+                                    {overviewData.instructorGrowthRate.toFixed(1)}% so với tháng trước
+                                </span>
+                            </>
                         )}
-                        <span>
-                            {overviewData.instructorGrowthRate >= 0 ? '+' : ''}
-                            {overviewData.instructorGrowthRate.toFixed(1)}% so với tháng trước
-                        </span>
                     </div>
                 </div>
             </div>
@@ -319,8 +375,30 @@ export const AdminDashboard = () => {
                                     tickLine={false}
                                 />
                                 <YAxis
+                                    label={{
+                                        value: "Doanh thu (VNĐ)",
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                        style: {
+                                            textAnchor: 'middle',
+                                            fontSize: 13,
+                                            fill: '#666'
+                                        },
+                                        offset: 5,
+                                        dx: -10
+                                    }}
                                     tick={{ fill: '#6b7280' }}
-                                    tickFormatter={(value) => `${value / 1000000}M`}
+                                    tickFormatter={(value) => {
+                                        if (value === 0) return '0';
+                                        if (value < 1000000) {
+                                            return new Intl.NumberFormat('vi-VN', {
+                                                maximumFractionDigits: 1,
+                                                notation: 'compact',
+                                                compactDisplay: 'short'
+                                            }).format(value);
+                                        }
+                                        return `${(value/1000000).toFixed(1)}M`;
+                                    }}
                                     axisLine={{ stroke: '#e5e7eb' }}
                                     tickLine={false}
                                 />

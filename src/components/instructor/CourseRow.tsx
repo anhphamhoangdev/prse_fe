@@ -2,6 +2,7 @@ import { InstructorCourse } from "../../types/course";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 import { ArrowUpRight, BookOpen, Edit, Eye, Star, Users } from "lucide-react";
+import {formatNumber} from "../../utils/formatNumber";
 
 export const CourseRow: React.FC<{ course: InstructorCourse }> = ({ course }) => {
     const navigate = useNavigate();
@@ -46,18 +47,18 @@ export const CourseRow: React.FC<{ course: InstructorCourse }> = ({ course }) =>
                     <div className="absolute left-0 top-full mt-2 p-2 bg-gray-900 text-white text-sm rounded-lg w-80
                     invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100
                     transition-all duration-200 z-50 shadow-lg">
-                        {course.description}
+                        {course.shortDescription}
                     </div>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-500">
                     <span className="flex items-center">
                         <Users className="w-3.5 h-3.5 mr-1"/>
-                        {course.totalStudents || 0}
+                        {formatNumber(course.totalStudents) || 0}
                     </span>
                     <span className="flex items-center">
                         <Eye className="w-3.5 h-3.5 mr-1"/>
-                        {course.totalViews || 0}
+                        {formatNumber(course.totalViews) || 0}
                     </span>
                     <span className="flex items-center">
                         <Star className="w-3.5 h-3.5 mr-1"/>
@@ -75,7 +76,7 @@ export const CourseRow: React.FC<{ course: InstructorCourse }> = ({ course }) =>
                         <span className="text-sm">Chỉnh sửa</span>
                     </button>
                     <button
-                        onClick={() => navigate(`/course/${course.id}`)}
+                        onClick={() => window.open(`/course-detail/${course.id}`, '_blank')}
                         className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                     >
                         <ArrowUpRight className="w-4 h-4"/>

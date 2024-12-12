@@ -148,7 +148,7 @@ const InstructorCourses: React.FC = () => {
 
                     {/* Hiển thị thông tin về số lượng */}
                     <div className="mt-4 text-center text-sm text-gray-600">
-                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length)}
+                        Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredCourses.length)}{' '}
                         trong tổng số {filteredCourses.length} khóa học
                     </div>
                 </>

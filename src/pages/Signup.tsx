@@ -115,6 +115,7 @@ export function SignupPage() {
             return;
         }
 
+
         if(isValidPassword && isValidUsername && isValidConfirmPassword && isValidEmail)
         {
             setIsLoading(true);
@@ -357,12 +358,13 @@ export function SignupPage() {
                                     <label htmlFor="terms" className="font-medium text-gray-700">
                                         Tôi đồng ý với{' '}
                                         <Link to="/terms" className="text-blue-600 hover:text-blue-500">
-                                            Điều khoản sử dụng
+                                            Điều khoản
                                         </Link>
                                         {' '}và{' '}
-                                        <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
-                                            Chính sách bảo mật
+                                        <Link to="/policies" className="text-blue-600 hover:text-blue-500">
+                                            Chính sách
                                         </Link>
+                                        {' '}tại EasyEdu
                                     </label>
                                 </div>
                             </div>

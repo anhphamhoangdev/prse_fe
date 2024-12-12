@@ -33,6 +33,8 @@ import CourseEdit from "./pages/instructor/CourseEdit";
 import ChapterEditPage from "./pages/instructor/ChapterEditPage";
 import LessonEdit from "./pages/instructor/LessonEdit";
 import {AdvisorChat} from "./pages/AdvisorChat";
+import {Terms} from "./pages/Terms";
+import {Policies} from "./pages/Policies";
 
 function App() {
     return (
@@ -40,6 +42,8 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/policies" element={<Policies />} />
                     <Route path="/login" element={<LoginPage/>} />
                     <Route path="/signup" element={<SignupPage/>} />
                     <Route path="/search" element={<Search />} />

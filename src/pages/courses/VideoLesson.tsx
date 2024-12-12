@@ -11,7 +11,6 @@ import {LoadingState} from "../../components/course/LoadingState";
 import {Message} from "postcss";
 import {sendMessageAI} from "../../services/chatService";
 import {MessageUtils} from "../../utils/messageUtil";
-import VideoLesson from "./VideoLesson";
 import {VideoPlayer} from "../../components/common/VideoPlayer";
 
 
@@ -44,7 +43,7 @@ interface SubmitLessonResponse {
 
 const VideoLessonDetail: React.FC = () => {
 
-    usePreventInspect()
+    // usePreventInspect()
 
     // 1. Hooks và State Declarations
     const navigate = useNavigate();
@@ -168,6 +167,8 @@ const VideoLessonDetail: React.FC = () => {
             nextLesson: null as Lesson | null,
             prevLesson: null as Lesson | null
         };
+
+        console.log('curriculum:', curriculum)
 
         // Duyệt trực tiếp qua curriculum vì đã là Chapter[]
         for (let i = 0; i < curriculum.length; i++) {

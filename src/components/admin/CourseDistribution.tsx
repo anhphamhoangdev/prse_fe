@@ -84,7 +84,7 @@ export const CourseDistribution: React.FC<CourseDistributionProps> = ({ data }) 
             <div className="flex items-center justify-between mb-6">
                 <div className="space-y-1">
                     <h2 className="text-xl font-bold text-gray-900">Phân bố khóa học</h2>
-                    <p className="text-sm text-gray-500">Thống kê theo lĩnh vực</p>
+                    <p className="text-sm text-gray-500">Thống kê theo thể loại</p>
                 </div>
                 <div className="px-4 py-2 bg-blue-50 rounded-lg text-center">
                     <div className="text-sm font-medium text-blue-600">
