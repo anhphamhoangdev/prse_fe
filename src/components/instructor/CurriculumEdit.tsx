@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     ChevronDown,
     ChevronUp,
@@ -26,6 +26,8 @@ export interface CurriculumEditProps {
 
 const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChange, course}) => {
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
+    const lastChapterRef = useRef<HTMLDivElement>(null);
+    const [shouldScroll, setShouldScroll] = useState(false);
 
     const getLessonIcon = (type: LessonInstructorEdit['type']): JSX.Element => {
         switch (type) {
@@ -97,8 +99,9 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
             newChapter
         );
 
-
         onChaptersChange([...chapters, response.chapter]);
+
+        setShouldScroll(true);
     };
 
     const handleUpdateChapter = (chapterId: number, updates: Partial<ChapterInstructorEdit>): void => {
@@ -119,6 +122,13 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
             }));
         onChaptersChange(updatedChapters);
     };
+
+    useEffect(() => {
+        if (shouldScroll && lastChapterRef.current) {
+            lastChapterRef.current.scrollIntoView({ behavior: 'smooth' });
+            setShouldScroll(false);
+        }
+    }, [chapters, shouldScroll]);
 
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -145,7 +155,7 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
                                 >
                                     {(provided) => (
                                         <div
-                                            ref={provided.innerRef}
+                                            ref={index === chapters.length - 1 ? lastChapterRef : provided.innerRef}
                                             {...provided.draggableProps}
                                             className="mb-4"
                                         >

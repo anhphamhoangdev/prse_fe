@@ -26,6 +26,9 @@ const ChapterEditPage: React.FC = () => {
     };
 
     useEffect(() => {
+
+        window.scrollTo(0, 0);
+
         const fetchData = async () => {
             if (!courseId || !chapterId) return;
 
@@ -44,7 +47,6 @@ const ChapterEditPage: React.FC = () => {
         fetchData();
     }, [courseId, chapterId]);
 
-
     useEffect(() => {
         const fetchData = async () => {
             if (!courseId || !chapterId) return;
@@ -55,7 +57,6 @@ const ChapterEditPage: React.FC = () => {
                         `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}`
                     )
                 ]);
-
                 setChapter(chapterResponse.chapter);
                 setLessons(chapterResponse.chapter.lessons);
             } catch (error) {

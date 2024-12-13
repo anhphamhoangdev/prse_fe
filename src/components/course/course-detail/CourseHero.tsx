@@ -11,7 +11,7 @@ import {formatLocalDateTimeToVN} from "../../../utils/formatLocalDateTimeToVN";
 
 interface CourseHeroProps {
     courseData: CourseBasicDTO;
-    onAddToCart?: () => void;
+    onAddToCart?: () => Promise<void>;
     onBuyNow?: () => void;
     onStartLearning?: () => void;
 }

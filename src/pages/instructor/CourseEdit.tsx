@@ -115,9 +115,6 @@ const CourseEdit: React.FC = () => {
         }
     };
 
-
-
-
     if (pageLoading) {
         return (
             <div className="flex justify-center items-center h-[calc(100vh-200px)]">

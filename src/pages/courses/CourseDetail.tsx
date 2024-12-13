@@ -12,6 +12,8 @@ import CourseContentLoading from "../../components/course/course-detail/CourseCo
 import {getLessonPath} from "../../types/lesson";
 import {requestPostWithAuth} from "../../utils/request";
 import {useNotification} from "../../components/notification/NotificationProvider";
+import {Course} from "../../models/Course";
+import {addToCart} from "../../services/cartService";
 
 
 const handleLessonClick = (chapterId: number, lessonId: number) => {
@@ -19,16 +21,10 @@ const handleLessonClick = (chapterId: number, lessonId: number) => {
     // router.push(`/learn/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
 };
 
-const handleAddToCart = () => {
-    // Xử lý thêm vào giỏ hàng
-    console.log('Adding to cart...');
-};
-
 const handleBuyNow = () => {
     // Xử lý mua ngay
     console.log('Processing purchase...');
 };
-
 
 const TabButton: React.FC<{
     tab: 'overview' | 'content';
@@ -43,7 +39,6 @@ const TabButton: React.FC<{
         {label}
     </button>
 );
-
 
 const CourseDetail: React.FC = () => {
 
@@ -136,8 +131,6 @@ const CourseDetail: React.FC = () => {
     const [curriculum, setCurriculum] = useState<CourseCurriculumDTO | null>(null);
     const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
 
-
-
     // chapter expand
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
     const [activeTab, setActiveTab] = useState<'overview' | 'content'>('overview');
@@ -157,6 +150,44 @@ const CourseDetail: React.FC = () => {
 
     // some
     const { showNotification } = useNotification();
+
+    const handleAddToCartSuccess = () => {
+        showNotification(
+            'success',
+            'Thành công',
+            'Khóa học đã được thêm vào giỏ hàng thành công'
+        );
+    };
+
+    const handleAddToCartError = (message: string) => {
+        showNotification(
+            'error',
+            'Không thành công',
+            message
+        );
+    };
+
+
+    const updateHeaderCartCount = () => {
+        // Dispatch một custom event để Header component có thể lắng nghe
+        const event = new CustomEvent('cartUpdated');
+        window.dispatchEvent(event);
+    };
+
+    const handleAddToCart = async () => {
+        try {
+            const response = await addToCart(Number(id));
+            if (response.code === 1) {
+                updateHeaderCartCount();
+                handleAddToCartSuccess();
+            } else {
+                handleAddToCartError(response.error_message ? response.error_message : 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+            }
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            handleAddToCartError('Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    };
 
 
     // fetchBasicInfo
@@ -277,6 +308,7 @@ const CourseDetail: React.FC = () => {
             setIsLoadingCurriculum(false);
         }
     };
+
     useEffect(() => {
         const loadCurriculum = async () => {
             if (activeTab === 'content' && !curriculum && id) {
@@ -469,7 +501,7 @@ const CourseDetail: React.FC = () => {
             <CourseHero
                 courseData={basicInfo}
                 onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyNow}
+                onBuyNow={handleAddToCart}
                 onStartLearning={handleStartLearningClick}
             />
             <div className="container mx-auto px-4 py-8">
@@ -523,7 +555,7 @@ const CourseDetail: React.FC = () => {
                         <CourseSidebar
                             courseData={basicInfo}
                             onAddToCart={handleAddToCart}
-                            onBuyNow={handleBuyNow}
+                            onBuyNow={handleAddToCart}
                             onStartLearning={handleStartLearningClick}
                         />
                     </div>
