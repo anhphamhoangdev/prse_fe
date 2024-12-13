@@ -72,23 +72,30 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
                 {!hideActions ? (
                     <div className="font-bold flex justify-between items-center">
-                        <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
                             {course.discountPrice && course.discountPrice < course.originalPrice ? (
                                 <>
-                                    <span className="line-through text-gray-400 text-sm mb-1">
-                                        {formatCurrency(course.originalPrice)}
-                                    </span>
-                                    <span className="bg-red-50 text-red-500 font-bold px-3 py-1 rounded-lg shadow-sm group-hover:shadow-md transition-all duration-300">
-                                        {formatCurrency(course.discountPrice)}
-                                    </span>
+                    <span
+                        className="relative bg-gradient-to-r from-red-500 via-rose-500 to-red-500 text-white font-bold px-4 py-1.5 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
+                        <span className="relative">
+                            {formatCurrency(course.discountPrice)}
+                        </span>
+                        <div
+                            className="absolute -right-1 -top-2 bg-yellow-400 text-[10px] text-red-600 font-black py-0.5 px-1.5 rounded-full shadow-sm">
+                            -{Math.round(((course.originalPrice - course.discountPrice) / course.originalPrice) * 100)}%
+                        </div>
+                    </span>
+                                    <span className="text-gray-400 text-sm line-through opacity-70">
+                        {formatCurrency(course.originalPrice)}
+                    </span>
                                 </>
                             ) : (
                                 <span className={`px-3 py-1 rounded-lg shadow-sm group-hover:shadow-md transition-all duration-300 
-                                    ${course.originalPrice <= 0
+                    ${course.originalPrice <= 0
                                     ? "bg-blue-50 text-blue-600"
                                     : "bg-gray-50 text-gray-700"}`}>
-                                    {formatCurrency(course.originalPrice)}
-                                </span>
+                    {formatCurrency(course.originalPrice)}
+                </span>
                             )}
                         </div>
 
@@ -128,7 +135,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             </div>
 
             {course.isHot && (
-                <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 text-white px-3 py-1.5 text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm animate-pulse">
+                <div
+                    className="absolute top-3 right-3 bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 text-white px-3 py-1.5 text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm animate-pulse">
                     <span className="flex items-center gap-1.5">
                         Hot
                         <i className="fas fa-fire-flame-curved animate-bounce"></i>

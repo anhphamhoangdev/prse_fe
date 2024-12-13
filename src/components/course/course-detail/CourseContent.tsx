@@ -307,7 +307,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                     >
                         <div className="flex items-center space-x-2">
                             <span className="font-medium text-gray-900">{chapter.title}</span>
-                            <span className="text-sm text-blue-600">({chapter.lessons.length} lessons)</span>
+                            <span className="text-sm text-blue-600">({chapter.lessons.length} bài học)</span>
                             {renderChapterProgress(chapter)}
                         </div>
                         {chapter.lessons.length > 0 ? (
