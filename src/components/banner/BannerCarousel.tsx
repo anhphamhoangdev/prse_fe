@@ -73,9 +73,7 @@ export const BannerCarousel: React.FC = () => {
 
     return (
         <div className="relative w-full h-[400px] overflow-hidden rounded-xl mb-8 group">
-            {/* Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10"/>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 z-10"/>
+
 
             {/* Slides Container */}
             <div
@@ -93,7 +91,7 @@ export const BannerCarousel: React.FC = () => {
                         className="relative w-full h-full flex-shrink-0"
                         style={{ width: `${100 / banners.length}%` }}
                     >
-                        <a href={banner.url} className="block w-full h-full transform transition-transform duration-700 hover:scale-105">
+                        <a href={banner.url} className="block w-full h-full">
                             <img
                                 src={banner.imageUrl}
                                 alt={`Banner ${index + 1}`}
@@ -103,6 +101,10 @@ export const BannerCarousel: React.FC = () => {
                     </div>
                 ))}
             </div>
+
+            {/*/!* Gradient Overlays *!/*/}
+            {/*<div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10"/>*/}
+            {/*<div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 z-10"/>*/}
 
             {/* Navigation Buttons */}
             {banners.length > 1 && (
