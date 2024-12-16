@@ -34,6 +34,8 @@ export const ENDPOINTS = {
         UPLOAD_COURSE : '/instructor/upload-course',
         UPLOAD_PREVIEW_VIDEO: '/instructor/upload-preview-video',
 
+        WITHDRAW_BANK: '/instructor/withdraw-bank',
+        WITHDRAW_STUDENT_ACCOUNT: '/instructor/withdraw-student-account',
 
     },
 
@@ -76,8 +78,11 @@ export const ENDPOINTS = {
         STUDENTS: '/admin/students',
         REVENUE: '/admin/revenue',
         CATEGORY_DISTRIBUTION: '/admin/category-distribution',
-    }
+    },
 
+    BANK: {
+        BASIC: '/banks',
+    }
 
 
     // USER: {

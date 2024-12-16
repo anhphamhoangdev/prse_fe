@@ -35,6 +35,7 @@ import LessonEdit from "./pages/instructor/LessonEdit";
 import {AdvisorChat} from "./pages/AdvisorChat";
 import {Terms} from "./pages/Terms";
 import {Policies} from "./pages/Policies";
+import {InstructorWithdraw} from "./pages/instructor/InstructorWithdraw";
 
 function App() {
     return (
@@ -91,7 +92,9 @@ function App() {
                                     <Route path="upload" element={<CourseUpload />} />
                                     <Route path="uploads" element={<UploadStatusPage />} />
                                     <Route path="course/:courseId/edit" element={<CourseEdit />} />
-                                    {/*<Route path="earnings" element={<Earnings />} />*/}
+
+
+                                    <Route path="withdraw" element={<InstructorWithdraw />} />
                                     {/*<Route path="analytics" element={<Analytics />} />*/}
                                     <Route path="course/:courseId/chapter/:chapterId" element={<ChapterEditPage />} />
                                     {<Route path="course/:courseId/chapter/:chapterId/lesson/:lessonId" element={<LessonEdit />} />}
