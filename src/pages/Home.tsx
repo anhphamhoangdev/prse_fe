@@ -68,6 +68,19 @@ export function Home() {
         fetchHotCourses(1);
     }, []);
 
+    useEffect(() => {
+        const handleAuthLogout = () => {
+            fetchHotCourses(1);
+            fetchDiscountCourses(1);
+        };
+
+        window.addEventListener('auth-logout', handleAuthLogout);
+
+        return () => {
+            window.removeEventListener('auth-logout', handleAuthLogout);
+        };
+    }, []);
+
 
     // Fetch free courses
     // useEffect(() => {

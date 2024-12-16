@@ -169,6 +169,7 @@ export const Header = () => {
         setUser(null);
         setCartCount(0);
         setWishlistCount(0);
+        window.dispatchEvent(new Event('auth-logout'));
         navigate('/');
     };
 
