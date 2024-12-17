@@ -101,17 +101,30 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
                         <div className="flex space-x-2">
                             <button
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md group/btn relative hover:scale-105"
+                                className="relative group/btn"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onAddToCart(course);
                                 }}
                             >
-                                <i className="fas fa-shopping-cart text-sm group-hover/btn:scale-110 transition-transform duration-300"></i>
-                                <span
-                                    className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover/btn:opacity-100 transition-all duration-300 whitespace-nowrap">
-                                    Thêm vào giỏ hàng
-                                </span>
+                                <div
+                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md relative hover:scale-105 overflow-visible">
+                                    <i className="fas fa-shopping-cart text-sm group-hover/btn:scale-110 transition-transform duration-300"></i>
+                                </div>
+
+                                {/* Tooltip được điều chỉnh vị trí mới */}
+                                <div className="absolute bottom-[calc(100%+10px)] right-0">
+                                    <div
+                                        className="relative opacity-0 group-hover/btn:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover/btn:translate-y-0 pointer-events-none z-[1]">
+                                        <div
+                                            className="bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg shadow-lg whitespace-nowrap">
+                                            Thêm vào giỏ hàng
+                                        </div>
+                                        {/* Điều chỉnh mũi tên chỉ xuống */}
+                                        <div
+                                            className="absolute right-4 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-blue-600"></div>
+                                    </div>
+                                </div>
                             </button>
                         </div>
                     </div>

@@ -36,6 +36,7 @@ import {AdvisorChat} from "./pages/AdvisorChat";
 import {Terms} from "./pages/Terms";
 import {Policies} from "./pages/Policies";
 import {InstructorWithdraw} from "./pages/instructor/InstructorWithdraw";
+import AdminWithdraw from "./pages/admin/AdminWithdraw";
 
 function App() {
     return (
@@ -108,6 +109,7 @@ function App() {
                             <Routes>
                                 <Route path="dashboard" element={<AdminDashboard />} />
                                 <Route path="users" element={<StudentManagement />} />
+                                <Route path="withdraw" element={<AdminWithdraw />} />
                                 {/*<Route path="courses" element={<AdminCourses />} />*/}
                                 {/*<Route path="settings" element={<AdminSettings />} />*/}
                                 {/*<Route path="users/:userId" element={<AdminUserDetail />} />*/}

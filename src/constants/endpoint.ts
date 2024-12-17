@@ -78,6 +78,7 @@ export const ENDPOINTS = {
         STUDENTS: '/admin/students',
         REVENUE: '/admin/revenue',
         CATEGORY_DISTRIBUTION: '/admin/category-distribution',
+        WITHDRAWS: '/admin/withdraws',
     },
 
     BANK: {

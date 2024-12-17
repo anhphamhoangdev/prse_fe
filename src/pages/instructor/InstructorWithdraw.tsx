@@ -1,6 +1,6 @@
 import React, {useContext, useState, useEffect, useRef} from 'react';
 import { DollarSign, CreditCard, User, ArrowRight } from "lucide-react";
-import { InstructorContext } from "../../layouts/InstructorLayout";
+import {InstructorContext, useInstructor} from "../../layouts/InstructorLayout";
 import {request, requestPostFormDataWithAuth, requestWithAuth} from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
 import { useNotification } from "../../components/notification/NotificationProvider";
@@ -15,24 +15,9 @@ interface WithdrawFormData {
     accountHolder?: string;
 }
 
-// Temporary mock data
-const mockBanks: Bank[] = [
-    {
-        name: "Ngân hàng TMCP Á Châu",
-        code: "ACB",
-        shortName: "ACB",
-        logo: "https://api.vietqr.io/img/ACB.png"
-    },
-    {
-        name: "Ngân hàng TMCP An Bình",
-        code: "ABB",
-        shortName: "ABBANK",
-        logo: "https://api.vietqr.io/img/ABB.png"
-    }
-];
 
 export const InstructorWithdraw: React.FC = () => {
-    const { instructor } = useContext(InstructorContext);
+    const { instructor, setInstructor } = useInstructor();
     const { showNotification } = useNotification();
     const [withdrawType, setWithdrawType] = useState<'bank' | 'student' | null>(null);
     const [loading, setLoading] = useState(false);
@@ -137,7 +122,7 @@ export const InstructorWithdraw: React.FC = () => {
                     throw new Error('Vui lòng chọn ngân hàng');
                 }
                 formDataToSend.append('bankCode', selectedBank.code);
-                formDataToSend.append('bankName', selectedBank.name);
+                formDataToSend.append('bankName', selectedBank.shortName);
                 formDataToSend.append('accountNumber', formData.accountNumber || '');
                 formDataToSend.append('accountHolder', formData.accountHolder || '');
 
@@ -145,7 +130,9 @@ export const InstructorWithdraw: React.FC = () => {
                     ENDPOINTS.INSTRUCTOR.WITHDRAW_BANK,
                     formDataToSend
                 );
-            } else {
+            }
+            // rut ve tai khoan hoc sinh
+            else {
                 await requestPostFormDataWithAuth(
                     ENDPOINTS.INSTRUCTOR.WITHDRAW_STUDENT_ACCOUNT,
                     formDataToSend
@@ -155,6 +142,13 @@ export const InstructorWithdraw: React.FC = () => {
             showNotification('success', 'Thành công', 'Yêu cầu rút tiền của bạn đã được xử lý');
             setShowConfirmModal(false);
 
+            if (instructor) {
+                const updatedInstructor = {
+                    ...instructor,
+                    money: instructor.money - formData.amount
+                };
+                setInstructor(updatedInstructor);
+            }
             // Reset form
             setWithdrawType(null);
             setSelectedBank(null);

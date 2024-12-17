@@ -1,5 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {TrendingUp, Users, BookOpen, DollarSign, AlertCircle, Award, TrendingDown, CheckCircle} from 'lucide-react';
+import {
+    TrendingUp,
+    Users,
+    BookOpen,
+    DollarSign,
+    AlertCircle,
+    Award,
+    TrendingDown,
+    CheckCircle,
+    ArrowRight
+} from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, Area
@@ -7,6 +17,7 @@ import {
 import {requestAdminWithAuth, requestWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
 import CourseDistribution from "../../components/admin/CourseDistribution";
+import {useNavigate} from "react-router-dom";
 
 
 const courseDistributionData = [
@@ -67,6 +78,7 @@ export const AdminDashboard = () => {
     const [revenueData, setRevenueData] = useState<RevenueStatistic[]>([]);
     const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistribution[]>([]);
 
+    const navigate = useNavigate();
 
     function formatCurrency(amount: number): string {
         if (amount >= 1000000) {
@@ -299,16 +311,23 @@ export const AdminDashboard = () => {
                                 <p className="text-sm text-red-600">Cần kiểm tra và xử lý</p>
                             </div>
                         </div>
-                        <div className="flex items-start p-4 bg-yellow-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3"/>
-                            <div>
+
+                        <button
+                            onClick={() => navigate('/admin/withdraw')}
+                            className="w-full flex items-start p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200 group"
+                        >
+                            <AlertCircle
+                                className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                            <div className="text-left">
                                 <h3 className="text-sm font-medium text-yellow-900">5 yêu cầu rút tiền</h3>
                                 <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
                             </div>
-                        </div>
+                            <div className="ml-auto flex items-center">
+                                <ArrowRight className="w-5 h-5 text-yellow-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
+                            </div>
+                        </button>
                     </div>
                 </div>
-
                 {/* Quick Actions */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Thao tác nhanh</h2>
