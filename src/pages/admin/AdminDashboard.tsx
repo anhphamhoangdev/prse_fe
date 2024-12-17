@@ -319,7 +319,7 @@ export const AdminDashboard = () => {
                             <AlertCircle
                                 className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
                             <div className="text-left">
-                                <h3 className="text-sm font-medium text-yellow-900">5 yêu cầu rút tiền</h3>
+                                <h3 className="text-sm font-medium text-yellow-900">2 yêu cầu rút tiền</h3>
                                 <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
                             </div>
                             <div className="ml-auto flex items-center">
