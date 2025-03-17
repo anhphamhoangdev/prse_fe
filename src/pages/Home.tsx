@@ -3,13 +3,14 @@ import { Course } from "../models/Course";
 import { BannerCarousel } from "../components/banner/BannerCarousel";
 import { SearchHeaderAndFooterLayout } from "../layouts/UserLayout";
 import { CourseHomeSection } from "../components/course/CourseHomeSection";
-import {getHomeDiscountCourse, getHomeFreeCourses, getHomeHotCourse, getMyCourses} from "../services/courseService";
+import { getHomeDiscountCourse, getHomeFreeCourses, getHomeHotCourse, getMyCourses } from "../services/courseService";
 import { MainLayout } from "../layouts/MainLayout";
-import {useNotification} from "../components/notification/NotificationProvider";
-
+import { useNotification } from "../components/notification/NotificationProvider";
+import { EmptyCourseSection } from "../components/course/EmptyCourseSection";
+import { useNavigate } from "react-router-dom";
 
 export function Home() {
-
+    const navigate = useNavigate();
     const { showNotification } = useNotification();
 
     const [freeCourses, setFreeCourses] = useState<Course[]>([]);
@@ -20,26 +21,31 @@ export function Home() {
     const [discountCurrentPage, setDiscountCurrentPage] = useState(1);
     const [discountTotalPages, setDiscountTotalPages] = useState(1);
     const [discountTotalElements, setDiscountTotalElements] = useState(0);
-
+    const [discountLoading, setDiscountLoading] = useState(true);
+    const [discountError, setDiscountError] = useState<string | null>(null);
 
     const [hotCourses, setHotCourses] = useState<Course[]>([]);
     const [hotCurrentPage, setHotCurrentPage] = useState(1);
     const [hotTotalPages, setHotTotalPages] = useState(1);
     const [hotTotalElements, setHotTotalElements] = useState(0);
+    const [hotLoading, setHotLoading] = useState(true);
+    const [hotError, setHotError] = useState<string | null>(null);
 
     // Fetch discount courses
     const fetchDiscountCourses = async (page: number) => {
         try {
-            setLoading(true);
+            setDiscountLoading(true);
             const pageData = await getHomeDiscountCourse(page - 1);
             setDiscountedCourses(pageData.content);
             setDiscountTotalPages(pageData.totalPages);
             setDiscountTotalElements(pageData.totalElements);
             setDiscountCurrentPage(pageData.number + 1);
+            setDiscountError(null);
         } catch (err) {
             console.error('Error fetching discount courses:', err);
-            setError('Failed to load discount courses. Please try again later.');
+            setDiscountError('Không thể tải khóa học giảm giá. Vui lòng thử lại sau.');
         } finally {
+            setDiscountLoading(false);
             setLoading(false);
         }
     };
@@ -50,16 +56,18 @@ export function Home() {
 
     const fetchHotCourses = async (page: number) => {
         try {
-            setLoading(true);
+            setHotLoading(true);
             const pageData = await getHomeHotCourse(page - 1);
             setHotCourses(pageData.content);
             setHotTotalPages(pageData.totalPages);
             setHotTotalElements(pageData.totalElements);
             setHotCurrentPage(pageData.number + 1);
+            setHotError(null);
         } catch (err) {
-            console.error('Error fetching discount courses:', err);
-            setError('Failed to load discount courses. Please try again later.');
+            console.error('Error fetching hot courses:', err);
+            setHotError('Không thể tải khóa học hot. Vui lòng thử lại sau.');
         } finally {
+            setHotLoading(false);
             setLoading(false);
         }
     };
@@ -81,28 +89,6 @@ export function Home() {
         };
     }, []);
 
-
-    // Fetch free courses
-    // useEffect(() => {
-    //     const fetchFreeCourses = async () => {
-    //
-    //         try {
-    //             const data = await getHomeFreeCourses();
-    //             setFreeCourses(data);
-    //         } catch (err) {
-    //             console.error('Error fetching free courses:', err);
-    //             setError('Failed to load free courses. Please try again later.');
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //
-    //     fetchFreeCourses();
-    // }, []);
-
-    // }, []);
-
-
     const handleAddToCartSuccess = () => {
         showNotification(
             'success',
@@ -119,6 +105,9 @@ export function Home() {
         );
     };
 
+    const handleBrowseAllCourses = () => {
+        navigate('/courses');
+    };
 
     if (loading) {
         return (
@@ -140,49 +129,83 @@ export function Home() {
         );
     }
 
-
+    // Kiểm tra nếu không có khóa học nào được tải
+    const noCoursesAvailable = (!hotLoading && hotCourses.length === 0 && !hotError) &&
+        (!discountLoading && discountedCourses.length === 0 && !discountError);
 
     return (
         <MainLayout>
             <BannerCarousel />
-            <>
 
-                {/* Khóa học đang hot */}
-                {hotCourses.length > 0 && (
-                    <CourseHomeSection
-                        title="Khóa học"
-                        courses={hotCourses}
-                        showHotLabel={true}
-                        displayType='home'
-                        onAddToCartSuccess={handleAddToCartSuccess}
-                        onAddToCartError={handleAddToCartError}
-                        totalElements={hotTotalElements}
-                        viewAllLink="/courses/hot"
+            {noCoursesAvailable ? (
+                <div className="container mx-auto py-12">
+                    <EmptyCourseSection
+                        message="Không có khóa học nào hiển thị"
+                        subMessage="Bạn có thể đã đăng ký tất cả các khóa học hiện có hoặc chưa có khóa học nào được cung cấp vào lúc này."
+                        actionText="Xem tất cả khóa học"
+                        onAction={handleBrowseAllCourses}
                     />
-                )}
+                </div>
+            ) : (
+                <>
+                    {/* Hiển thị khóa học hot */}
+                    {hotLoading ? (
+                        <div className="py-8 flex justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : hotError ? (
+                        <div className="bg-red-100 text-red-700 p-4 rounded-md my-4">
+                            {hotError}
+                        </div>
+                    ) : hotCourses.length > 0 ? (
+                        <CourseHomeSection
+                            title="Khóa học"
+                            courses={hotCourses}
+                            showHotLabel={true}
+                            displayType='home'
+                            onAddToCartSuccess={handleAddToCartSuccess}
+                            onAddToCartError={handleAddToCartError}
+                            totalElements={hotTotalElements}
+                            viewAllLink="/courses/hot"
+                        />
+                    ) : (
+                        <EmptyCourseSection
+                            message="Không có khóa học hot nào"
+                            subMessage="Hiện tại không có khóa học hot nào được đề xuất"
+                            actionText="Xem tất cả khóa học"
+                            onAction={handleBrowseAllCourses}
+                        />
+                    )}
 
-                {discountedCourses.length > 0 && (
-                    <CourseHomeSection
-                        title="Khóa học đang được discount"
-                        courses={discountedCourses}
-                        displayType='home'
-                        onAddToCartSuccess={handleAddToCartSuccess}
-                        onAddToCartError={handleAddToCartError}
-                        totalElements={discountTotalElements}
-                        viewAllLink="/courses/discount"
-                    />
-                )}
-                {/*{freeCourses.length > 0 && (*/}
-                {/*    <CourseHomeSection*/}
-                {/*        title="Khóa học Free"*/}
-                {/*        courses={freeCourses}*/}
-                {/*        displayType='home'*/}
-                {/*        onAddToCartSuccess={handleAddToCartSuccess}*/}
-                {/*        onAddToCartError={handleAddToCartError}*/}
-                {/*    />*/}
-                {/*)}*/}
-            </>
-
+                    {/* Hiển thị khóa học giảm giá */}
+                    {discountLoading ? (
+                        <div className="py-8 flex justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : discountError ? (
+                        <div className="bg-red-100 text-red-700 p-4 rounded-md my-4">
+                            {discountError}
+                        </div>
+                    ) : discountedCourses.length > 0 ? (
+                        <CourseHomeSection
+                            title="Khóa học đang được discount"
+                            courses={discountedCourses}
+                            displayType='home'
+                            onAddToCartSuccess={handleAddToCartSuccess}
+                            onAddToCartError={handleAddToCartError}
+                            totalElements={discountTotalElements}
+                            viewAllLink="/courses/discount"
+                        />
+                    ) : (
+                        <EmptyCourseSection
+                            message="Không có khóa học giảm giá nào"
+                            subMessage="Hiện tại không có khóa học nào đang được giảm giá"
+                            actionText="Xem tất cả khóa học"
+                            onAction={handleBrowseAllCourses}
+                        />
+                    )}
+                </>
+            )}
         </MainLayout>
     );
 }
