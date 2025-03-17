@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SearchHeaderAndFooterLayout } from "../../layouts/UserLayout";
 import { Lightbulb, BookOpen, DollarSign, Award, CheckCircle, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,7 +8,39 @@ export function BecomeInstructor() {
     const navigate = useNavigate();
     const [isHovering, setIsHovering] = useState(false);
 
+    // Kiểm tra token khi component được mount
+    useEffect(() => {
+        const checkAuth = () => {
+            // Lấy token từ localStorage hoặc nơi bạn lưu trữ
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+            // Nếu không có token, chuyển hướng đến trang đăng nhập
+            if (!token) {
+                navigate("/login", {
+                    state: {
+                        from: "/become-instructor",
+                        message: "Vui lòng đăng nhập để trở thành Instructor"
+                    }
+                });
+            }
+        };
+
+        checkAuth();
+    }, [navigate]);
+
     const handlePaymentRedirect = () => {
+        // Kiểm tra token một lần nữa trước khi chuyển hướng đến trang thanh toán
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+            navigate("/login", {
+                state: {
+                    from: "/become-instructor",
+                    message: "Vui lòng đăng nhập để trở thành Instructor"
+                }
+            });
+            return;
+        }
+
         navigate("/payment/instructor");
     };
 

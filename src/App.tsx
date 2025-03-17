@@ -76,7 +76,7 @@ function App() {
                     {/* Learning routes */}
 
 
-                    <Route path='become-instructor' element={<BecomeInstructor/>}></Route>
+                    <Route path='/become-instructor' element={<BecomeInstructor/>}></Route>
                     <Route path='/my-courses' element={<MyCoursesPage/>}></Route>
                     <Route path="/course-detail/:courseId/:chapterId/:lessonId/video" element={<VideoLesson />} />
                     {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/reading" element={<TextLessonDetail />} />*/}

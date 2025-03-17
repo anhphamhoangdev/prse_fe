@@ -22,7 +22,7 @@ interface LoginResponse
 export function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(true);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("")
