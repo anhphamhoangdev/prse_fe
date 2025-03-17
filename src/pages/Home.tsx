@@ -138,7 +138,7 @@ export function Home() {
             <BannerCarousel />
 
             {noCoursesAvailable ? (
-                <div className="container py-12">
+                <div className="container">
                     <EmptyCourseSection
                         message="Không có khóa học nào hiển thị"
                         subMessage="Bạn có thể đã đăng ký tất cả các khóa học hiện có hoặc chưa có khóa học nào được cung cấp vào lúc này."
