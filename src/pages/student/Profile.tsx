@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SearchHeaderAndFooterLayout } from "../../layouts/UserLayout";
 import {Mail, Phone, CalendarDays, User, MoreHorizontal, Check, X, Upload, AlertCircle, Info} from "lucide-react";
-import { requestWithAuth } from "../../utils/request";
+import {requestPostWithAuth, requestWithAuth} from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
 import {Alert} from "../../components/common/Alert";
 import {uploadAvatar} from "../../services/studentService";
@@ -117,10 +117,13 @@ export function Profile() {
 
     const handleChangePasswordSubmit = async (oldPassword: string, newPassword: string) => {
         try {
-            // const result = await changePassword(oldPassword, newPassword);
-            // if (!result.success) {
-            //     throw new Error(result.error);
-            // }
+            await requestPostWithAuth(
+                ENDPOINTS.STUDENT.UPDATE_PASSWORD,
+                {
+                    oldPassword,
+                    newPassword
+                }
+            );
 
             setAlertMessage({
                 type: 'success',
@@ -132,8 +135,10 @@ export function Profile() {
                 type: 'error',
                 message: error instanceof Error ? error.message : 'Có lỗi xảy ra khi đổi mật khẩu'
             });
+            // Keep modal open so user can try again
         }
     };
+
     const validateFile = (file: File): boolean => {
         // Reset error state
         setUploadError("");

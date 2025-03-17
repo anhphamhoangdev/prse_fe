@@ -23,6 +23,7 @@ export const ENDPOINTS = {
         LOGIN: '/student/login',
         PROFILE: '/student/profile',
         UPDATE_AVATAR: '/student/update-avatar',
+        UPDATE_PASSWORD: '/student/update-password',
     },
 
     INSTRUCTOR: {
