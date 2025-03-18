@@ -290,8 +290,9 @@ export function InstructorPaymentPage() {
                                     Tên hiển thị
                                 </label>
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                        <User className="h-4 w-4 text-gray-400" />
+                                    <div
+                                        className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <User className="h-4 w-4 text-gray-400"/>
                                     </div>
                                     <input
                                         type="text"
@@ -310,32 +311,22 @@ export function InstructorPaymentPage() {
                             </div>
 
                             <div className="mt-2">
-                                <label htmlFor="title-input" className="block text-xs font-medium text-gray-700 mb-1">
-                                    Chức danh/Vị trí
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="title-input"
-                                        name="title"
-                                        value={instructorDraft.title}
-                                        onChange={(e) => handleTitleChange(e.target.value)}
-                                        className="block w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Senior Java Developer, React Expert..."
-                                        required
-                                    />
-                                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                        <Award className="h-4 w-4 text-gray-400" />
-                                    </div>
-                                </div>
-                                <p className="mt-0.5 text-xs text-gray-500">
-                                    Chức danh chuyên môn (nên giới hạn 1-2 chức danh)
-                                </p>
+                                <AutocompleteInput
+                                    value={instructorDraft.title}
+                                    onChange={handleTitleChange}
+                                    placeholder="Senior Java Developer, React Expert..."
+                                    label="Chức danh/Vị trí"
+                                    helperText="Chức danh chuyên môn"
+                                />
                             </div>
+                            <p className="mt-0.5 text-xs text-gray-500">
+                                Chức danh chuyên môn (nên giới hạn 1-2 chức danh)
+                            </p>
+                        </div>
 
-                            {/* Phần xem trước thông tin - Thu gọn */}
-                            <div className="border border-gray-200 rounded-md p-2 mt-2 bg-gray-50">
-                                <h3 className="text-xs font-medium text-gray-700 mb-1.5">Xem trước hiển thị</h3>
+                        {/* Phần xem trước thông tin - Thu gọn */}
+                        <div className="border border-gray-200 rounded-md p-2 mt-2 bg-gray-50">
+                            <h3 className="text-xs font-medium text-gray-700 mb-1.5">Xem trước hiển thị</h3>
 
                                 <div className="flex items-center p-2 bg-white rounded-md">
                                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
