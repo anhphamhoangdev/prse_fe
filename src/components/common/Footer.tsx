@@ -8,10 +8,10 @@ const openInNewTab = (url: string) => {
     if (newWindow) newWindow.opener = null;
 }
 export const Footer = () => (
-    <footer className="bg-slate-900 text-gray-300 py-8 mt-8 w-full border-t border-slate-800">
+    <footer className="bg-slate-900 text-gray-300 py-8 w-full border-t border-slate-800">
         <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                {/* Thông tin công ty */}
+                {/* Thông tin công ty mt-8 */}
                 <div className="space-y-3">
                     <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-sky-300 mb-2
                                  hover:from-blue-300 hover:to-sky-200 transition-all duration-300 cursor-default">

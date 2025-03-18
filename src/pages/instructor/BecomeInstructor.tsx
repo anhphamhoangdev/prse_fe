@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { SearchHeaderAndFooterLayout } from "../../layouts/UserLayout";
-import { Lightbulb, BookOpen, DollarSign, Award, CheckCircle, ChevronRight } from "lucide-react";
+import { Lightbulb, BookOpen, DollarSign, Award, CheckCircle, ChevronRight, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+const steps = [
+    {
+        number: 1,
+        title: "Đăng ký & Thanh toán",
+        description: "Thanh toán phí 200.000 VNĐ để kích hoạt tài khoản Instructor của bạn."
+    },
+    {
+        number: 2,
+        title: "Tạo khóa học",
+        description: "Thiết kế và xây dựng khóa học với các công cụ chuyên nghiệp."
+    },
+    {
+        number: 3,
+        title: "Bắt đầu kiếm tiền",
+        description: "Thu 70% doanh thu từ mỗi khóa học bán ra trên nền tảng."
+    }
+];
 
 export function BecomeInstructor() {
     const navigate = useNavigate();
@@ -51,18 +69,18 @@ export function BecomeInstructor() {
             opacity: 1,
             transition: {
                 when: "beforeChildren",
-                staggerChildren: 0.3,
-                duration: 0.5
+                staggerChildren: 0.1,
+                duration: 0.3
             }
         }
     };
 
     const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
+        hidden: { y: 10, opacity: 0 },
         visible: {
             y: 0,
             opacity: 1,
-            transition: { duration: 0.6, ease: "easeOut" }
+            transition: { duration: 0.3, ease: "easeOut" }
         }
     };
 
@@ -76,33 +94,71 @@ export function BecomeInstructor() {
         tap: { scale: 0.95 }
     };
 
+    // Animation variants cho quy trình
+    const processContainerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                when: "beforeChildren",
+                staggerChildren: 0.8, // Delay giữa các step (0.8 giây)
+                delayChildren: 0.3    // Delay ban đầu trước khi step đầu tiên xuất hiện
+            }
+        }
+    };
+
+    const stepVariants = {
+        hidden: {
+            opacity: 0,
+            x: -30,
+            filter: "blur(4px)"
+        },
+        visible: {
+            opacity: 1,
+            x: 0,
+            filter: "blur(0px)",
+            transition: {
+                duration: 0.1,
+                ease: "easeOut"
+            }
+        }
+    };
+
+    // Animation cho vạch kết nối
+    const lineVariants = {
+        hidden: { height: 0 },
+        visible: {
+            height: "100%",
+            transition: {
+                duration: 2,
+                ease: "easeInOut"
+            }
+        }
+    };
+
+    // Quyền lợi thu gọn
     const benefits = [
         {
-            icon: <BookOpen className="w-8 h-8 text-blue-500" />,
-            title: "Tạo và Quản lý Khóa học",
-            description: "Toàn quyền quản lý nội dung và cập nhật khóa học của bạn. Tự do thiết kế trải nghiệm học tập độc đáo cho học viên."
+            icon: <DollarSign className="w-5 h-5 text-green-500" />,
+            title: "Hưởng 70% doanh thu",
+            description: "Thu nhập hấp dẫn từ mỗi khóa học bán được"
         },
         {
-            icon: <DollarSign className="w-8 h-8 text-green-500" />,
-            title: "Thu nhập Không giới hạn",
-            description: "Kiếm tiền từ mỗi khóa học bán được. Hệ thống ăn chia minh bạch với 70% doanh thu thuộc về bạn."
+            icon: <BookOpen className="w-5 h-5 text-blue-500" />,
+            title: "Quản lý nội dung",
+            description: "Toàn quyền tạo và cập nhật khóa học"
         },
         {
-            icon: <Award className="w-8 h-8 text-purple-500" />,
-            title: "Xây dựng Thương hiệu Cá nhân",
-            description: "Chia sẻ kiến thức chuyên môn để khẳng định vị thế trong ngành và xây dựng cộng đồng học viên trung thành."
-        },
-        {
-            icon: <Lightbulb className="w-8 h-8 text-yellow-500" />,
-            title: "Công cụ Quản lý Hiệu quả",
-            description: "Truy cập vào bộ công cụ chuyên nghiệp để theo dõi hiệu suất khóa học, phản hồi học viên và tối ưu hóa nội dung."
+            icon: <Award className="w-5 h-5 text-purple-500" />,
+            title: "Xây dựng thương hiệu",
+            description: "Khẳng định vị thế chuyên môn cá nhân"
         }
     ];
 
     return (
         <SearchHeaderAndFooterLayout>
             <div className="relative overflow-hidden">
-                {/* Hero Background with subtle animation */}
+                {/* Hero Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 z-0">
                     <motion.div
                         className="absolute inset-0"
@@ -122,157 +178,190 @@ export function BecomeInstructor() {
                     />
                 </div>
 
-                <div className="container mx-auto px-4 py-12 relative z-10">
+                <div className="container mx-auto px-4 py-8 relative z-10">
+                    {/* Header - Thu gọn */}
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-8"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7 }}
+                        transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700">
+                        <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700">
                             Trở thành Instructor
                         </h1>
-                        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                            Chia sẻ kiến thức, truyền cảm hứng và tạo ra thu nhập từ chuyên môn của bạn
+                        <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+                            Chia sẻ kiến thức, truyền cảm hứng và tạo thu nhập từ chuyên môn của bạn
                         </p>
                     </motion.div>
 
-                    {/* Main content section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {/* Left side: Features and benefits */}
+                    {/* Main content - 3 cột ngang */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start max-w-6xl mx-auto mb-12">
+                        {/* Cột 1: Quyền lợi Instructor */}
                         <motion.div
-                            className="space-y-10"
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
+                            className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 h-full"
                         >
-                            <motion.div variants={itemVariants} className="bg-white rounded-xl shadow-xl p-6 border-l-4 border-blue-500">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-4">Tại sao nên trở thành Instructor?</h2>
-                                <p className="text-gray-600">
-                                    Trở thành Instructor mở ra cơ hội chia sẻ kiến thức, xây dựng thương hiệu cá nhân và
-                                    tạo thu nhập bền vững từ những kinh nghiệm và chuyên môn đã tích lũy.
-                                </p>
-                            </motion.div>
+                            <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
+                                <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                                    <Award className="w-5 h-5 text-blue-600 mr-2" />
+                                    Quyền lợi Instructor
+                                </h2>
+                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-4 space-y-3">
                                 {benefits.map((benefit, index) => (
                                     <motion.div
                                         key={index}
                                         variants={itemVariants}
-                                        className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                                        className="flex items-start gap-3 p-3 bg-gray-50 rounded-md"
                                     >
-                                        <div className="mb-4">{benefit.icon}</div>
-                                        <h3 className="text-lg font-semibold mb-2 text-gray-800">{benefit.title}</h3>
-                                        <p className="text-sm text-gray-600">{benefit.description}</p>
+                                        <div className="bg-white p-2 rounded-full shadow-sm">
+                                            {benefit.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-gray-800">{benefit.title}</h3>
+                                            <p className="text-xs text-gray-600">{benefit.description}</p>
+                                        </div>
                                     </motion.div>
                                 ))}
+
+                                <div className="mt-3 pt-3 border-t border-gray-100">
+                                    <div className="text-sm text-gray-700 bg-blue-50 p-3 rounded-md">
+                                        <p className="font-medium text-blue-800 mb-1">Tại sao nên trở thành Instructor?</p>
+                                        <p className="text-xs">Chia sẻ kiến thức, xây dựng thương hiệu và tạo thu nhập từ chuyên môn của bạn.</p>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
 
-                        {/* Right side: Pricing card */}
+                        {/* Cột 2: Thanh toán */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.8, delay: 0.5 }}
-                            className="flex justify-center"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 h-full"
                         >
-                            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md w-full border border-gray-100">
-                                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-                                    <h3 className="text-2xl font-bold">Instructor Premium</h3>
-                                    <p className="opacity-75 mt-1">Khởi đầu sự nghiệp giảng dạy</p>
-                                </div>
+                            <div className="p-4 border-b bg-gradient-to-r from-green-50 to-green-100">
+                                <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                                    <DollarSign className="w-5 h-5 text-green-600 mr-2" />
+                                    Gói Instructor
+                                </h2>
+                            </div>
 
-                                <div className="p-8">
-                                    <div className="flex justify-center items-end mb-6">
-                                        <span className="text-4xl font-bold text-gray-800">200.000</span>
-                                        <span className="text-xl text-gray-600 ml-1">VNĐ</span>
+                            <div className="p-4">
+                                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-4 text-white mb-4">
+                                    <div className="text-center">
+                                        <h3 className="text-xl font-bold">Premium</h3>
+                                        <div className="mt-2 mb-1">
+                                            <span className="text-3xl font-bold">200.000</span>
+                                            <span className="text-lg ml-1">VNĐ</span>
+                                        </div>
+                                        <p className="opacity-80 text-sm">Thanh toán một lần, trọn đời</p>
                                     </div>
-
-                                    <p className="text-center text-gray-500 mb-8">
-                                        Thanh toán một lần, trở thành Instructor trọn đời
-                                    </p>
-
-                                    <ul className="space-y-4 mb-8">
-                                        <li className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600">Hưởng <span className="font-semibold">70%</span> doanh thu từ mỗi khóa học bán được</span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600">Toàn quyền quản lý và cập nhật nội dung khóa học</span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600">Công cụ phân tích dữ liệu và báo cáo chi tiết</span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600">Thanh toán nhanh chóng, rút tiền dễ dàng</span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600">Hỗ trợ kỹ thuật và tư vấn từ đội ngũ chuyên nghiệp</span>
-                                        </li>
-                                    </ul>
-
-                                    <motion.button
-                                        variants={buttonVariants}
-                                        initial="initial"
-                                        whileHover="hover"
-                                        whileTap="tap"
-                                        onClick={handlePaymentRedirect}
-                                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold rounded-lg flex items-center justify-center"
-                                        onMouseEnter={() => setIsHovering(true)}
-                                        onMouseLeave={() => setIsHovering(false)}
-                                    >
-                                        <span>Trở thành Instructor ngay</span>
-                                        <motion.div
-                                            animate={{ x: isHovering ? 5 : 0 }}
-                                            transition={{ duration: 0.2 }}
-                                        >
-                                            <ChevronRight className="ml-2 w-5 h-5" />
-                                        </motion.div>
-                                    </motion.button>
                                 </div>
+
+                                <ul className="space-y-2 mb-4 text-sm">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                                        <span className="text-gray-600">Hưởng <span className="font-semibold">70%</span> doanh thu</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                                        <span className="text-gray-600">Toàn quyền quản lý nội dung</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                                        <span className="text-gray-600">Công cụ phân tích dữ liệu</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                                        <span className="text-gray-600">Thanh toán nhanh chóng</span>
+                                    </li>
+                                </ul>
+
+                                <motion.button
+                                    variants={buttonVariants}
+                                    initial="initial"
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    onClick={handlePaymentRedirect}
+                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold rounded-lg flex items-center justify-center"
+                                    onMouseEnter={() => setIsHovering(true)}
+                                    onMouseLeave={() => setIsHovering(false)}
+                                >
+                                    <span>Trở thành Instructor</span>
+                                    <motion.div
+                                        animate={{ x: isHovering ? 5 : 0 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <ChevronRight className="ml-2 w-5 h-5" />
+                                    </motion.div>
+                                </motion.button>
+                            </div>
+                        </motion.div>
+
+                        {/* Cột 3: Quy trình đơn giản với animation xuất hiện dần */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 h-full"
+                        >
+                            <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-purple-100">
+                                <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                                    <Lightbulb className="w-5 h-5 text-purple-600 mr-2" />
+                                    Quy trình đơn giản
+                                </h2>
+                            </div>
+
+                            <div className="p-4">
+                                <motion.div
+                                    className="space-y-6"
+                                    variants={processContainerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
+                                    <div className="relative">
+                                        {/* Line connecting steps */}
+                                        <motion.div
+                                            className="absolute left-6 top-0 bottom-0 w-0.5 bg-blue-100 z-0"
+                                            variants={lineVariants}
+                                        ></motion.div>
+
+                                        {/* Individual steps */}
+                                        {steps.map((step, index) => (
+                                            <motion.div
+                                                key={step.number}
+                                                className="relative z-10 flex items-start mb-6 last:mb-0"
+                                                variants={stepVariants}
+                                            >
+                                                <div className="flex-shrink-0">
+                                                    <motion.div
+                                                        className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"
+                                                        initial={{ scale: 0.6, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        transition={{
+                                                            delay: 0.8 * index + 0.3, // Match the stagger timing
+                                                            duration: 0.4,
+                                                            type: "spring"
+                                                        }}
+                                                    >
+                                                        <span className="text-lg font-bold">{step.number}</span>
+                                                    </motion.div>
+                                                </div>
+                                                <div className="ml-4">
+                                                    <h3 className="font-semibold text-gray-800 mb-1">{step.title}</h3>
+                                                    <p className="text-sm text-gray-600">{step.description}</p>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </motion.div>
                             </div>
                         </motion.div>
                     </div>
-
-                    {/* Testimonials or additional info section */}
-                    <motion.div
-                        className="mt-20 bg-white rounded-xl shadow-lg p-8 border border-gray-100"
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8 }}
-                    >
-                        <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">Quy trình đơn giản</h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="text-center">
-                                <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-                                    <span className="text-xl font-bold">1</span>
-                                </div>
-                                <h3 className="font-semibold mb-2">Đăng ký & Thanh toán</h3>
-                                <p className="text-gray-600 text-sm">Hoàn tất thanh toán phí 200.000 VNĐ để kích hoạt tài khoản Instructor.</p>
-                            </div>
-
-                            <div className="text-center">
-                                <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-                                    <span className="text-xl font-bold">2</span>
-                                </div>
-                                <h3 className="font-semibold mb-2">Tạo khóa học</h3>
-                                <p className="text-gray-600 text-sm">Thiết kế và xây dựng khóa học của bạn với các công cụ chuyên nghiệp.</p>
-                            </div>
-
-                            <div className="text-center">
-                                <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-                                    <span className="text-xl font-bold">3</span>
-                                </div>
-                                <h3 className="font-semibold mb-2">Bắt đầu kiếm tiền</h3>
-                                <p className="text-gray-600 text-sm">Thu 70% doanh thu từ mỗi khóa học được bán ra trên nền tảng.</p>
-                            </div>
-                        </div>
-                    </motion.div>
                 </div>
             </div>
         </SearchHeaderAndFooterLayout>
