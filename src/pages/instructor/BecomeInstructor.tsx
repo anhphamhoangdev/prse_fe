@@ -41,7 +41,7 @@ export function BecomeInstructor() {
             return;
         }
 
-        navigate("/payment/instructor");
+        navigate("/register-instructor");
     };
 
     // Animation variants
