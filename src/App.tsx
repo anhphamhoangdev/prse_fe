@@ -38,6 +38,7 @@ import {Policies} from "./pages/Policies";
 import {InstructorWithdraw} from "./pages/instructor/InstructorWithdraw";
 import AdminWithdraw from "./pages/admin/AdminWithdraw";
 import {BecomeInstructor} from "./pages/instructor/BecomeInstructor";
+import {InstructorPaymentPage} from "./pages/student/InstructorPaymentPage";
 
 function App() {
     return (
@@ -77,6 +78,7 @@ function App() {
 
 
                     <Route path='/become-instructor' element={<BecomeInstructor/>}></Route>
+                    <Route path='/register-instructor' element={<InstructorPaymentPage/>}></Route>
                     <Route path='/my-courses' element={<MyCoursesPage/>}></Route>
                     <Route path="/course-detail/:courseId/:chapterId/:lessonId/video" element={<VideoLesson />} />
                     {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/reading" element={<TextLessonDetail />} />*/}
