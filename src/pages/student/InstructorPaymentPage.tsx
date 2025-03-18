@@ -5,6 +5,8 @@ import { AlertCircle, CreditCard, CheckCircle, Award, User, Shield, Zap, Book, B
 import { motion, AnimatePresence } from "framer-motion";
 import { AutocompleteInput } from "../../components/common/AutocompleteInput";
 import InstructorPreview from "../../components/instructor/InstructorPreview";
+import {PaymentMethod} from "../../types/payment";
+import {getPaymentMethods} from "../../services/paymentService";
 
 // Định nghĩa kiểu dữ liệu cho InstructorDraft
 interface InstructorDraft {
@@ -67,6 +69,10 @@ export function InstructorPaymentPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValid, setFormValid] = useState(false);
 
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [loadingMethods, setLoadingMethods] = useState(true);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+
     // Animation variants
     const cardVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -110,10 +116,29 @@ export function InstructorPaymentPage() {
         }
     };
 
+    const handlePaymentMethodChange = (method: PaymentMethod) => {
+        setSelectedPaymentMethod(method);
+    };
+
     // Kiểm tra form hợp lệ
     useEffect(() => {
         setFormValid(instructorDraft.displayName.trim() !== "" && instructorDraft.title.trim() !== "");
     }, [instructorDraft]);
+
+    useEffect(() => {
+        const fetchPaymentMethods = async () => {
+            try {
+                const methods = await getPaymentMethods();
+                setPaymentMethods(methods);
+            } catch (error) {
+                setError(error instanceof Error ? error.message : "Có lỗi xảy ra khi tải phương thức thanh toán");
+            } finally {
+                setLoadingMethods(false);
+            }
+        };
+
+        fetchPaymentMethods();
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -345,32 +370,48 @@ export function InstructorPaymentPage() {
                             </div>
                         </div>
                         <div className="p-3 space-y-3">
-                            <motion.div
-                                className="bg-white p-2 rounded-md border border-gray-200"
-                                whileHover={{ scale: 1.02 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            >
-                                <div className="flex items-center">
-                                    <div className="w-6 h-6 mr-2 flex-shrink-0">
-                                        <img
-                                            src="/images/payment/vnpay.png"
-                                            alt="VNPay"
-                                            className="w-full h-full object-contain"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = "https://via.placeholder.com/40?text=VNPay";
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="flex-grow">
-                                        <h3 className="font-medium text-xs">Thanh toán qua VNPay</h3>
-                                    </div>
-                                    <div className="w-4 h-4 rounded-full border border-blue-500 flex items-center justify-center">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    </div>
+                            {/* Hiển thị danh sách phương thức thanh toán */}
+                            {loadingMethods ? (
+                                <div className="text-center text-gray-500 text-xs">Đang tải phương thức thanh toán...</div>
+                            ) : paymentMethods.length > 0 ? (
+                                <div className="space-y-2">
+                                    {paymentMethods.map((method) => (
+                                        <motion.div
+                                            key={method.id}
+                                            className="bg-white p-2 rounded-md border border-gray-200 cursor-pointer"
+                                            whileHover={{ scale: 1.02 }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                            onClick={() => handlePaymentMethodChange(method)}
+                                        >
+                                            <div className="flex items-center">
+                                                <div className="w-6 h-6 mr-2 flex-shrink-0">
+                                                    <img
+                                                        src={method.logoUrl}
+                                                        alt={method.name}
+                                                        className="w-full h-full object-contain"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.src = "https://payos.vn/docs/img/logo.svg"; // Default fallback logo
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-medium text-xs">{method.name}</h3>
+                                                </div>
+                                                <div className="w-4 h-4 rounded-full border border-blue-500 flex items-center justify-center">
+                                                    {selectedPaymentMethod?.id === method.id && (
+                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
                                 </div>
-                            </motion.div>
+                            ) : (
+                                <div className="text-center text-red-500 text-xs">Không có phương thức thanh toán nào khả dụng</div>
+                            )}
 
+                            {/* Thông tin giá */}
                             <div className="bg-blue-50 p-2 rounded-md text-xs">
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600">Gói dịch vụ:</span>
@@ -382,7 +423,9 @@ export function InstructorPaymentPage() {
                                 </div>
                                 <div className="flex justify-between mb-1">
                                     <span className="text-gray-600">Giảm giá ({instructorDraft.discountRate}%):</span>
-                                    <span className="font-medium text-green-600">-{(instructorDraft.price - instructorDraft.discountedPrice).toLocaleString()} VNĐ</span>
+                                    <span className="font-medium text-green-600">
+        -{(instructorDraft.price - instructorDraft.discountedPrice).toLocaleString()} VNĐ
+      </span>
                                 </div>
                                 <div className="pt-1 border-t border-blue-100 flex justify-between">
                                     <span className="font-semibold">Tổng thanh toán:</span>
@@ -390,22 +433,32 @@ export function InstructorPaymentPage() {
                                 </div>
                             </div>
 
+                            {/* Nút thanh toán */}
                             <motion.button
                                 onClick={handlePayment}
-                                disabled={isProcessing || !formValid}
+                                disabled={isProcessing || !formValid || !selectedPaymentMethod}
                                 className={`w-full py-2 text-sm rounded-md font-semibold flex items-center justify-center gap-2 ${
-                                    isProcessing || !formValid
+                                    isProcessing || !formValid || !selectedPaymentMethod
                                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                         : "bg-blue-600 text-white hover:bg-blue-700"
                                 }`}
-                                whileHover={!isProcessing && formValid ? { scale: 1.02 } : {}}
-                                whileTap={!isProcessing && formValid ? { scale: 0.98 } : {}}
+                                whileHover={!isProcessing && formValid && selectedPaymentMethod ? { scale: 1.02 } : {}}
+                                whileTap={!isProcessing && formValid && selectedPaymentMethod ? { scale: 0.98 } : {}}
                             >
                                 {isProcessing ? (
                                     <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg
+                                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
                                         </svg>
                                         Đang xử lý...
                                     </>
@@ -413,6 +466,13 @@ export function InstructorPaymentPage() {
                                     "Hoàn tất đăng ký và thanh toán"
                                 )}
                             </motion.button>
+
+                            {/* Thông báo lỗi nếu chưa chọn phương thức thanh toán */}
+                            {!selectedPaymentMethod && !isProcessing && formValid && (
+                                <div className="text-amber-600 bg-amber-50 p-1.5 rounded text-xs">
+                                    Vui lòng chọn một phương thức thanh toán
+                                </div>
+                            )}
 
                             {!formValid && (
                                 <div className="text-amber-600 bg-amber-50 p-1.5 rounded text-xs">
