@@ -329,22 +329,23 @@ export function InstructorPaymentPage() {
 
                             {/* Phần xem trước thông tin - Thu gọn */}
                             <div className="border border-gray-200 rounded-md p-2 mt-2 bg-gray-50">
-                                <h3 className="text-xs font-medium text-gray-700 mb-1.5">Xem trước hiển thị</h3>
+                                {/*<h3 className="text-xs font-medium text-gray-700 mb-1.5">Xem trước hiển thị</h3>*/}
 
-                                <div className="flex items-center p-2 bg-white rounded-md">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                                        <User className="w-4 h-4 text-blue-600" />
-                                    </div>
+                                {/*<div className="flex items-center p-2 bg-white rounded-md">*/}
+                                {/*    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">*/}
+                                {/*        <User className="w-4 h-4 text-blue-600" />*/}
+                                {/*    </div>*/}
 
-                                    <div>
-                                        <div className="font-semibold text-sm text-gray-800">
-                                            {instructorDraft.displayName || 'Tên Instructor'}
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                            {instructorDraft.title || 'Chức danh chuyên môn'}
-                                        </div>
-                                    </div>
-                                </div>
+                                {/*    <div>*/}
+                                {/*        <div className="font-semibold text-sm text-gray-800">*/}
+                                {/*            {instructorDraft.displayName || 'Tên Instructor'}*/}
+                                {/*        </div>*/}
+                                {/*        <div className="text-xs text-gray-600">*/}
+                                {/*            {instructorDraft.title || 'Chức danh chuyên môn'}*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+                                <InstructorPreview displayName={instructorDraft.displayName} title={instructorDraft.title} />
                             </div>
                         </div>
                     </motion.div>
