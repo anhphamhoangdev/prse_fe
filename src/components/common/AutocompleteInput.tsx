@@ -40,12 +40,12 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             setIsLoading(true);
             try {
                 // Fetch all titles from the database (up to 400)
-                const response = await requestWithAuth<{ data: { instructor_common_titles: InstructorTitle[] } }>(
+                const response = await requestWithAuth<{  instructor_common_titles: InstructorTitle[] }>(
                     ENDPOINTS.INSTRUCTOR.COMMON_TITLES
                 );
 
                 // Extract position strings and filter out any empty values
-                const positions = response.data.instructor_common_titles
+                const positions = response.instructor_common_titles
                     .map(item => item.position)
                     .filter(position => position && position.trim() !== '');
 
