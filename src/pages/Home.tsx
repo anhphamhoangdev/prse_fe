@@ -8,6 +8,7 @@ import { MainLayout } from "../layouts/MainLayout";
 import { useNotification } from "../components/notification/NotificationProvider";
 import { EmptyCourseSection } from "../components/course/EmptyCourseSection";
 import { useNavigate } from "react-router-dom";
+import ThemeSwitcher from "../components/common/ThemeSwitcher";
 
 export function Home() {
     const navigate = useNavigate();
@@ -135,8 +136,7 @@ export function Home() {
 
     return (
         <MainLayout>
-            <BannerCarousel />
-
+            <BannerCarousel/>
             {noCoursesAvailable ? (
                 <div className="container">
                     <EmptyCourseSection

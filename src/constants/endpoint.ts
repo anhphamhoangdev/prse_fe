@@ -37,6 +37,8 @@ export const ENDPOINTS = {
 
         WITHDRAW_BANK: '/instructor/withdraw-bank',
         WITHDRAW_STUDENT_ACCOUNT: '/instructor/withdraw-student-account',
+        COMMON_TITLES: "/instructor/common-titles",
+
 
     },
 

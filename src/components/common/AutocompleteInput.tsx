@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Briefcase, AlertTriangle } from "lucide-react";
+import {requestWithAuth} from "../../utils/request";
+import {ENDPOINTS} from "../../constants/endpoint";
 
 interface AutocompleteInputProps {
     value: string;
@@ -9,42 +11,11 @@ interface AutocompleteInputProps {
     helperText?: string;
 }
 
-// Mô phỏng API gọi lấy gợi ý chức danh
-const fetchTitleSuggestions = async (query: string): Promise<string[]> => {
-    // Trong thực tế, đây sẽ là API call đến backend
-    // Nhưng hiện tại chúng ta sẽ mô phỏng với một danh sách cứng
-
-    const commonTitles = [
-        "Senior Java Developer",
-        "Senior Frontend Developer",
-        "React Developer",
-        "Angular Developer",
-        "Full Stack Developer",
-        "UI/UX Designer",
-        "Product Manager",
-        "Data Scientist",
-        "DevOps Engineer",
-        "Machine Learning Engineer",
-        "iOS Developer",
-        "Android Developer",
-        "Backend Developer",
-        "Cloud Architect",
-        "Software Architect",
-        "Node.js Developer",
-        "Python Developer",
-        "Blockchain Developer",
-        "Game Developer",
-        "QA Engineer"
-    ];
-
-    // // Giả lập độ trễ của network request
-    // await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Lọc danh sách theo query
-    return commonTitles.filter(title =>
-        title.toLowerCase().includes(query.toLowerCase())
-    );
-};
+// Define interface for instructor title data
+interface InstructorTitle {
+    id: number;
+    position: string;
+}
 
 export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
                                                                         value,
@@ -57,12 +28,40 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [highlightedIndex, setHighlightedIndex] = useState(-1); // Thêm state để theo dõi tùy chọn được chọn
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [tooManyTitles, setTooManyTitles] = useState(false);
+    const [allTitles, setAllTitles] = useState<string[]>([]);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Xử lý click ngoài để đóng suggestions
+    // Fetch all instructor common titles from the database
+    useEffect(() => {
+        const fetchInstructorTitles = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch all titles from the database (up to 400)
+                const response = await requestWithAuth<{ data: { instructor_common_titles: InstructorTitle[] } }>(
+                    ENDPOINTS.INSTRUCTOR.COMMON_TITLES
+                );
+
+                // Extract position strings and filter out any empty values
+                const positions = response.data.instructor_common_titles
+                    .map(item => item.position)
+                    .filter(position => position && position.trim() !== '');
+
+                setAllTitles(positions);
+                console.log(`Loaded ${positions.length} instructor common titles`);
+            } catch (error) {
+                console.error("Failed to fetch instructor titles:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchInstructorTitles();
+    }, []);
+
+    // Handle click outside to close suggestions
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -76,61 +75,50 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         };
     }, []);
 
-    // Kiểm tra số lượng chức danh
+    // Check number of titles
     useEffect(() => {
         const titles = inputValue.split(',').map(t => t.trim()).filter(t => t !== '');
         setTooManyTitles(titles.length > 2);
     }, [inputValue]);
 
-    // Lấy phần đang nhập hiện tại (sau dấu phẩy cuối cùng)
+    // Get current term (after the last comma)
     const getCurrentTerm = (text: string): string => {
         const parts = text.split(',');
         return parts[parts.length - 1].trim();
     };
 
-    // Fetch suggestions khi người dùng nhập
+    // Update suggestions based on user input
     useEffect(() => {
-        const fetchSuggestions = async () => {
-            const currentTerm = getCurrentTerm(inputValue);
+        const currentTerm = getCurrentTerm(inputValue);
 
-            if (currentTerm.length < 2) {
-                setSuggestions([]);
-                return;
-            }
+        if (currentTerm.length < 2 || allTitles.length === 0) {
+            setSuggestions([]);
+            return;
+        }
 
-            setIsLoading(true);
-            try {
-                const results = await fetchTitleSuggestions(currentTerm);
-                setSuggestions(results);
-            } catch (error) {
-                console.error("Failed to fetch suggestions:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        // Filter titles based on current input
+        const filteredTitles = allTitles.filter(title =>
+            title.toLowerCase().includes(currentTerm.toLowerCase())
+        );
 
-        const timeoutId = setTimeout(() => {
-            fetchSuggestions();
-        }, 300); // Debounce
-
-        return () => clearTimeout(timeoutId);
-    }, [inputValue]);
+        setSuggestions(filteredTitles);
+    }, [inputValue, allTitles]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setInputValue(newValue);
         setShowSuggestions(true);
-        setHighlightedIndex(-1); // Reset highlighted index khi người dùng nhập
+        setHighlightedIndex(-1); // Reset highlighted index when user types
     };
 
     const handleSelectSuggestion = (suggestion: string) => {
-        // Tách chuỗi nhập thành các phần
+        // Split input into parts
         const parts = inputValue.split(',');
 
-        // Lấy tất cả phần trước phần cuối
+        // Get all parts except the last one
         const previousParts = parts.slice(0, parts.length - 1);
 
-        // Tạo giá trị mới với suggestion
+        // Create new value with the suggestion
         const newValue = previousParts.length
             ? previousParts.join(',') + ', ' + suggestion
             : suggestion;
@@ -139,14 +127,14 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         onChange(newValue);
         setShowSuggestions(false);
 
-        // Thêm dấu phẩy sau khi chọn để người dùng có thể tiếp tục nhập
+        // Add comma after selection so user can continue typing
         setTimeout(() => {
             if (inputRef.current) {
                 const updatedValue = newValue + ', ';
                 setInputValue(updatedValue);
                 onChange(updatedValue);
 
-                // Đặt con trỏ vào vị trí cuối cùng
+                // Set cursor to the end
                 inputRef.current.focus();
                 const length = updatedValue.length;
                 inputRef.current.setSelectionRange(length, length);
@@ -155,16 +143,16 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     };
 
     const handleInputBlur = () => {
-        // Khi blur, cập nhật giá trị cuối cùng về parent component
+        // When blurring, update final value to parent component
         setTimeout(() => {
-            // Loại bỏ dấu phẩy và khoảng trắng thừa ở cuối
+            // Remove trailing commas and whitespace
             const cleanedValue = inputValue.replace(/,\s*$/, '');
             setInputValue(cleanedValue);
             onChange(cleanedValue);
         }, 200);
     };
 
-    // Xử lý phím Tab, Enter, và mũi tên lên/xuống
+    // Handle Tab, Enter, and arrow key navigation
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (showSuggestions && suggestions.length > 0) {
             if (e.key === 'ArrowDown') {
@@ -206,7 +194,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
                     onKeyDown={handleKeyDown}
                     className={`block w-full pl-8 pr-3 py-2 text-sm border ${
                         tooManyTitles ? 'border-amber-300' : 'border-gray-300'
-                    } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`} // Style giống input cũ
+                    } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                     placeholder={placeholder}
                 />
                 {isLoading && (
@@ -228,7 +216,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
                 </p>
             )}
 
-            {/* Thông báo khi có quá nhiều chức danh */}
+            {/* Too many titles warning */}
             {tooManyTitles && (
                 <div className="mt-2 flex items-start gap-2 text-amber-600 bg-amber-50 p-2 rounded text-xs">
                     <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />

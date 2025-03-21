@@ -35,3 +35,22 @@ export const formatTimeAgo = (dateString: string) => {
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays} ngày trước`;
 };
+
+// Format date
+export const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+// Format time
+export const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
