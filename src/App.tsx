@@ -40,6 +40,8 @@ import AdminWithdraw from "./pages/admin/AdminWithdraw";
 import {BecomeInstructor} from "./pages/instructor/BecomeInstructor";
 import {InstructorPaymentPage} from "./pages/student/InstructorPaymentPage";
 import TransactionHistoryPage from "./pages/student/TransactionHistoryPage";
+import {InstructorPaymentCancelledPage} from "./pages/payment/InstructorPaymentCancelledPage";
+import {InstructorPaymentSuccessPage} from "./pages/payment/InstructorPaymentSuccessPage";
 
 function App() {
     return (
@@ -69,6 +71,8 @@ function App() {
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/payment/success" element={<PaymentSuccessPage></PaymentSuccessPage>} />
                     <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
+                    <Route path="/payment-instructor/error" element={<InstructorPaymentCancelledPage />} />
+                    <Route path="/payment-instructor/success" element={<InstructorPaymentSuccessPage />} />
 
 
                     <Route path='/courses/discount' element={<AllDiscountCoursesPage/>}></Route>

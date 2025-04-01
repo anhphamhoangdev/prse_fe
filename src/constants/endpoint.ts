@@ -64,6 +64,9 @@ export const ENDPOINTS = {
         GET_ALL_METHODS: '/payment-method',
         CREATE: '/payment/create',
         UPDATE_STATUS: '/payment/update-status',
+        UPDATE_STATUS_INSTRUCTOR: '/payment/update-status-instructor',
+        CREATE_INSTRUCTOR: '/payment/create-instructor',
+
     },
 
     CHAT: {

@@ -5,19 +5,20 @@ import {AlertCircle, CreditCard, CheckCircle, Award, User, Shield, Zap, Book, Ba
 import { motion, AnimatePresence } from "framer-motion";
 import { AutocompleteInput } from "../../components/common/AutocompleteInput";
 import InstructorPreview from "../../components/instructor/InstructorPreview";
-import {PaymentMethod} from "../../types/payment";
-import {getPaymentMethods} from "../../services/paymentService";
+import {PaymentMethod, PaymentMethodResponse} from "../../types/payment";
+import {getPaymentMethods, PaymentResponse} from "../../services/paymentService";
+import {requestPostWithAuthFullResponse} from "../../utils/request";
+import {ENDPOINTS} from "../../constants/endpoint";
 
 // Định nghĩa kiểu dữ liệu cho InstructorDraft
 interface InstructorDraft {
     id: string;
     price: number;
-    discountedPrice: number;
-    discountRate: number;
     // Thông tin người dùng bổ sung
     displayName: string;
     title: string;
 }
+
 
 // Dữ liệu quyền lợi
 const benefitItems = [
@@ -56,9 +57,9 @@ const benefitItems = [
 export function InstructorPaymentPage() {
     const [instructorDraft, setInstructorDraft] = useState<InstructorDraft>({
         id: `instructor-${Date.now()}`,
-        price: 400000,
-        discountedPrice: 200000,
-        discountRate: 50,
+        price: 200000,
+        // discountedPrice: 200000,
+        // discountRate: 50,
         displayName: "",
         title: ""
     });
@@ -161,24 +162,42 @@ export function InstructorPaymentPage() {
             return;
         }
 
+        if (!selectedPaymentMethod) {
+            setError("Vui lòng chọn phương thức thanh toán");
+            return;
+        }
+
         setIsProcessing(true);
         setError("");
 
         try {
-            // Lưu thông tin instructor vào session storage
-            sessionStorage.setItem('becomeInstructorDraft', JSON.stringify(instructorDraft));
+            // Chuẩn bị dữ liệu cho API
+            const paymentData = {
+                instructorName: instructorDraft.displayName,
+                instructorTitle: instructorDraft.title,
+                price: instructorDraft.price,
+                paymentMethodId: selectedPaymentMethod.id
+            };
 
-            // Giả lập thanh toán
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Gọi API đăng ký instructor sử dụng requestPostWithAuthFullResponse
+            const responseData = await requestPostWithAuthFullResponse<PaymentResponse>(ENDPOINTS.PAYMENT.CREATE_INSTRUCTOR, paymentData);
 
-            // Redirect đến trang thành công
-            navigate('/payment/success', {
-                state: {
-                    transactionId: `INS-${Date.now()}`,
-                    status: 'success',
-                    type: 'instructor'
-                }
-            });
+            console.log(responseData);
+
+            // Nếu cần redirect (VNPay, Momo...)
+            if (responseData.code === 1 && responseData.data.payment_info.checkoutUrl) {
+                window.location.href = responseData.data.payment_info.checkoutUrl;
+
+            // } else {
+            //     // Redirect đến trang thành công
+            //     navigate('/payment/success', {
+            //         state: {
+            //             transactionId: responseData.transactionId || `INS-${Date.now()}`,
+            //             status: responseData.status || 'success',
+            //             type: 'instructor'
+            //         }
+            //     });
+            }
         } catch (error) {
             let errorMessage = "Có lỗi xảy ra khi xử lý thanh toán";
             if (error instanceof Error) {
@@ -189,6 +208,7 @@ export function InstructorPaymentPage() {
             setIsProcessing(false);
         }
     };
+
 
     return (
         <SearchHeaderAndFooterLayout>
@@ -433,20 +453,14 @@ export function InstructorPaymentPage() {
                                     <span className="font-medium">Gói Instructor</span>
                                 </div>
                                 <div className="flex justify-between mb-2">
-                                    <span className="text-gray-700">Giá gốc:</span>
+                                    <span className="text-gray-700">Giá :</span>
                                     <span
-                                        className="font-medium line-through text-gray-500">{instructorDraft.price.toLocaleString()} VNĐ</span>
-                                </div>
-                                <div className="flex justify-between mb-2">
-                                    <span className="text-gray-700">Giảm giá ({instructorDraft.discountRate}%):</span>
-                                    <span className="font-medium text-green-600">
-                                        -{(instructorDraft.price - instructorDraft.discountedPrice).toLocaleString()} VNĐ
-                                    </span>
+                                        className="font-medium text-green-600">{instructorDraft.price.toLocaleString()} VNĐ</span>
                                 </div>
                                 <div className="pt-2 border-t border-blue-100 flex justify-between">
                                     <span className="font-semibold text-base">Tổng thanh toán:</span>
                                     <span
-                                        className="font-bold text-base text-blue-600">{instructorDraft.discountedPrice.toLocaleString()} VNĐ</span>
+                                        className="font-bold text-base text-blue-600">{instructorDraft.price.toLocaleString()} VNĐ</span>
                                 </div>
                             </div>
 

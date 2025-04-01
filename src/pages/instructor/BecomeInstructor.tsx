@@ -101,8 +101,8 @@ export function BecomeInstructor() {
             opacity: 1,
             transition: {
                 when: "beforeChildren",
-                staggerChildren: 0.8, // Delay giữa các step (0.8 giây)
-                delayChildren: 0.3    // Delay ban đầu trước khi step đầu tiên xuất hiện
+                staggerChildren: 0.4, // Delay giữa các step (0.8 giây)
+                delayChildren: 0    // Delay ban đầu trước khi step đầu tiên xuất hiện
             }
         }
     };
