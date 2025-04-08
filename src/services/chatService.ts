@@ -22,7 +22,7 @@ export async function sendMessageAI(message: string): Promise<AIResponse> {
 export async function sendMessageAIRecommendation(message: string): Promise<AIResponse> {
     console.log('[ChatService] sendMessageAIRecommendation:', message);
 
-    const url = 'https://prse-api.ngrok.app/rec_chatbot';
+    const url = `${process.env.REACT_APP_CHATBOT}`;
 
     try {
         const response = await fetch(url, {
