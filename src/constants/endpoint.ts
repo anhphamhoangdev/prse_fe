@@ -74,7 +74,8 @@ export const ENDPOINTS = {
     },
 
     WEBSOCKET: {
-        CONNECT: `https://${process.env.REACT_APP_BASE_IP}:8443/ws`,
+        // CONNECT: `https://${process.env.REACT_APP_BASE_IP}:8443/ws`,
+        CONNECT: `${process.env.REACT_APP_WEBSOCKET}`,
     },
 
     ADMIN: {
