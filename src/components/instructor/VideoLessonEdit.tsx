@@ -93,7 +93,7 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
         try {
             setLoading(true);
             const response = await requestWithAuth<{ video: VideoLesson }>(
-                `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}/lesson/${lesson.id}/video`
+                `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}/lesson/${lesson.id}/details`
             );
             setVideoLesson(response.video);
             setError(null);

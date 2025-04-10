@@ -470,3 +470,49 @@ export async function putAdminWithAuth<T>(endpoint: string, data: any): Promise<
     }
     return jsonResponse.data;
 }
+
+export async function getWithAuth<T>(endpoint: string): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    if (response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if (response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    }
+
+    const json = await response.json();
+
+    if (json.code === 0) {
+        throw new Error(json.error_message);
+    }
+
+    return json.data;
+}

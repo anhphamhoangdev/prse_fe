@@ -5,6 +5,7 @@ import { ENDPOINTS } from '../../constants/endpoint';
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VideoLessonEdit from "../../components/instructor/VideoLessonEdit";
+import QuizLessonEdit from "../../components/instructor/QuizLessonEdit";
 
 interface Lesson {
     id: number;
@@ -54,7 +55,7 @@ const LessonEdit = () => {
             case 'code':
                 return <div>Code Editor Component (Coming Soon)</div>;
             case 'quiz':
-                return <div>Quiz Editor Component (Coming Soon)</div>;
+                return <QuizLessonEdit lesson={lesson} />;
             default:
                 return <div>Unsupported lesson type</div>;
         }

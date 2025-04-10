@@ -42,6 +42,9 @@ import {InstructorPaymentPage} from "./pages/student/InstructorPaymentPage";
 import TransactionHistoryPage from "./pages/student/TransactionHistoryPage";
 import {InstructorPaymentCancelledPage} from "./pages/payment/InstructorPaymentCancelledPage";
 import {InstructorPaymentSuccessPage} from "./pages/payment/InstructorPaymentSuccessPage";
+import QuizLessonDetail from "./pages/courses/QuizLessonDetail";
+import QuizPage from "./pages/courses/QuizWindowsPage";
+import LessonDetailLayout from "./context/CourseDetailLayout";
 
 function App() {
     return (
@@ -85,7 +88,13 @@ function App() {
                     <Route path='/become-instructor' element={<BecomeInstructor/>}></Route>
                     <Route path='/register-instructor' element={<InstructorPaymentPage/>}></Route>
                     <Route path='/my-courses' element={<MyCoursesPage/>}></Route>
-                    <Route path="/course-detail/:courseId/:chapterId/:lessonId/video" element={<VideoLesson />} />
+                    <Route path="/course-detail/:courseId/:chapterId/:lessonId" element={<LessonDetailLayout />}>
+                        <Route path="video" element={<VideoLesson />} />
+                        <Route path="quiz" element={<QuizLessonDetail />} />
+                    </Route>
+                    {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/video" element={<VideoLesson />} />*/}
+                    {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/quiz" element={<QuizLessonDetail />} />*/}
+                    <Route path="/quiz/:courseId/:chapterId/:lessonId" element={<QuizPage />} />
                     {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/reading" element={<TextLessonDetail />} />*/}
                     {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/practice" element={<CodeLessonDetail />} />*/}
                     {/*<Route path="/course-detail/:courseId/:chapterId/:lessonId/quiz" element={<QuizLessonDetail />} />*/}

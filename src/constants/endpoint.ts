@@ -92,6 +92,15 @@ export const ENDPOINTS = {
         BASIC: '/banks',
     }
 
+    ,
+
+    QUIZ: {
+        BASIC: '/quiz',
+        SUBMIT: '/quiz/submit',
+        GET_QUIZ_HISTORY: '/quiz/history',
+    },
+
+
 
     // USER: {
     //     PROFILE: '/user/profile',

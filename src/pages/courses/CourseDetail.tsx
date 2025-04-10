@@ -12,7 +12,6 @@ import CourseContentLoading from "../../components/course/course-detail/CourseCo
 import {getLessonPath} from "../../types/lesson";
 import {requestPostWithAuth} from "../../utils/request";
 import {useNotification} from "../../components/notification/NotificationProvider";
-import {Course} from "../../models/Course";
 import {addToCart} from "../../services/cartService";
 
 
