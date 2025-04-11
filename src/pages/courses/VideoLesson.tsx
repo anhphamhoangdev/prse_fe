@@ -1,8 +1,7 @@
-// src/pages/VideoLessonDetail.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { SearchHeaderAndFooterLayout } from '../../layouts/UserLayout';
 import { ChevronLeft, ChevronRight, Play, CheckCircle, Circle } from 'lucide-react';
-import { Lesson, VideoLessonData } from '../../types/course'; // Không cần import Chapter vì dùng từ context
+import { Lesson, VideoLessonData } from '../../types/course';
 import { useNavigate, useParams } from 'react-router-dom';
 import { requestPostWithAuth, requestWithAuth } from '../../utils/request';
 import AIChatDrawer from '../../components/course/AIChatDrawer';
@@ -32,68 +31,104 @@ interface SubmitLessonResponse {
 
 const VideoLessonDetail: React.FC = () => {
     const navigate = useNavigate();
-    const { courseId, chapterId, lessonId } = useParams();
-    const { curriculum, isLoading: isCurriculumLoading, fetchCurriculum } = useCurriculum();
+    const { courseId: initialCourseId, chapterId: initialChapterId, lessonId: initialLessonId } = useParams();
+    const { curriculum, isLoading: isCurriculumLoading } = useCurriculum();
 
     const [currentLesson, setCurrentLesson] = useState<VideoLessonData | null>(null);
-    const [isLessonLoading, setIsLessonLoading] = useState(true);
+    const [isLessonLoading, setIsLessonLoading] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messages, setMessages] = useState<Message[]>(() => MessageUtils.createInitialMessages());
+    const [currentCourseId, setCurrentCourseId] = useState(initialCourseId);
+    const [currentChapterId, setCurrentChapterId] = useState(initialChapterId);
+    const [currentLessonId, setCurrentLessonId] = useState(initialLessonId);
+
+    const fetchLessonData = useCallback(async (courseId: string, chapterId: string, lessonId: string) => {
+        try {
+            setIsLessonLoading(true);
+            setCurrentLesson(null);
+            const endpoint = `/course/${courseId}/${chapterId}/${lessonId}/video`;
+            const videoData: VideoLessonApiResponse = await requestWithAuth(endpoint);
+            setCurrentLesson(videoData.currentLesson);
+        } catch (error) {
+            console.error('Error fetching lesson data:', error);
+        } finally {
+            setIsLessonLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        if (courseId) fetchCurriculum(courseId);
+        if (initialCourseId && initialChapterId && initialLessonId) {
+            setCurrentCourseId(initialCourseId);
+            setCurrentChapterId(initialChapterId);
+            setCurrentLessonId(initialLessonId);
+            fetchLessonData(initialCourseId, initialChapterId, initialLessonId);
+        }
+    }, [initialCourseId, initialChapterId, initialLessonId, fetchLessonData]);
 
-        const fetchLessonData = async () => {
-            try {
-                setIsLessonLoading(true);
-                const endpoint = `/course/${courseId}/${chapterId}/${lessonId}/video`;
-                const videoData: VideoLessonApiResponse = await requestWithAuth(endpoint);
-                setCurrentLesson(videoData.currentLesson);
-            } catch (error) {
-                console.error('Error fetching lesson data:', error);
-            } finally {
-                setIsLessonLoading(false);
-            }
-        };
-
-        if (courseId && lessonId) fetchLessonData();
-    }, [courseId, chapterId, lessonId, refreshTrigger, fetchCurriculum]);
+    useEffect(() => {
+        if (currentCourseId && currentChapterId && currentLessonId) {
+            fetchLessonData(currentCourseId, currentChapterId, currentLessonId);
+        }
+    }, [refreshTrigger, currentCourseId, currentChapterId, currentLessonId, fetchLessonData]);
 
     const findNavigationInfo = useCallback(() => {
-        if (!curriculum || !lessonId) return { currentLesson: null, nextLesson: null, prevLesson: null };
+        if (!curriculum || !currentLessonId) return { currentLesson: null, nextLesson: null, prevLesson: null };
         let currentLesson: Lesson | null = null;
         let nextLesson: Lesson | null = null;
         let prevLesson: Lesson | null = null;
 
         for (let i = 0; i < curriculum.length; i++) {
             const chapter = curriculum[i];
-            const lessonIndex = chapter.lessons.findIndex((l) => l.id === Number(lessonId));
+            const lessonIndex = chapter.lessons.findIndex((l) => l.id === Number(currentLessonId));
             if (lessonIndex !== -1) {
                 currentLesson = chapter.lessons[lessonIndex];
+
+                // Tìm nextLesson (bỏ qua chapter rỗng)
                 if (lessonIndex < chapter.lessons.length - 1) {
                     nextLesson = chapter.lessons[lessonIndex + 1];
-                } else if (i < curriculum.length - 1) {
-                    nextLesson = curriculum[i + 1].lessons[0];
+                } else {
+                    // Nếu hết lesson trong chapter hiện tại, tìm chapter tiếp theo có lesson
+                    for (let j = i + 1; j < curriculum.length; j++) {
+                        if (curriculum[j].lessons.length > 0) {
+                            nextLesson = curriculum[j].lessons[0];
+                            break;
+                        }
+                    }
                 }
+
+                // Tìm prevLesson (bỏ qua chapter rỗng)
                 if (lessonIndex > 0) {
                     prevLesson = chapter.lessons[lessonIndex - 1];
-                } else if (i > 0) {
-                    prevLesson = curriculum[i - 1].lessons[curriculum[i - 1].lessons.length - 1];
+                } else {
+                    // Nếu ở đầu chapter, tìm chapter trước đó có lesson
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (curriculum[j].lessons.length > 0) {
+                            prevLesson = curriculum[j].lessons[curriculum[j].lessons.length - 1];
+                            break;
+                        }
+                    }
                 }
                 break;
             }
         }
         return { currentLesson, nextLesson, prevLesson };
-    }, [curriculum, lessonId]);
+    }, [curriculum, currentLessonId]);
 
     const handleLessonNavigation = useCallback(
         (lesson: Lesson, nextChapterId: number) => {
-            const baseCoursePath = `/course-detail/${courseId}`;
+            const baseCoursePath = `/course-detail/${currentCourseId}`;
             const paths = { video: 'video', text: 'reading', code: 'practice', quiz: 'quiz' };
-            navigate(`${baseCoursePath}/${nextChapterId}/${lesson.id}/${paths[lesson.type] || ''}`);
+            const newUrl = `${baseCoursePath}/${nextChapterId}/${lesson.id}/${paths[lesson.type] || ''}`;
+            navigate(newUrl, { replace: true });
+            // Chỉ fetch dữ liệu nếu lesson là video
+            if (lesson.type === 'video') {
+                setCurrentChapterId(String(nextChapterId));
+                setCurrentLessonId(String(lesson.id));
+                fetchLessonData(currentCourseId || '', String(nextChapterId), String(lesson.id));
+            }
         },
-        [courseId, navigate]
+        [currentCourseId, navigate, fetchLessonData]
     );
 
     const handleNavigation = useCallback(
@@ -129,8 +164,8 @@ const VideoLessonDetail: React.FC = () => {
         try {
             const userMessage = MessageUtils.createUserMessage(content, {
                 lessonId: currentLesson?.id,
-                lessonTitle: findNavigationInfo().currentLesson?.title, // Dùng title từ curriculum
-                chapterId: Number(chapterId),
+                lessonTitle: findNavigationInfo().currentLesson?.title,
+                chapterId: Number(currentChapterId),
             });
             setMessages((prev) => [...prev, userMessage]);
             const response = await sendMessageAI(content);
@@ -138,7 +173,7 @@ const VideoLessonDetail: React.FC = () => {
                 const aiMessage = MessageUtils.createAIMessage(response.data.message, {
                     lessonId: currentLesson?.id,
                     lessonTitle: findNavigationInfo().currentLesson?.title,
-                    chapterId: Number(chapterId),
+                    chapterId: Number(currentChapterId),
                 });
                 setMessages((prev) => [...prev, aiMessage]);
             } else {
@@ -152,7 +187,7 @@ const VideoLessonDetail: React.FC = () => {
         }
     };
 
-    if (isLessonLoading || !currentLesson) {
+    if (isCurriculumLoading) {
         return (
             <SearchHeaderAndFooterLayout>
                 <LoadingState />
@@ -161,6 +196,7 @@ const VideoLessonDetail: React.FC = () => {
     }
 
     const { currentLesson: lessonInfo, nextLesson, prevLesson } = findNavigationInfo();
+    const currentChapter = curriculum?.find((ch) => ch.id === Number(currentChapterId));
 
     return (
         <SearchHeaderAndFooterLayout>
@@ -169,98 +205,120 @@ const VideoLessonDetail: React.FC = () => {
                     <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                                    <Play className="w-5 h-5" />
+                                <div
+                                    className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                    <Play className="w-5 h-5"/>
                                 </div>
                                 <div>
                                     <div className="text-sm text-gray-500">Chương hiện tại</div>
                                     <div className="font-medium text-gray-900">
-                                        {curriculum?.find((ch) => ch.id === Number(chapterId))?.title || 'Đang tải...'}
+                                        {currentChapter?.title || 'Đang tải...'}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => handleNavigation('prev')}
-                                    disabled={!prevLesson}
+                                    disabled={!prevLesson || isLessonLoading}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                        !prevLesson
+                                        !prevLesson || isLessonLoading
                                             ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                                             : 'border-blue-100 text-blue-600 hover:bg-blue-50'
                                     }`}
                                 >
-                                    <ChevronLeft className="w-4 h-4" />
+                                    <ChevronLeft className="w-4 h-4"/>
                                     <span className="hidden sm:inline">Bài trước</span>
                                 </button>
                                 <button
                                     onClick={() => handleNavigation('next')}
-                                    disabled={!nextLesson}
+                                    disabled={!nextLesson || isLessonLoading}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                        !nextLesson
+                                        !nextLesson || isLessonLoading
                                             ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                                             : 'border-blue-100 text-blue-600 hover:bg-blue-50'
                                     }`}
                                 >
                                     <span className="hidden sm:inline">Bài tiếp</span>
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-4 h-4"/>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2">
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <div className="relative w-full">
-                                    <VideoPlayer url={currentLesson.videoUrl} className="w-full" />
+                        <div className="lg:col-span-2 relative">
+                            {isLessonLoading && !currentLesson && (
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+                                    <div
+                                        className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>
                                 </div>
-                                <div className="p-6">
+                            )}
+                            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                                {/* Container video có tỉ lệ 16:9 cố định */}
+                                <div className="relative w-full aspect-video shrink-0">
+                                    {currentLesson && (
+                                        <VideoPlayer
+                                            url={currentLesson.videoUrl}
+                                            className={`absolute inset-0 w-full h-full object-cover ${isLessonLoading ? 'opacity-50' : 'opacity-100'}`}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Phần nội dung bên dưới video */}
+                                <div className="p-6 grow">
                                     <div className="space-y-4">
-                                        <h1 className="text-2xl font-bold text-gray-900">{lessonInfo?.title || 'Video Lesson'}</h1>
+                                        <h1 className="text-2xl font-bold text-gray-900">
+                                            {lessonInfo?.title || (isLessonLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
+                                        </h1>
                                         <div className="flex flex-wrap items-center gap-4 text-sm">
                                             <div className="flex items-center gap-2 text-blue-600">
-                                                <Play className="w-4 h-4" />
+                                                <Play className="w-4 h-4"/>
                                                 <span>Video Bài Giảng</span>
                                             </div>
-                                            <div className="flex flex-col sm:flex-row items-start justify-between pt-6 mt-6 border-t border-gray-100">
-                                                <div className="w-full sm:w-1/2 mb-4 sm:mb-0">
-                                                    <div className="space-y-1">
-                                                        <h4 className="text-base font-medium text-gray-900">Hoàn thành bài học</h4>
-                                                        <p className="text-sm text-gray-500 leading-relaxed">
-                                                            Hoàn thành bài học này để mở khóa nội dung tiếp theo trong khóa học của bạn.
-                                                        </p>
-                                                    </div>
+                                        </div>
+                                        <div
+                                            className="flex flex-col sm:flex-row items-start justify-between pt-6 mt-6 border-t border-gray-100">
+                                            <div className="w-full sm:w-1/2 mb-4 sm:mb-0">
+                                                <div className="space-y-1">
+                                                    <h4 className="text-base font-medium text-gray-900">Hoàn thành bài
+                                                        học</h4>
+                                                    <p className="text-sm text-gray-500 leading-relaxed">
+                                                        Hoàn thành bài học này để mở khóa nội dung tiếp theo trong khóa
+                                                        học của bạn.
+                                                    </p>
                                                 </div>
-                                                <div className="w-full sm:w-auto">
-                                                    <button
-                                                        onClick={() => handleSubmitLesson(courseId || 0, chapterId || 0, lessonId || 0)}
-                                                        disabled={isSubmitting || lessonInfo?.progress?.status === 'completed'}
-                                                        className={`w-full sm:w-auto flex items-center gap-3 px-8 py-3 rounded-lg font-medium transition-all duration-200 ease-in-out min-w-[200px] justify-center ${
-                                                            lessonInfo?.progress?.status === 'completed'
-                                                                ? 'bg-green-50 text-green-600 border border-green-200'
-                                                                : isSubmitting
-                                                                    ? 'bg-gray-50 text-gray-400 border border-gray-200'
-                                                                    : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm hover:shadow-md active:shadow-sm'
-                                                        }`}
-                                                    >
-                                                        {lessonInfo?.progress?.status === 'completed' ? (
-                                                            <>
-                                                                <CheckCircle className="w-5 h-5 opacity-90" />
-                                                                <span>Bài học đã hoàn thành</span>
-                                                            </>
-                                                        ) : isSubmitting ? (
-                                                            <>
-                                                                <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-                                                                <span>Đang xử lý...</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <CheckCircle className="w-5 h-5 opacity-90" />
-                                                                <span>Xác nhận hoàn thành</span>
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                </div>
+                                            </div>
+                                            <div className="w-full sm:w-auto">
+                                                <button
+                                                    onClick={() => handleSubmitLesson(currentCourseId || 0, currentChapterId || 0, currentLessonId || 0)}
+                                                    disabled={isSubmitting || lessonInfo?.progress?.status === 'completed' || isLessonLoading}
+                                                    className={`w-full sm:w-auto flex items-center gap-3 px-8 py-3 rounded-lg font-medium transition-all duration-200 ease-in-out min-w-[200px] justify-center ${
+                                                        lessonInfo?.progress?.status === 'completed'
+                                                            ? 'bg-green-50 text-green-600 border border-green-200'
+                                                            : isSubmitting || isLessonLoading
+                                                                ? 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'
+                                                                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm hover:shadow-md active:shadow-sm'
+                                                    }`}
+                                                >
+                                                    {lessonInfo?.progress?.status === 'completed' ? (
+                                                        <>
+                                                            <CheckCircle className="w-5 h-5 opacity-90"/>
+                                                            <span>Bài học đã hoàn thành</span>
+                                                        </>
+                                                    ) : isSubmitting ? (
+                                                        <>
+                                                            <div
+                                                                className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"/>
+                                                            <span>Đang xử lý...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <CheckCircle className="w-5 h-5 opacity-90"/>
+                                                            <span>Xác nhận hoàn thành</span>
+                                                        </>
+                                                    )}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -268,14 +326,14 @@ const VideoLessonDetail: React.FC = () => {
                             </div>
                         </div>
                         <CurriculumSidebar
-                            courseId={courseId}
-                            currentLessonId={lessonId}
+                            courseId={currentCourseId}
+                            currentLessonId={currentLessonId}
                             onLessonSelect={handleLessonNavigation}
                         />
                     </div>
                 </div>
             </div>
-            <AIChatDrawer position="right" onSendMessage={handleAIMessage} messages={messages} />
+            <AIChatDrawer position="right" onSendMessage={handleAIMessage} messages={messages}/>
         </SearchHeaderAndFooterLayout>
     );
 };
