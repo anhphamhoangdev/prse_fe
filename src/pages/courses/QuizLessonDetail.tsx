@@ -296,11 +296,11 @@ const QuizLessonDetail: React.FC = () => {
                                                                                     : 'Chưa đạt'}
                                                                     </span>
                                                                 </div>
-                                                                <div className="pr-3">
-                                                                    <button className="text-blue-600 hover:text-blue-800">
-                                                                        <ChevronRight className="w-5 h-5" />
-                                                                    </button>
-                                                                </div>
+                                                                {/*<div className="pr-3">*/}
+                                                                {/*    <button className="text-blue-600 hover:text-blue-800">*/}
+                                                                {/*        <ChevronRight className="w-5 h-5" />*/}
+                                                                {/*    </button>*/}
+                                                                {/*</div>*/}
                                                             </div>
                                                         </div>
                                                     ))}
