@@ -1,7 +1,7 @@
 // src/routes/LessonDetailLayout.tsx
 import React from 'react';
 import { Outlet, useParams } from 'react-router-dom';
-import { CurriculumProvider } from './CurriculumContext';
+import {CurriculumProvider} from "../context/CurriculumContext";
 
 const LessonDetailLayout: React.FC = () => {
     const { courseId } = useParams();

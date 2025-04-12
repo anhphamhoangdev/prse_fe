@@ -44,7 +44,7 @@ import {InstructorPaymentCancelledPage} from "./pages/payment/InstructorPaymentC
 import {InstructorPaymentSuccessPage} from "./pages/payment/InstructorPaymentSuccessPage";
 import QuizLessonDetail from "./pages/courses/QuizLessonDetail";
 import QuizPage from "./pages/courses/QuizWindowsPage";
-import LessonDetailLayout from "./context/CourseDetailLayout";
+import LessonDetailLayout from "./layouts/LessonDetailLayout";
 
 function App() {
     return (

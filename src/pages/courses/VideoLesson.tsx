@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SearchHeaderAndFooterLayout } from '../../layouts/UserLayout';
-import { ChevronLeft, ChevronRight, Play, CheckCircle, Circle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, CheckCircle, Circle, X, Menu } from 'lucide-react';
 import { Lesson, VideoLessonData } from '../../types/course';
 import { useNavigate, useParams } from 'react-router-dom';
 import { requestPostWithAuth, requestWithAuth } from '../../utils/request';
@@ -11,7 +12,7 @@ import { sendMessageAI } from '../../services/chatService';
 import { MessageUtils } from '../../utils/messageUtil';
 import { VideoPlayer } from '../../components/common/VideoPlayer';
 import { useCurriculum } from '../../context/CurriculumContext';
-import CurriculumSidebar from "../../components/course/course-detail/CurriculumSidebar";
+import CurriculumSidebar from '../../components/course/course-detail/CurriculumSidebar';
 
 interface VideoLessonApiResponse {
     currentLesson: VideoLessonData;
@@ -42,6 +43,7 @@ const VideoLessonDetail: React.FC = () => {
     const [currentCourseId, setCurrentCourseId] = useState(initialCourseId);
     const [currentChapterId, setCurrentChapterId] = useState(initialChapterId);
     const [currentLessonId, setCurrentLessonId] = useState(initialLessonId);
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true); // Mặc định visible
 
     const fetchLessonData = useCallback(async (courseId: string, chapterId: string, lessonId: string) => {
         try {
@@ -83,12 +85,9 @@ const VideoLessonDetail: React.FC = () => {
             const lessonIndex = chapter.lessons.findIndex((l) => l.id === Number(currentLessonId));
             if (lessonIndex !== -1) {
                 currentLesson = chapter.lessons[lessonIndex];
-
-                // Tìm nextLesson (bỏ qua chapter rỗng)
                 if (lessonIndex < chapter.lessons.length - 1) {
                     nextLesson = chapter.lessons[lessonIndex + 1];
                 } else {
-                    // Nếu hết lesson trong chapter hiện tại, tìm chapter tiếp theo có lesson
                     for (let j = i + 1; j < curriculum.length; j++) {
                         if (curriculum[j].lessons.length > 0) {
                             nextLesson = curriculum[j].lessons[0];
@@ -96,12 +95,9 @@ const VideoLessonDetail: React.FC = () => {
                         }
                     }
                 }
-
-                // Tìm prevLesson (bỏ qua chapter rỗng)
                 if (lessonIndex > 0) {
                     prevLesson = chapter.lessons[lessonIndex - 1];
                 } else {
-                    // Nếu ở đầu chapter, tìm chapter trước đó có lesson
                     for (let j = i - 1; j >= 0; j--) {
                         if (curriculum[j].lessons.length > 0) {
                             prevLesson = curriculum[j].lessons[curriculum[j].lessons.length - 1];
@@ -121,7 +117,6 @@ const VideoLessonDetail: React.FC = () => {
             const paths = { video: 'video', text: 'reading', code: 'practice', quiz: 'quiz' };
             const newUrl = `${baseCoursePath}/${nextChapterId}/${lesson.id}/${paths[lesson.type] || ''}`;
             navigate(newUrl, { replace: true });
-            // Chỉ fetch dữ liệu nếu lesson là video
             if (lesson.type === 'video') {
                 setCurrentChapterId(String(nextChapterId));
                 setCurrentLessonId(String(lesson.id));
@@ -187,6 +182,10 @@ const VideoLessonDetail: React.FC = () => {
         }
     };
 
+    const toggleSidebar = () => {
+        setIsSidebarVisible((prev) => !prev);
+    };
+
     if (isCurriculumLoading) {
         return (
             <SearchHeaderAndFooterLayout>
@@ -201,139 +200,164 @@ const VideoLessonDetail: React.FC = () => {
     return (
         <SearchHeaderAndFooterLayout>
             <div className="min-h-screen bg-gray-100">
-                <div className="container mx-auto py-6 px-4 lg:px-6">
-                    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                                    <Play className="w-5 h-5"/>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500">Chương hiện tại</div>
-                                    <div className="font-medium text-gray-900">
-                                        {currentChapter?.title || 'Đang tải...'}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => handleNavigation('prev')}
-                                    disabled={!prevLesson || isLessonLoading}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                        !prevLesson || isLessonLoading
-                                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'border-blue-100 text-blue-600 hover:bg-blue-50'
-                                    }`}
-                                >
-                                    <ChevronLeft className="w-4 h-4"/>
-                                    <span className="hidden sm:inline">Bài trước</span>
-                                </button>
-                                <button
-                                    onClick={() => handleNavigation('next')}
-                                    disabled={!nextLesson || isLessonLoading}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                        !nextLesson || isLessonLoading
-                                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                                            : 'border-blue-100 text-blue-600 hover:bg-blue-50'
-                                    }`}
-                                >
-                                    <span className="hidden sm:inline">Bài tiếp</span>
-                                    <ChevronRight className="w-4 h-4"/>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div className="container mx-auto py-6 px-4 lg:px-6 flex flex-col lg:flex-row gap-6">
+                    {/* Sidebar bên trái với motion */}
+                    <AnimatePresence>
+                        {isSidebarVisible && (
+                            <motion.div
+                                initial={{ x: -300, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -300, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className="lg:w-1/3 w-full" // Tăng từ lg:w-1/4 lên lg:w-1/3
+                            >
+                                <CurriculumSidebar
+                                    courseId={currentCourseId}
+                                    currentLessonId={currentLessonId}
+                                    onLessonSelect={handleLessonNavigation}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 relative">
-                            {isLessonLoading && !currentLesson && (
-                                <div
-                                    className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
-                                    <div
-                                        className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>
-                                </div>
+                    {/* Nội dung chính */}
+                    <div
+                        className={`relative flex-grow transition-all duration-300 ${
+                            isSidebarVisible ? 'lg:w-2/3' : 'w-full max-w-4xl mx-auto' // Giảm từ lg:w-3/4 xuống lg:w-2/3
+                        }`}
+                    >
+                        {/* Nút bật/tắt sidebar cải tiến */}
+                        <button
+                            onClick={toggleSidebar}
+                            className="absolute top-4 left-4 z-20 p-2.5 rounded-lg bg-gradient-to-r from-gray-100 to-gray-200 shadow-lg hover:from-gray-200 hover:to-gray-300 transition-all duration-200 flex items-center justify-center"
+                        >
+                            {isSidebarVisible ? (
+                                <X className="w-6 h-6 text-gray-700 transition-transform duration-200 hover:scale-110" />
+                            ) : (
+                                <Menu className="w-6 h-6 text-gray-700 transition-transform duration-200 hover:scale-110" />
                             )}
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-                                {/* Container video có tỉ lệ 16:9 cố định */}
-                                <div className="relative w-full aspect-video shrink-0">
-                                    {currentLesson && (
-                                        <VideoPlayer
-                                            url={currentLesson.videoUrl}
-                                            className={`absolute inset-0 w-full h-full object-cover ${isLessonLoading ? 'opacity-50' : 'opacity-100'}`}
-                                        />
-                                    )}
-                                </div>
+                        </button>
 
-                                {/* Phần nội dung bên dưới video */}
-                                <div className="p-6 grow">
-                                    <div className="space-y-4">
-                                        <h1 className="text-2xl font-bold text-gray-900">
-                                            {lessonInfo?.title || (isLessonLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
-                                        </h1>
-                                        <div className="flex flex-wrap items-center gap-4 text-sm">
-                                            <div className="flex items-center gap-2 text-blue-600">
-                                                <Play className="w-4 h-4"/>
-                                                <span>Video Bài Giảng</span>
+                        {/* Thanh điều hướng */}
+                        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                        <Play className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-gray-500">Chương hiện tại</div>
+                                        <div className="font-medium text-gray-900">
+                                            {currentChapter?.title || 'Đang tải...'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleNavigation('prev')}
+                                        disabled={!prevLesson || isLessonLoading}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                                            !prevLesson || isLessonLoading
+                                                ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'border-blue-100 text-blue-600 hover:bg-blue-50'
+                                        }`}
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Bài trước</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleNavigation('next')}
+                                        disabled={!nextLesson || isLessonLoading}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                                            !nextLesson || isLessonLoading
+                                                ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'border-blue-100 text-blue-600 hover:bg-blue-50'
+                                        }`}
+                                    >
+                                        <span className="hidden sm:inline">Bài tiếp</span>
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Nội dung bài học */}
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                            <div className="relative w-full aspect-video shrink-0">
+                                {isLessonLoading && !currentLesson && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+                                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
+                                {currentLesson && (
+                                    <VideoPlayer
+                                        url={currentLesson.videoUrl}
+                                        className={`absolute inset-0 w-full h-full object-cover ${
+                                            isLessonLoading ? 'opacity-50' : 'opacity-100'
+                                        }`}
+                                    />
+                                )}
+                            </div>
+                            <div className="p-6 grow">
+                                <div className="space-y-4">
+                                    <h1 className="text-2xl font-bold text-gray-900">
+                                        {lessonInfo?.title || (isLessonLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
+                                    </h1>
+                                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                                        <div className="flex items-center gap-2 text-blue-600">
+                                            <Play className="w-4 h-4" />
+                                            <span>Video Bài Giảng</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row items-start justify-between pt-6 mt-6 border-t border-gray-100">
+                                        <div className="w-full sm:w-1/2 mb-4 sm:mb-0">
+                                            <div className="space-y-1">
+                                                <h4 className="text-base font-medium text-gray-900">Hoàn thành bài học</h4>
+                                                <p className="text-sm text-gray-500 leading-relaxed">
+                                                    Hoàn thành bài học này để mở khóa nội dung tiếp theo trong khóa học của bạn.
+                                                </p>
                                             </div>
                                         </div>
-                                        <div
-                                            className="flex flex-col sm:flex-row items-start justify-between pt-6 mt-6 border-t border-gray-100">
-                                            <div className="w-full sm:w-1/2 mb-4 sm:mb-0">
-                                                <div className="space-y-1">
-                                                    <h4 className="text-base font-medium text-gray-900">Hoàn thành bài
-                                                        học</h4>
-                                                    <p className="text-sm text-gray-500 leading-relaxed">
-                                                        Hoàn thành bài học này để mở khóa nội dung tiếp theo trong khóa
-                                                        học của bạn.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="w-full sm:w-auto">
-                                                <button
-                                                    onClick={() => handleSubmitLesson(currentCourseId || 0, currentChapterId || 0, currentLessonId || 0)}
-                                                    disabled={isSubmitting || lessonInfo?.progress?.status === 'completed' || isLessonLoading}
-                                                    className={`w-full sm:w-auto flex items-center gap-3 px-8 py-3 rounded-lg font-medium transition-all duration-200 ease-in-out min-w-[200px] justify-center ${
-                                                        lessonInfo?.progress?.status === 'completed'
-                                                            ? 'bg-green-50 text-green-600 border border-green-200'
-                                                            : isSubmitting || isLessonLoading
-                                                                ? 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'
-                                                                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm hover:shadow-md active:shadow-sm'
-                                                    }`}
-                                                >
-                                                    {lessonInfo?.progress?.status === 'completed' ? (
-                                                        <>
-                                                            <CheckCircle className="w-5 h-5 opacity-90"/>
-                                                            <span>Bài học đã hoàn thành</span>
-                                                        </>
-                                                    ) : isSubmitting ? (
-                                                        <>
-                                                            <div
-                                                                className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"/>
-                                                            <span>Đang xử lý...</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <CheckCircle className="w-5 h-5 opacity-90"/>
-                                                            <span>Xác nhận hoàn thành</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
+                                        <div className="w-full sm:w-auto">
+                                            <button
+                                                onClick={() =>
+                                                    handleSubmitLesson(currentCourseId || 0, currentChapterId || 0, currentLessonId || 0)
+                                                }
+                                                disabled={isSubmitting || lessonInfo?.progress?.status === 'completed' || isLessonLoading}
+                                                className={`w-full sm:w-auto flex items-center gap-3 px-8 py-3 rounded-lg font-medium transition-all duration-200 ease-in-out min-w-[200px] justify-center ${
+                                                    lessonInfo?.progress?.status === 'completed'
+                                                        ? 'bg-green-50 text-green-600 border border-green-200'
+                                                        : isSubmitting || isLessonLoading
+                                                            ? 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'
+                                                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm hover:shadow-md active:shadow-sm'
+                                                }`}
+                                            >
+                                                {lessonInfo?.progress?.status === 'completed' ? (
+                                                    <>
+                                                        <CheckCircle className="w-5 h-5 opacity-90" />
+                                                        <span>Bài học đã hoàn thành</span>
+                                                    </>
+                                                ) : isSubmitting ? (
+                                                    <>
+                                                        <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                                                        <span>Đang xử lý...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CheckCircle className="w-5 h-5 opacity-90" />
+                                                        <span>Xác nhận hoàn thành</span>
+                                                    </>
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <CurriculumSidebar
-                            courseId={currentCourseId}
-                            currentLessonId={currentLessonId}
-                            onLessonSelect={handleLessonNavigation}
-                        />
                     </div>
                 </div>
             </div>
-            <AIChatDrawer position="right" onSendMessage={handleAIMessage} messages={messages}/>
+            <AIChatDrawer position="right" onSendMessage={handleAIMessage} messages={messages} />
         </SearchHeaderAndFooterLayout>
     );
 };
