@@ -167,6 +167,7 @@ export interface VideoLessonData {
     duration: number;
     createdAt?: string;
     updatedAt?: string;
+    complete?: boolean;
 }
 
 
