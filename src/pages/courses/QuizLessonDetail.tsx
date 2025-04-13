@@ -48,8 +48,7 @@ const QuizLessonDetail: React.FC = () => {
         try {
             setIsQuizLoading(true);
             const data = await requestWithAuth<QuizHistoryApiData>(ENDPOINTS.QUIZ.GET_QUIZ_HISTORY + `/${lessonId}`);
-            await new Promise((resolve) => setTimeout(resolve, 300)); // Delay tối thiểu 300ms
-            setQuizHistory(data.quiz_history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+            setQuizHistory(data.quiz_history);
         } catch (error) {
             console.error('Error fetching quiz history:', error);
         } finally {
