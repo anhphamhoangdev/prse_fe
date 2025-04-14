@@ -13,7 +13,6 @@ import {
     Share2,
 } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { CourseCurriculumDTO, Chapter, Lesson } from '../../../types/course';
 import { formatDuration } from '../../../utils/formatSecondToHour';
 import { useNavigate } from 'react-router-dom';
