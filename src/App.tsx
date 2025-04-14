@@ -46,12 +46,12 @@ import QuizLessonDetail from "./pages/courses/QuizLessonDetail";
 import QuizPage from "./pages/courses/QuizWindowsPage";
 import LessonDetailLayout from "./layouts/LessonDetailLayout";
 import CertificatePage from "./pages/certificate/CertificatePage";
-import {Helmet} from "react-helmet-async";
+import {Helmet, HelmetProvider} from "react-helmet-async";
 
 function App() {
     return (
         <NotificationProvider>
-            <Helmet>
+            <HelmetProvider>
             <BrowserRouter>
                 <Routes>
                     <Route path="/certificate/:courseId" element={<CertificatePage></CertificatePage>} />
@@ -140,7 +140,7 @@ function App() {
                     } />
                 </Routes>
             </BrowserRouter>
-            </Helmet>
+            </HelmetProvider>
         </NotificationProvider>
 
     );
