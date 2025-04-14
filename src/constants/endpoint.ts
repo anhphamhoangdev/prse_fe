@@ -100,6 +100,10 @@ export const ENDPOINTS = {
         GET_QUIZ_HISTORY: '/quiz/history',
     },
 
+    CERTIFICATE : {
+        GENERATE_CERTIFICATE: '/certificate/generate',
+    },
+
 
 
     // USER: {

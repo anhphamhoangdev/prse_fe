@@ -14,7 +14,7 @@ export const formatLocalDateTimeToVN = (isoString: string) => {
     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // getMonth() returns 0-11
     const year = date.getFullYear().toString().slice(-2);
 
-    return `${time} ${day}/${month}/${year}`;
+    return `${time} ${day}/${month}/20${year}`;
 };
 
 

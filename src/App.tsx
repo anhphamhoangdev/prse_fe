@@ -52,7 +52,7 @@ function App() {
         <NotificationProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/test-certificate" element={<CertificatePage></CertificatePage>} />
+                    <Route path="/certificate/:courseId" element={<CertificatePage></CertificatePage>} />
                     <Route path="/" element={<Home />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/policies" element={<Policies />} />

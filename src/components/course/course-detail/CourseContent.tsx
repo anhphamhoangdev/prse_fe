@@ -98,7 +98,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({
     };
 
     const handleGetCertificate = () => {
-        navigate(`/course/${courseId}/certificate`);
+        navigate(`/certificate/${courseId}`);
     };
 
     const handleShareLinkedIn = () => {
