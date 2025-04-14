@@ -103,7 +103,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({
     };
 
     const handleShareLinkedIn = () => {
-        const shareUrl = encodeURIComponent(`https://prse-fe.vercel.app/course/${courseId}`);
+        const shareUrl = encodeURIComponent(`https://prse-fe.vercel.app/course-detail/${courseId}`);
         const caption = encodeURIComponent(
             `Tôi vừa hoàn thành khóa học "${courseTitle}" trên EasyEDU! 🎉 Một hành trình học tập tuyệt vời! #HọcTập #ThànhTựu`
         );
