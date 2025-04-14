@@ -45,12 +45,14 @@ import {InstructorPaymentSuccessPage} from "./pages/payment/InstructorPaymentSuc
 import QuizLessonDetail from "./pages/courses/QuizLessonDetail";
 import QuizPage from "./pages/courses/QuizWindowsPage";
 import LessonDetailLayout from "./layouts/LessonDetailLayout";
+import CertificatePage from "./pages/certificate/CertificatePage";
 
 function App() {
     return (
         <NotificationProvider>
             <BrowserRouter>
                 <Routes>
+                    <Route path="/test-certificate" element={<CertificatePage></CertificatePage>} />
                     <Route path="/" element={<Home />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/policies" element={<Policies />} />
