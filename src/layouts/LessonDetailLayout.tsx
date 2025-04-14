@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { CurriculumProvider } from '../context/CurriculumContext';
-import { SearchHeaderAndFooterLayout } from '../layouts/UserLayout';
+import { SearchHeaderAndFooterLayout } from './UserLayout';
 import { ChevronLeft, ChevronRight, Play, X, Menu } from 'lucide-react';
 import { Lesson } from '../types/course';
 import CurriculumSidebar from '../components/course/course-detail/CurriculumSidebar';
@@ -61,7 +61,7 @@ const LessonContent: React.FC<LessonContentProps> = ({ isSidebarVisible, toggleS
                     }
                 }
 
-                break; // Thoát vòng lặp sau khi tìm thấy bài học hiện tại
+                break;
             }
         }
 

@@ -310,22 +310,50 @@ export async function getCourseCurriculum(courseId: number): Promise<CourseCurri
             return null;
         }
 
-        const chapters = response.data?.chapters?.chapters;
+        // Kiểm tra response.data và response.data.chapters
+        if (!response.data || !response.data.chapters) {
+            console.warn('[CourseService] No valid chapters data found in response');
+            return null;
+        }
 
-        // Check if chapters exists and is an array
-        if (!chapters || !Array.isArray(chapters)) {
-            console.warn('[CourseService] No valid chapters data found');
+        const chapters = response.data.chapters.chapters || [];
+
+        // Check if chapters is an array
+        if (!Array.isArray(chapters)) {
+            console.warn('[CourseService] Chapters data is not an array');
             return null;
         }
 
         // Check if array is empty
         if (chapters.length === 0) {
             console.warn('[CourseService] Course has no chapters');
-            return { chapters: [] };
+            return {
+                courseProgress: 0,
+                courseStatus: "not_started",
+                totalLessons: 0,
+                completedLessons: 0,
+                remainingLessons: 0,
+                chapters: []
+            };
         }
 
-        console.log(`[CourseService] Successfully fetched curriculum with ${chapters.length} chapters`);
-        return { chapters };
+        // Ánh xạ dữ liệu từ response.data.chapters
+        const curriculum: CourseCurriculumDTO = {
+            courseProgress: response.data.chapters.courseProgress || 0,
+            courseStatus: response.data.chapters.courseStatus || "not_started",
+            totalLessons: response.data.chapters.totalLessons || 0,
+            completedLessons: response.data.chapters.completedLessons || 0,
+            remainingLessons: response.data.chapters.remainingLessons || 0,
+            chapters
+        };
+
+        console.log(`[CourseService] Successfully fetched curriculum with ${chapters.length} chapters`, {
+            courseProgress: curriculum.courseProgress,
+            totalLessons: curriculum.totalLessons,
+            completedLessons: curriculum.completedLessons
+        });
+
+        return curriculum;
 
     } catch (error) {
         console.error('[CourseService] Error fetching course curriculum:', error);

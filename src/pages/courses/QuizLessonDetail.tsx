@@ -1,9 +1,8 @@
-// src/components/course/QuizLessonDetail.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { requestWithAuth } from '../../utils/request';
 import { ENDPOINTS } from '../../constants/endpoint';
-import { Circle, Play } from 'lucide-react';
+import { Circle, Play, Trophy, RefreshCw } from 'lucide-react';
 import { Lesson } from '../../types/course';
 import { motion } from 'framer-motion';
 
@@ -28,13 +27,13 @@ interface OutletContext {
 
 const formatDateVN = (dateString: string): string => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}, ${day}/${month}/${year}`;
+    return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 };
 
 const QuizLessonDetail: React.FC = () => {
@@ -47,7 +46,7 @@ const QuizLessonDetail: React.FC = () => {
     const fetchQuizHistory = useCallback(async () => {
         try {
             setIsQuizLoading(true);
-            const data = await requestWithAuth<QuizHistoryApiData>(ENDPOINTS.QUIZ.GET_QUIZ_HISTORY + `/${lessonId}`);
+            const data = await requestWithAuth<QuizHistoryApiData>(`${ENDPOINTS.QUIZ.GET_QUIZ_HISTORY}/${lessonId}`);
             setQuizHistory(data.quiz_history);
         } catch (error) {
             console.error('Error fetching quiz history:', error);
@@ -62,132 +61,198 @@ const QuizLessonDetail: React.FC = () => {
 
     const handleStartQuiz = () => navigate(`/quiz/${courseId}/${chapterId}/${lessonId}`);
 
+    const bestAttempt = quizHistory.length > 0
+        ? quizHistory.reduce((prev, current) => (prev.score > current.score ? prev : current))
+        : null;
+
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6 transition-opacity duration-300 ease-in-out">
+        <div className="relative rounded-xl bg-gray-50 min-h-screen p-6 md:p-8 font-sans">
+            {/* Loading Overlay */}
             {isQuizLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
-                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
                 </div>
             )}
-            <h1 className="text-2xl font-bold text-gray-900 mb-4 transition-opacity duration-300 ease-in-out">
-                {currentLesson?.title || (isQuizLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
-            </h1>
-            <div className="space-y-6">
+
+            {/* Header */}
+            <motion.header
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-8"
+            >
+                <h1 className="text-3xl font-bold text-gray-800">
+                    {currentLesson?.title || (isQuizLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
+                </h1>
+                <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="mt-2 text-lg text-gray-600"
+                >
+                    Đạt từ{' '}
+                    <span className="font-bold text-blue-600">80 điểm</span> để hoàn thành bạn nhé !
+                </motion.p>
+            </motion.header>
+
+            {/* Main Content */}
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* No Quiz History */}
                 {quizHistory.length === 0 ? (
-                    <div className="text-center py-12">
-                        <Circle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-600 text-lg">Bạn chưa làm bài quiz này.</p>
-                        <p className="text-gray-500 mb-6">Hãy bắt đầu để kiểm tra kiến thức của bạn!</p>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-center py-16 bg-white rounded-2xl shadow-md"
+                    >
+                        <Circle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-xl text-gray-700 font-medium">Bạn chưa làm bài quiz này.</p>
+                        <p className="text-gray-500 mt-2 mb-6">Hãy bắt đầu để kiểm tra kiến thức của bạn!</p>
                         <button
                             onClick={handleStartQuiz}
                             disabled={isQuizLoading}
-                            className={`bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-all ${
-                                isQuizLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:shadow-sm'
+                            className={`inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg transition-all duration-200 ${
+                                isQuizLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:shadow-lg'
                             }`}
                         >
-                            Làm bài ngay
+                            <Play className="w-5 h-5 mr-2" />
+                            Bắt đầu bài quiz
                         </button>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2 text-blue-600">
-                            <Play className="w-4 h-4" />
-                            <span>Quiz - {currentLesson?.title}</span>
-                        </div>
-                        <div className="border-t pt-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">Lịch sử làm bài</h3>
+                    <div className="space-y-8">
+                        {/* Best Attempt */}
+                        {bestAttempt && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-2xl p-6 shadow-md"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <Trophy className="w-10 h-10 text-yellow-500" />
+                                    <div className="flex-1">
+                                        <h3 className="text-xl font-semibold text-gray-800">Thành tích tốt nhất</h3>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-3xl font-bold text-yellow-600">{bestAttempt.score}</span>
+                                                <span className="text-sm text-gray-600">
+                          ({bestAttempt.correctAnswers}/{bestAttempt.totalQuestions} câu đúng)
+                        </span>
+                                            </div>
+                                            <span className="text-sm text-gray-500">{formatDateVN(bestAttempt.date)}</span>
+                                        </div>
+                                        <div className="mt-3 h-2 bg-gray-200 rounded-full">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${(bestAttempt.correctAnswers / bestAttempt.totalQuestions) * 100}%` }}
+                                                transition={{ duration: 0.7, ease: 'easeOut' }}
+                                                className="h-2 bg-yellow-500 rounded-full"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Quiz History */}
+                        <div className="bg-white rounded-2xl shadow-md p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-semibold text-gray-800">Lịch sử làm bài</h3>
                                 <button
                                     onClick={handleStartQuiz}
                                     disabled={isQuizLoading}
-                                    className={`bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                                        isQuizLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:shadow-sm'
+                                    className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg transition-all duration-200 ${
+                                        isQuizLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:shadow-lg'
                                     }`}
                                 >
                                     <Play className="w-4 h-4 mr-2" />
                                     Làm lại bài quiz
                                 </button>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {quizHistory.map((attempt, index) => (
-                                    <div
+                                    <motion.div
                                         key={attempt.id}
-                                        className="border rounded-lg overflow-hidden shadow-sm hover:shadow transition-all"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                        className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                                     >
-                                        <div className="flex items-center">
-                                            <div className="bg-blue-50 p-3 flex items-center justify-center">
-                                                <div className="relative w-12 h-12">
-                                                    <svg className="w-12 h-12 -rotate-90">
-                                                        <circle
-                                                            cx="24"
-                                                            cy="24"
-                                                            r="20"
-                                                            fill="none"
-                                                            stroke="#e5e7eb"
-                                                            strokeWidth="4"
-                                                        />
-                                                        <circle
-                                                            cx="24"
-                                                            cy="24"
-                                                            r="20"
-                                                            fill="none"
-                                                            stroke="#3b82f6"
-                                                            strokeWidth="4"
-                                                            strokeDasharray={`${2 * Math.PI * 20 * (attempt.score / 100)} ${
-                                                                2 * Math.PI * 20 * (1 - attempt.score / 100)
-                                                            }`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    </svg>
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <span className="text-sm font-bold text-blue-600">{attempt.score}</span>
-                                                    </div>
-                                                </div>
+                                        {/* Score Circle */}
+                                        <div className="relative w-12 h-12 mr-4">
+                                            <svg className="w-12 h-12 -rotate-90">
+                                                <circle cx="24" cy="24" r="20" fill="none" stroke="#e5e7eb" strokeWidth="4" />
+                                                <circle
+                                                    cx="24"
+                                                    cy="24"
+                                                    r="20"
+                                                    fill="none"
+                                                    stroke={
+                                                        attempt.score >= 80
+                                                            ? '#22c55e' // Green for Xuất sắc
+                                                            : attempt.score >= 60
+                                                                ? '#eab308' // Yellow for Gần đạt rồi
+                                                                : '#ef4444' // Red for Chưa đạt
+                                                    }
+                                                    strokeWidth="4"
+                                                    strokeDasharray={`${2 * Math.PI * 20 * (attempt.score / 100)} ${
+                                                        2 * Math.PI * 20 * (1 - attempt.score / 100)
+                                                    }`}
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-sm font-bold text-blue-600">{attempt.score}</span>
                                             </div>
-                                            <div className="p-3 flex-1">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <div className="flex items-center">
-                                                        <span className="font-medium text-sm">Bài làm {quizHistory.length - index}</span>
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">{formatDateVN(attempt.date)}</div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex-1">
-                                                        <div className="h- followup questions:1.5 bg-gray-200 rounded-full">
-                                                            <div
-                                                                className="h-1.5 bg-green-500 rounded-full"
-                                                                style={{
-                                                                    width: `${(attempt.correctAnswers / attempt.totalQuestions) * 100}%`,
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <span className="text-xs font-medium">
-                            {attempt.correctAnswers}/{attempt.totalQuestions}
-                          </span>
-                                                </div>
+                                        </div>
+
+                                        {/* Attempt Details */}
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="font-medium text-gray-700">Lần làm thứ {quizHistory.length - index}</span>
+                                                <span className="text-xs text-gray-500">{formatDateVN(attempt.date)}</span>
                                             </div>
-                                            <div className="px-3">
-                        <span
-                            className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-                                attempt.score >= 80
-                                    ? 'bg-green-100 text-green-800'
-                                    : attempt.score >= 60
-                                        ? 'bg-yellow-100 text-yellow-800'
-                                        : 'bg-red-100 text-red-800'
-                            }`}
-                        >
-                          {attempt.score >= 80
-                              ? 'Xuất sắc'
-                              : attempt.score >= 60
-                                  ? 'Đạt'
-                                  : attempt.score >= 50
-                                      ? 'Trung Bình'
-                                      : 'Chưa đạt'}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full">
+                                                    <div
+                                                        className="h-1.5 rounded-full"
+                                                        style={{
+                                                            width: `${(attempt.correctAnswers / attempt.totalQuestions) * 100}%`,
+                                                            backgroundColor:
+                                                                attempt.score >= 80
+                                                                    ? '#22c55e' // Green for Xuất sắc
+                                                                    : attempt.score >= 60
+                                                                        ? '#eab308' // Yellow for Gần đạt rồi
+                                                                        : '#ef4444', // Red for Chưa đạt
+                                                        }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs font-medium text-gray-600">
+                          {attempt.correctAnswers}/{attempt.totalQuestions}
                         </span>
                                             </div>
                                         </div>
-                                    </div>
+
+                                        {/* Status Badge */}
+                                        <div className="ml-4">
+                      <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              attempt.score >= 80
+                                  ? 'bg-green-100 text-green-800'
+                                  : attempt.score >= 60
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                          }`}
+                      >
+                        {attempt.score >= 80
+                            ? 'Xuất sắc'
+                            : attempt.score >= 60
+                                ? 'Gần đạt rồi'
+                                : 'Chưa đạt'}
+                      </span>
+                                        </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         </div>

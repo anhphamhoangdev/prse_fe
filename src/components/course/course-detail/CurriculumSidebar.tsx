@@ -5,7 +5,6 @@ import { Chapter, Lesson } from '../../../types/course';
 import { useCurriculum } from '../../../context/CurriculumContext';
 import { formatDuration } from '../../../utils/formatSecondToHour';
 
-// Component con cho từng lesson
 const LessonItem: React.FC<{
     lesson: Lesson;
     chapter: Chapter;
@@ -56,8 +55,7 @@ const ChapterItem: React.FC<{
     expanded: boolean;
     toggleChapter: (chapterId: number) => void;
     onLessonSelect: (lesson: Lesson, chapterId: number) => void;
-    calculateChapterProgress: (chapter: Chapter) => number;
-}> = memo(({ chapter, currentLessonId, expanded, toggleChapter, onLessonSelect, calculateChapterProgress }) => {
+}> = memo(({ chapter, currentLessonId, expanded, toggleChapter, onLessonSelect }) => {
     const isActive = chapter.lessons.some((l) => l.id === Number(currentLessonId));
 
     return (
@@ -114,14 +112,14 @@ interface CurriculumSidebarProps {
 
 const CurriculumSidebar: React.FC<CurriculumSidebarProps> = memo(
     ({ courseId, currentLessonId, onLessonSelect }) => {
-        const { curriculum, isLoading, fetchCurriculum } = useCurriculum();
+        const { curriculum, isLoading, totalLessons, completedLessons } = useCurriculum();
         const [expandedChapters, setExpandedChapters] = useState<number[]>([]);
 
-        useEffect(() => {
-            if (courseId) {
-                fetchCurriculum(courseId);
-            }
-        }, [courseId, fetchCurriculum]);
+        // useEffect(() => {
+        //     if (courseId) {
+        //         fetchCurriculum(courseId);
+        //     }
+        // }, [courseId, fetchCurriculum]);
 
         useEffect(() => {
             if (!curriculum || !currentLessonId) return;
@@ -141,11 +139,10 @@ const CurriculumSidebar: React.FC<CurriculumSidebarProps> = memo(
             );
         }, []);
 
-        const calculateChapterProgress = useCallback((chapter: Chapter): number => {
-            if (!chapter.lessons.length) return 0;
-            const completedLessons = chapter.lessons.filter((l) => l.progress?.status === 'completed').length;
-            return Math.round((completedLessons / chapter.lessons.length) * 100);
-        }, []);
+        const calculateCourseProgress = useCallback((): number => {
+            if (!totalLessons) return 0;
+            return Math.round((completedLessons / totalLessons) * 100);
+        }, [totalLessons, completedLessons]);
 
         if (isLoading || !curriculum) {
             return (
@@ -162,26 +159,23 @@ const CurriculumSidebar: React.FC<CurriculumSidebarProps> = memo(
             <div className="bg-white rounded-lg shadow-md p-6 max-h-[80vh] overflow-hidden">
                 <div className="space-y-6">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Tiến độ chương</h2>
-                        {curriculum[0] && (
-                            <div className="p-4 bg-gray-50 rounded-md space-y-3">
-                                <div className="relative w-full bg-gray-200 rounded-md h-3 overflow-hidden">
-                                    <div
-                                        className="absolute top-0 left-0 h-3 bg-blue-600 rounded-md transition-all duration-500 ease-out"
-                                        style={{ width: `${calculateChapterProgress(curriculum[0])}%` }}
-                                    />
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="font-semibold text-gray-800">
-                                        {calculateChapterProgress(curriculum[0])}% hoàn thành
-                                    </span>
-                                    <span className="text-gray-600">
-                                        {curriculum[0].lessons.filter((l) => l.progress?.status === 'completed')
-                                            .length}/{curriculum[0].lessons.length} bài học
-                                    </span>
-                                </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Tiến độ khóa học</h2>
+                        <div className="p-4 bg-gray-50 rounded-md space-y-3">
+                            <div className="relative w-full bg-gray-200 rounded-md h-3 overflow-hidden">
+                                <div
+                                    className="absolute top-0 left-0 h-3 bg-blue-600 rounded-md transition-all duration-500 ease-out"
+                                    style={{ width: `${calculateCourseProgress()}%` }}
+                                />
                             </div>
-                        )}
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="font-semibold text-gray-800">
+                                    {calculateCourseProgress()}% hoàn thành
+                                </span>
+                                <span className="text-gray-600">
+                                    {completedLessons}/{totalLessons} bài học
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">Nội dung khóa học</h3>
@@ -194,7 +188,6 @@ const CurriculumSidebar: React.FC<CurriculumSidebarProps> = memo(
                                     expanded={expandedChapters.includes(chapter.id)}
                                     toggleChapter={toggleChapter}
                                     onLessonSelect={onLessonSelect}
-                                    calculateChapterProgress={calculateChapterProgress}
                                 />
                             ))}
                         </div>

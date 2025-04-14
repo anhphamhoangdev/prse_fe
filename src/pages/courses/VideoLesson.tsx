@@ -9,18 +9,11 @@ import { VideoPlayer } from '../../components/common/VideoPlayer';
 import { CheckCircle, ArrowRight, Lightbulb } from 'lucide-react';
 import { Lesson, VideoLessonData } from '../../types/course';
 import { useCurriculum } from '../../context/CurriculumContext';
-import {motivationalMessages} from "../../types/data";
-import { motion } from "framer-motion";
-
+import { motivationalMessages } from '../../types/data';
+import { motion } from 'framer-motion';
 
 interface VideoLessonApiResponse {
     currentLesson: VideoLessonData;
-}
-
-interface SubmitLessonRequest {
-    courseId: string | number;
-    chapterId: string | number;
-    lessonId: string | number;
 }
 
 interface SubmitLessonResponse {
@@ -35,7 +28,6 @@ interface OutletContext {
 }
 
 const VideoLessonDetail: React.FC = () => {
-    const navigate = useNavigate();
     const { courseId, chapterId, lessonId } = useParams();
     const { currentLesson: lessonInfo, handleLessonNavigation } = useOutletContext<OutletContext>();
     const { curriculum, updateLessonProgress } = useCurriculum();
@@ -46,33 +38,41 @@ const VideoLessonDetail: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>(() => MessageUtils.createInitialMessages());
     const [motivationalMessage, setMotivationalMessage] = useState('');
 
-
-
-    // Hàm tìm bài học tiếp theo
+    // Hàm tìm bài học tiếp theo, đồng bộ với logic của LessonDetailLayout
     const findNextLesson = useCallback(() => {
         if (!curriculum || !chapterId || !lessonId) return null;
 
-        const currentChapterIndex = curriculum.findIndex((chapter) => chapter.id === Number(chapterId));
-        if (currentChapterIndex === -1) return null;
+        let nextLesson: Lesson | null = null;
 
-        const currentChapter = curriculum[currentChapterIndex];
-        const currentLessonIndex = currentChapter.lessons.findIndex((lesson) => lesson.id === Number(lessonId));
-        if (currentLessonIndex === -1) return null;
+        // Tìm chapter hiện tại và bài học hiện tại
+        for (let i = 0; i < curriculum.length; i++) {
+            const chapter = curriculum[i];
+            const lessonIndex = chapter.lessons.findIndex((l) => l.id === Number(lessonId));
 
-        if (currentLessonIndex + 1 < currentChapter.lessons.length) {
-            return {
-                lesson: currentChapter.lessons[currentLessonIndex + 1],
-                chapterId: currentChapter.id,
-            };
-        }
+            if (lessonIndex !== -1 && chapter.id === Number(chapterId)) {
+                // Tìm bài học tiếp theo trong cùng chapter
+                if (lessonIndex < chapter.lessons.length - 1) {
+                    nextLesson = chapter.lessons[lessonIndex + 1];
+                    return {
+                        lesson: nextLesson,
+                        chapterId: chapter.id,
+                    };
+                }
 
-        if (currentChapterIndex + 1 < curriculum.length) {
-            const nextChapter = curriculum[currentChapterIndex + 1];
-            if (nextChapter.lessons.length > 0) {
-                return {
-                    lesson: nextChapter.lessons[0],
-                    chapterId: nextChapter.id,
-                };
+                // Nếu không có bài học tiếp theo trong chapter hiện tại,
+                // duyệt các chapter sau để tìm bài học đầu tiên
+                for (let j = i + 1; j < curriculum.length; j++) {
+                    if (curriculum[j].lessons.length > 0) {
+                        nextLesson = curriculum[j].lessons[0];
+                        return {
+                            lesson: nextLesson,
+                            chapterId: curriculum[j].id,
+                        };
+                    }
+                }
+
+                // Không tìm thấy bài học tiếp theo
+                return null;
             }
         }
 
@@ -105,11 +105,10 @@ const VideoLessonDetail: React.FC = () => {
         }
     }, [courseId, chapterId, lessonId, refreshTrigger, fetchLessonData]);
 
-    // Chọn một thông điệp ngẫu nhiên khi component được tải
     useEffect(() => {
         const randomIndex = Math.floor(Math.random() * motivationalMessages.length);
         setMotivationalMessage(motivationalMessages[randomIndex]);
-    }, [lessonId]); // Thay đổi thông điệp khi chuyển bài học
+    }, [lessonId]);
 
     const handleSubmitLesson = async (courseId: string | number, chapterId: string | number, lessonId: string | number) => {
         try {
@@ -199,15 +198,15 @@ const VideoLessonDetail: React.FC = () => {
                         ) : (
                             <motion.div
                                 className="w-full sm:w-1/2 mb-4 sm:mb-0"
-                                initial={{opacity: 0, y: 20}}
-                                animate={{opacity: 1, y: 0}}
-                                transition={{duration: 0.5, ease: "easeOut"}}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, ease: 'easeOut' }}
                             >
                                 <motion.div
-                                    whileHover={{scale: 1.03, boxShadow: "0 8px 20px rgba(59, 130, 246, 0.2)"}}
+                                    whileHover={{ scale: 1.03, boxShadow: '0 8px 20px rgba(59, 130, 246, 0.2)' }}
                                     className="flex items-center gap-3 bg-blue-50 p-3 rounded-2xl shadow-sm"
                                 >
-                                    <Lightbulb className="w-6 h-6 text-blue-500"/>
+                                    <Lightbulb className="w-6 h-6 text-blue-500" />
                                     <span className="text-sm font-semibold text-blue-700">{motivationalMessage}</span>
                                 </motion.div>
                             </motion.div>

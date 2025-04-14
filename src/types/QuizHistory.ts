@@ -4,12 +4,16 @@ export class QuizHistory {
     correctAnswers: number;
     totalQuestions: number;
     lessonId: number;
+    courseId: number;
+    chapterId: number;
 
-    constructor(score: number, correctAnswers: number, totalQuestions: number, lessonId: number) {
+    constructor(score: number, correctAnswers: number, totalQuestions: number, lessonId: number, courseId: number, chapterId: number) {
         this.score = score;
         this.correctAnswers = correctAnswers;
         this.totalQuestions = totalQuestions;
         this.lessonId = lessonId;
+        this.courseId = courseId;
+        this.chapterId = chapterId;
     }
 
     // Optional: Hàm chuyển object sang JSON để gửi API
@@ -19,6 +23,8 @@ export class QuizHistory {
             correctAnswers: this.correctAnswers,
             totalQuestions: this.totalQuestions,
             lessonId: this.lessonId,
+            courseId: this.courseId,
+            chapterId: this.chapterId,
         };
     }
 }

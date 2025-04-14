@@ -128,6 +128,11 @@ export interface CourseBasicDTO {
 }
 
 export interface CourseCurriculumDTO {
+    courseProgress: number;
+    courseStatus: string;
+    totalLessons: number;
+    completedLessons: number;
+    remainingLessons: number;
     chapters: Chapter[];
 }
 

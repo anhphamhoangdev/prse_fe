@@ -1,16 +1,18 @@
-// src/context/CurriculumContext.tsx
 import React, { createContext, useState, useCallback, useEffect, useContext } from 'react';
 import { Chapter } from '../types/course';
 import { requestWithAuth } from '../utils/request';
 
-// Định nghĩa kiểu cho dữ liệu trả về từ API curriculum
 interface CurriculumApiResponse {
     chapters: {
+        totalLessons: number;
+        completedLessons: number;
         chapters: Chapter[];
     };
 }
 
 interface CurriculumContextProps {
+    totalLessons: number;
+    completedLessons: number;
     curriculum: Chapter[] | null;
     isLoading: boolean;
     fetchCurriculum: (courseId: string) => Promise<void>;
@@ -25,7 +27,8 @@ export const CurriculumProvider: React.FC<{ courseId: string; children: React.Re
                                                                                               }) => {
     const [curriculum, setCurriculum] = useState<Chapter[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [totalLessons, setTotalLessons] = useState(0);
+    const [completedLessons, setCompletedLessons] = useState(0);
     const fetchCurriculum = useCallback(async (courseId: string) => {
         if (!courseId) return;
         try {
@@ -33,6 +36,9 @@ export const CurriculumProvider: React.FC<{ courseId: string; children: React.Re
             const response = await requestWithAuth<CurriculumApiResponse>(`/course/${courseId}/curriculum`);
             const data = response.chapters.chapters; // Truy cập đúng cấu trúc
             setCurriculum(data);
+            setTotalLessons(response.chapters.totalLessons);
+            setCompletedLessons(response.chapters.completedLessons);
+            console.log('CurriculumProvider :', data);
         } catch (error) {
             console.error('Error fetching curriculum:', error);
             setCurriculum(null);
@@ -50,11 +56,18 @@ export const CurriculumProvider: React.FC<{ courseId: string; children: React.Re
                     ...chapter,
                     lessons: chapter.lessons.map((lesson) => {
                         if (lesson.id !== lessonId) return lesson;
+                        const wasCompleted = lesson.progress?.status === 'completed';
+                        const isCompleted = status === 'completed';
+                        if (!wasCompleted && isCompleted) {
+                            setCompletedLessons((prev) => prev + 1);
+                        } else if (wasCompleted && !isCompleted) {
+                            setCompletedLessons((prev) => Math.max(0, prev - 1)); 
+                        }
                         return {
                             ...lesson,
                             progress: {
                                 ...lesson.progress,
-                                status: status as 'not_started' | 'completed' | null, // Ép kiểu để khớp với LessonProgress
+                                status: status as 'not_started' | 'completed' | null,
                             },
                         };
                     }),
@@ -70,7 +83,7 @@ export const CurriculumProvider: React.FC<{ courseId: string; children: React.Re
     }, [courseId, curriculum, fetchCurriculum]);
 
     return (
-        <CurriculumContext.Provider value={{ curriculum, isLoading, fetchCurriculum, updateLessonProgress }}>
+        <CurriculumContext.Provider value={{ curriculum, totalLessons, completedLessons, isLoading, fetchCurriculum, updateLessonProgress }}>
             {children}
         </CurriculumContext.Provider>
     );
