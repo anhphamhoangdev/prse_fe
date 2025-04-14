@@ -102,6 +102,7 @@ export const ENDPOINTS = {
 
     CERTIFICATE : {
         GENERATE_CERTIFICATE: '/certificate/generate',
+        PULIC: '/certificate/public',
     },
 
 

@@ -47,6 +47,7 @@ import QuizPage from "./pages/courses/QuizWindowsPage";
 import LessonDetailLayout from "./layouts/LessonDetailLayout";
 import CertificatePage from "./pages/certificate/CertificatePage";
 import {Helmet, HelmetProvider} from "react-helmet-async";
+import PublicCertificatePage from "./pages/certificate/PublicCertificatePage";
 
 function App() {
     return (
@@ -55,6 +56,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/certificate/:courseId" element={<CertificatePage></CertificatePage>} />
+                    <Route path="/certificate/public/:publiccode" element={<PublicCertificatePage></PublicCertificatePage>} />
                     <Route path="/" element={<Home />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/policies" element={<Policies />} />
