@@ -10,12 +10,13 @@ import {
     Trophy,
     Brain,
     Award,
-    Share2
+    Share2,
 } from 'lucide-react';
-import React, { useCallback, useState } from "react";
-import { CourseCurriculumDTO, Chapter, Lesson } from "../../../types/course";
-import { formatDuration } from "../../../utils/formatSecondToHour";
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useState } from 'react';
+import { Helmet } from 'react-helmet';
+import { CourseCurriculumDTO, Chapter, Lesson } from '../../../types/course';
+import { formatDuration } from '../../../utils/formatSecondToHour';
+import { useNavigate } from 'react-router-dom';
 
 interface CourseContentProps {
     curriculum: CourseCurriculumDTO;
@@ -30,32 +31,37 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                                                                 curriculum,
                                                                 expandedChapters,
                                                                 setExpandedChapters,
-                                                                courseId = "0",
+                                                                courseId = '0',
                                                                 isEnrolled = false,
                                                                 onLessonClick,
                                                             }) => {
     const navigate = useNavigate();
     const [showMotivation, setShowMotivation] = useState(false);
 
+    // Extract course data for meta tags
+    const courseTitle =  'Khóa học tuyệt vời';
+    const courseDescription =  'Học và nâng cao kỹ năng của bạn với khóa học này!';
+    const courseImage =  'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D'; // Replace with actual image URL
+
     // Lấy dữ liệu trực tiếp từ curriculum
     const { courseProgress, courseStatus, totalLessons, completedLessons, remainingLessons, chapters } = curriculum;
 
     const motivationalQuotes = [
-        "Học, học nữa, học mãi! 📚",
-        "Kiến thức là chìa khóa mở mọi cánh cửa! 🔑",
-        "Mỗi ngày học một ít, mỗi ngày tiến một bước! 👣",
-        "Đầu tư cho kiến thức, sinh lời cả đời! 💎",
-        "Hôm nay chăm chỉ, ngày mai tỏa sáng! ⭐",
-        "Không có gì là không thể, chỉ cần bạn dám ước mơ! 🌟",
-        "Chỉ cần bạn không bỏ cuộc, thành công sẽ đến! 💪",
-        "Học hỏi là hành trình không có điểm dừng! 🚀",
-        "Mỗi thất bại là một bài học quý giá! 📖",
-        "Nỗ lực hôm nay, thành công ngày mai! ⏳",
-        "Kiến thức là sức mạnh, hãy khai phóng nó! ⚡",
-        "Bước đầu tiên là điều quan trọng nhất, hãy bắt đầu ngay! 🏁",
-        "Thành công không đến từ việc chờ đợi, mà từ việc hành động! 🏆",
-        "Hãy tin vào chính mình, bạn có thể làm được! 🌈",
-        "Mỗi ngày là một cơ hội mới để học hỏi! 🌅"
+        'Học, học nữa, học mãi! 📚',
+        'Kiến thức là chìa khóa mở mọi cánh cửa! 🔑',
+        'Mỗi ngày học một ít, mỗi ngày tiến một bước! 👣',
+        'Đầu tư cho kiến thức, sinh lời cả đời! 💎',
+        'Hôm nay chăm chỉ, ngày mai tỏa sáng! ⭐',
+        'Không có gì là không thể, chỉ cần bạn dám ước mơ! 🌟',
+        'Chỉ cần bạn không bỏ cuộc, thành công sẽ đến! 💪',
+        'Học hỏi là hành trình không có điểm dừng! 🚀',
+        'Mỗi thất bại là một bài học quý giá! 📖',
+        'Nỗ lực hôm nay, thành công ngày mai! ⏳',
+        'Kiến thức là sức mạnh, hãy khai phóng nó! ⚡',
+        'Bước đầu tiên là điều quan trọng nhất, hãy bắt đầu ngay! 🏁',
+        'Thành công không đến từ việc chờ đợi, mà từ việc hành động! 🏆',
+        'Hãy tin vào chính mình, bạn có thể làm được! 🌈',
+        'Mỗi ngày là một cơ hội mới để học hỏi! 🌅',
     ];
 
     const getRandomQuote = () => {
@@ -93,26 +99,16 @@ export const CourseContent: React.FC<CourseContentProps> = ({
     };
 
     const handleGetCertificate = () => {
-        // Điều hướng đến trang chứng chỉ
         navigate(`/course/${courseId}/certificate`);
     };
 
     const handleShareLinkedIn = () => {
-        // Thông tin về khóa học để chia sẻ
-        const shareTitle = encodeURIComponent("Tôi vừa hoàn thành khóa học tuyệt vời!");
-        const shareSummary = encodeURIComponent(
-            `Tôi rất vui khi chia sẻ rằng tôi đã hoàn thành khóa học"! 🎉 ` +
-            `Hành trình học tập này đã giúp tôi nâng cao kỹ năng và kiến thức. Cảm ơn [Tên nền tảng]! ` +
-            `#HọcTập #ThànhTựu`
+        const shareUrl = encodeURIComponent(`https://prse-fe.vercel.app/course/${courseId}`);
+        const caption = encodeURIComponent(
+            `Tôi vừa hoàn thành khóa học "${courseTitle}" trên EasyEDU! 🎉 Một hành trình học tập tuyệt vời! #HọcTập #ThànhTựu`
         );
-        const shareUrl = encodeURIComponent(`https://https://prse-fe.vercel.app//course/${courseId}`); // Thay bằng URL thực tế của khóa học hoặc chứng chỉ
-        const source = encodeURIComponent("Your Platform Name"); // Tên nền tảng của bạn
-
-        // Tạo URL chia sẻ LinkedIn
-        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&title=${shareTitle}&summary=${shareSummary}&source=${source}`;
-
-        // Mở URL trong tab mới
-        window.open(linkedInShareUrl, "_blank");
+        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&title=${caption}`;
+        window.open(linkedInShareUrl, '_blank');
     };
 
     const CourseSummary = () => {
@@ -124,19 +120,19 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                 </h3>
 
                 <div className="flex flex-wrap gap-3 mb-4">
-                    <span className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg text-purple-700 font-medium transition-all hover:bg-purple-100">
-                        <Trophy className="w-4 h-4 text-purple-500" />
-                        {chapters.length} chương học
-                    </span>
+          <span className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg text-purple-700 font-medium transition-all hover:bg-purple-100">
+            <Trophy className="w-4 h-4 text-purple-500" />
+              {chapters.length} chương học
+          </span>
                     <span className="flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-lg text-orange-700 font-medium transition-all hover:bg-orange-100">
-                        <Brain className="w-4 h-4 text-orange-500" />
+            <Brain className="w-4 h-4 text-orange-500" />
                         {totalLessons} bài học
-                    </span>
+          </span>
                     {isEnrolled && (
                         <span className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-lg text-green-700 font-medium transition-all hover:bg-green-100">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            Hoàn thành: {completedLessons}/{totalLessons}
-                        </span>
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              Hoàn thành: {completedLessons}/{totalLessons}
+            </span>
                     )}
                 </div>
 
@@ -187,12 +183,8 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                             <Trophy className="w-6 h-6 text-yellow-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-green-800">
-                                Bạn đã hoàn thành khóa học! 🎉
-                            </h3>
-                            <p className="text-sm text-green-700">
-                                Hãy nhận chứng chỉ và chia sẻ thành tựu của bạn
-                            </p>
+                            <h3 className="text-lg font-semibold text-green-800">Bạn đã hoàn thành khóa học! 🎉</h3>
+                            <p className="text-sm text-green-700">Hãy nhận chứng chỉ và chia sẻ thành tựu của bạn</p>
                         </div>
                     </div>
 
@@ -228,19 +220,15 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                     </div>
                     <div className="flex-grow">
                         <div className="font-medium text-blue-800">
-                            {courseProgress < 30 ? (
-                                "Khởi đầu tuyệt vời! Hãy tiếp tục nhé! 💪"
-                            ) : courseProgress < 60 ? (
-                                "Bạn đang làm rất tốt! Cố lên! ⭐"
-                            ) : courseProgress < 90 ? (
-                                "Sắp hoàn thành rồi! Cố gắng nào! 🎯"
-                            ) : (
-                                "Chỉ còn một chút nữa thôi! Chiến thắng trong tầm tay! 🏆"
-                            )}
+                            {courseProgress < 30
+                                ? 'Khởi đầu tuyệt vời! Hãy tiếp tục nhé! 💪'
+                                : courseProgress < 60
+                                    ? 'Bạn đang làm rất tốt! Cố lên! ⭐'
+                                    : courseProgress < 90
+                                        ? 'Sắp hoàn thành rồi! Cố gắng nào! 🎯'
+                                        : 'Chỉ còn một chút nữa thôi! Chiến thắng trong tầm tay! 🏆'}
                         </div>
-                        <div className="text-sm text-blue-700 mt-1">
-                            Còn {remainingLessons} bài học nữa để hoàn thành
-                        </div>
+                        <div className="text-sm text-blue-700 mt-1">Còn {remainingLessons} bài học nữa để hoàn thành</div>
                     </div>
                 </div>
             </div>
@@ -257,43 +245,42 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                         <Play className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-grow">
-                        <div className="font-medium text-blue-800">
-                            Hãy bắt đầu hành trình học tập của bạn! 🚀
-                        </div>
-                        <div className="text-sm text-blue-700 mt-1">
-                            Chọn bài học đầu tiên để khởi đầu khóa học
-                        </div>
+                        <div className="font-medium text-blue-800">Hãy bắt đầu hành trình học tập của bạn! 🚀</div>
+                        <div className="text-sm text-blue-700 mt-1">Chọn bài học đầu tiên để khởi đầu khóa học</div>
                     </div>
                 </div>
             </div>
         );
     };
 
-    const handleLessonNavigation = useCallback((lesson: Lesson, chapterId: number) => {
-        if (!isEnrolled) return;
+    const handleLessonNavigation = useCallback(
+        (lesson: Lesson, chapterId: number) => {
+            if (!isEnrolled) return;
 
-        if (onLessonClick) {
-            onLessonClick(chapterId, lesson.id);
-        }
+            if (onLessonClick) {
+                onLessonClick(chapterId, lesson.id);
+            }
 
-        const baseCoursePath = `/course-detail/${courseId}`;
-        switch (lesson.type) {
-            case 'video':
-                navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/video`);
-                break;
-            case 'text':
-                navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/reading`);
-                break;
-            case 'code':
-                navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/practice`);
-                break;
-            case 'quiz':
-                navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/quiz`);
-                break;
-            default:
-                navigate(`${baseCoursePath}/${chapterId}/${lesson.id}`);
-        }
-    }, [isEnrolled, courseId, navigate, onLessonClick]);
+            const baseCoursePath = `/course-detail/${courseId}`;
+            switch (lesson.type) {
+                case 'video':
+                    navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/video`);
+                    break;
+                case 'text':
+                    navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/reading`);
+                    break;
+                case 'code':
+                    navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/practice`);
+                    break;
+                case 'quiz':
+                    navigate(`${baseCoursePath}/${chapterId}/${lesson.id}/quiz`);
+                    break;
+                default:
+                    navigate(`${baseCoursePath}/${chapterId}/${lesson.id}`);
+            }
+        },
+        [isEnrolled, courseId, navigate, onLessonClick]
+    );
 
     const renderChapterProgress = (chapter: Chapter) => {
         if (!isEnrolled || !chapter.progress) return null;
@@ -303,7 +290,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({
         const statusLabels = {
             completed: 'Đã hoàn thành',
             in_progress: 'Đang học',
-            not_started: 'Chưa bắt đầu'
+            not_started: 'Chưa bắt đầu',
         };
 
         const statusLabel = status ? statusLabels[status as keyof typeof statusLabels] : 'Chưa bắt đầu';
@@ -314,9 +301,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                     {statusLabel}
                 </div>
                 {progressPercent != null && (
-                    <span className="text-sm text-gray-500 font-semibold">
-                        {Math.round(progressPercent)}%
-                    </span>
+                    <span className="text-sm text-gray-500 font-semibold">{Math.round(progressPercent)}%</span>
                 )}
             </div>
         );
@@ -329,8 +314,8 @@ export const CourseContent: React.FC<CourseContentProps> = ({
             <>
                 {lesson.progress.lastAccessedAt && (
                     <span className="text-xs text-gray-500">
-                        Truy cập: {new Date(lesson.progress.lastAccessedAt).toLocaleDateString()}
-                    </span>
+            Truy cập: {new Date(lesson.progress.lastAccessedAt).toLocaleDateString()}
+          </span>
                 )}
             </>
         );
@@ -338,29 +323,44 @@ export const CourseContent: React.FC<CourseContentProps> = ({
 
     const getLessonTypeLabel = (type: string) => {
         switch (type) {
-            case 'video': return 'Video';
-            case 'text': return 'Bài đọc';
-            case 'code': return 'Bài tập code';
-            case 'quiz': return 'Câu hỏi';
-            default: return 'Bài học';
+            case 'video':
+                return 'Video';
+            case 'text':
+                return 'Bài đọc';
+            case 'code':
+                return 'Bài tập code';
+            case 'quiz':
+                return 'Câu hỏi';
+            default:
+                return 'Bài học';
         }
     };
 
     return (
         <div className="space-y-6">
+            {/* Add Helmet at the top level */}
+            <Helmet>
+                <title>Khóa học tuyệt vời</title>
+                <meta name="title" property="og:title" content="Khóa học tuyệt vời"/>
+                <meta property="og:description" content="Học và nâng cao kỹ năng của bạn với khóa học này!"/>
+                <meta name="image" property="og:image"
+                      content="https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"/>
+                <meta property="og:url" content="https://prse-fe.vercel.app/course/0"/>
+                <meta property="og:type" content="website"/>
+            </Helmet>
 
             {isEnrolled && (
                 <div className="space-y-4">
-                    <CourseCompletion />
+                    <CourseCompletion/>
                 </div>
             )}
 
-            <CourseSummary />
+            <CourseSummary/>
 
             {isEnrolled && (
                 <div className="space-y-4">
-                    <CourseProgress />
-                    <NewCourseStatus />
+                    <CourseProgress/>
+                    <NewCourseStatus/>
                 </div>
             )}
 
@@ -369,17 +369,19 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                     <div key={chapter.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                         <button
                             className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
-                            onClick={() => setExpandedChapters((prev) => ({
-                                ...prev,
-                                [chapter.id]: !prev[chapter.id],
-                            }))}
+                            onClick={() =>
+                                setExpandedChapters((prev) => ({
+                                    ...prev,
+                                    [chapter.id]: !prev[chapter.id],
+                                }))
+                            }
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-left">
                                 <span className="font-semibold text-gray-900 text-lg">{chapter.title}</span>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                                        {chapter.lessons.length} bài học
-                                    </span>
+                  <span className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                    {chapter.lessons.length} bài học
+                  </span>
                                     {renderChapterProgress(chapter)}
                                 </div>
                             </div>
@@ -404,35 +406,33 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                                         <div
                                             key={lesson.id}
                                             className={`
-                                                p-4 
-                                                ${isEnrolled ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}
-                                                ${isCompleted ? 'bg-green-50 hover:bg-green-100' : ''}
-                                                ${isInProgress ? 'bg-blue-50 hover:bg-blue-100' : ''}
-                                            `}
+                        p-4 
+                        ${isEnrolled ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}
+                        ${isCompleted ? 'bg-green-50 hover:bg-green-100' : ''}
+                        ${isInProgress ? 'bg-blue-50 hover:bg-blue-100' : ''}
+                      `}
                                             onClick={() => handleLessonNavigation(lesson, chapter.id)}
                                         >
                                             <div className="flex items-start sm:items-center gap-3">
                                                 <div className={`p-2 rounded-lg ${getProgressColor(lesson.progress?.status || 'not_started')}`}>
-                                                    {getLessonIcon(lesson.type, lesson.progress?.status || "not_started")}
+                                                    {getLessonIcon(lesson.type, lesson.progress?.status || 'not_started')}
                                                 </div>
 
                                                 <div className="flex-grow">
                                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                                         <span className="font-medium text-gray-800">{lesson.title}</span>
                                                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                                                            {getLessonTypeLabel(lesson.type)}
-                                                        </span>
+                              {getLessonTypeLabel(lesson.type)}
+                            </span>
                                                     </div>
 
-                                                    <div className="mt-1 text-xs text-gray-500">
-                                                        {renderLessonStatus(lesson)}
-                                                    </div>
+                                                    <div className="mt-1 text-xs text-gray-500">{renderLessonStatus(lesson)}</div>
                                                 </div>
 
                                                 {lesson.duration && (
                                                     <span className="text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1 rounded-lg border border-gray-200">
-                                                        {formatDuration(lesson.duration ? lesson.duration : 0)}
-                                                    </span>
+                            {formatDuration(lesson.duration ? lesson.duration : 0)}
+                          </span>
                                                 )}
                                             </div>
                                         </div>

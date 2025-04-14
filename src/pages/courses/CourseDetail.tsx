@@ -13,6 +13,7 @@ import { getLessonPath } from "../../types/lesson";
 import { requestPostWithAuth } from "../../utils/request";
 import { useNotification } from "../../components/notification/NotificationProvider";
 import { addToCart } from "../../services/cartService";
+import {Helmet} from "react-helmet";
 
 const handleLessonClick = (chapterId: number, lessonId: number) => {
     console.log(`Navigating to lesson ${lessonId} in chapter ${chapterId}`);
@@ -316,6 +317,15 @@ const CourseDetail: React.FC = () => {
 
     return (
         <SearchHeaderAndFooterLayout>
+            {/*<Helmet>*/}
+            {/*    <title>Khóa học tuyệt vời</title>*/}
+            {/*    <meta name="title" property="og:title" content="Khóa học tuyệt vời"/>*/}
+            {/*    <meta property="og:description" content="Học và nâng cao kỹ năng của bạn với khóa học này!"/>*/}
+            {/*    <meta name="image" property="og:image"*/}
+            {/*          content="https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"/>*/}
+            {/*    <meta property="og:url" content="https://prse-fe.vercel.app/course/0"/>*/}
+            {/*    <meta property="og:type" content="website"/>*/}
+            {/*</Helmet>*/}
             <CourseHero
                 courseData={basicInfo}
                 onAddToCart={handleAddToCart}
