@@ -105,6 +105,10 @@ export const ENDPOINTS = {
         PULIC: '/certificate/public',
     },
 
+    ENROLLMENT : {
+        STATS : '/enrollment/stats',
+    }
+
 
 
     // USER: {

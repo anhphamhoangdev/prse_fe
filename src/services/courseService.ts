@@ -38,12 +38,27 @@ interface PageResponse<T> {
     numberOfElements: number;
 }
 
+export interface Enrollment {
+    id: number;
+    course: Course;
+    status: string;
+    progressPercent: number;
+    enrolledAt: string;
+    completedAt: string | null;
+}
+
 interface MyCoursesResponse {
     code: number;
     error_message: any;
     data: {
         courses: PageResponse<Course>
     }
+}
+
+export interface ApiResponse<T> {
+    error_message: Record<string, any>;
+    code: number;
+    data: T;
 }
 
 export async function getHomeFreeCourses(): Promise<Course[]> {
@@ -86,61 +101,55 @@ export async function getHomeFreeCourses(): Promise<Course[]> {
 
 
 
-export async function getMyCourses(page: number = 0, size: number = 12): Promise<PageResponse<Course>> {
-    console.log('[CourseService] Fetching my courses');
+export async function getMyCourses(
+    page: number = 0,
+    size: number = 12,
+    status?: string
+): Promise<PageResponse<Enrollment>> {
+    console.log("[CourseService] Fetching my courses");
     try {
-        const response = await requestGetWithOptionalAuth<MyCoursesResponse>(
-            `${ENDPOINTS.COURSE.MY_COURSES}?page=${page}&size=${size}`
+        const response = await requestGetWithOptionalAuth<
+            ApiResponse<{ courses: PageResponse<Enrollment> }>
+        >(
+            `${ENDPOINTS.COURSE.MY_COURSES}?page=${page}&size=${size}${
+                status ? `&status=${status}` : ""
+            }`
         );
 
-        if (response.code === 1) {
-            const pageData = response.data.courses;
-            pageData.content = pageData.content.map((course: Course) => new Course(
-                course.id,
-                course.instructorId,
-                course.title,
-                course.shortDescription,
-                course.description,
-                course.imageUrl,
-                course.language,
-                course.originalPrice,
-                course.averageRating,
-                course.totalStudents,
-                course.totalViews,
-                course.isPublish,
-                course.isHot,
-                course.isDiscount,
-                course.createdAt,
-                course.updatedAt,
-                course.originalPrice
-            ));
 
-            console.log(`[CourseService] Successfully fetched ${pageData.content.length} courses (Page ${page + 1} of ${pageData.totalPages})`);
+        if (response.code === 1) {
+            // Handle API inconsistency (sample uses "courses", controller uses "enrollments")
+            const pageData = response.data.courses;
+            console.log(
+                `[CourseService] Successfully fetched ${pageData.content.length} enrollments (Page ${
+                    page + 1
+                } of ${pageData.totalPages})`
+            );
             return pageData;
         }
 
-        console.warn('[CourseService] Received unexpected response code:', response.code);
+        console.warn("[CourseService] Received unexpected response code:", response.code);
         return {
             content: [],
             totalElements: 0,
             totalPages: 0,
             first: true,
             last: true,
-            size: size,
+            size,
             number: page,
-            numberOfElements: 0
+            numberOfElements: 0,
         };
     } catch (error) {
-        console.error('[CourseService] Error fetching my courses:', error);
+        console.error("[CourseService] Error fetching my courses:", error);
         return {
             content: [],
             totalElements: 0,
             totalPages: 0,
             first: true,
             last: true,
-            size: size,
+            size,
             number: page,
-            numberOfElements: 0
+            numberOfElements: 0,
         };
     }
 }
