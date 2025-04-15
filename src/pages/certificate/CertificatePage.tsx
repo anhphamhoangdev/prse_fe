@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, Share2, ArrowLeft, Trophy, Mail, Facebook } from 'lucide-react';
+import { Download, ArrowLeft, Trophy, Copy } from 'lucide-react';
 import { requestPostWithAuth } from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
 import { formatLocalDateTimeToVN } from "../../utils/formatLocalDateTimeToVN";
 import { Footer } from "../../components/common/Footer";
-import { Helmet, HelmetProvider } from 'react-helmet-async'; // Thay đổi import để sử dụng react-helmet-async
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 interface Certificate {
     id: number;
@@ -17,6 +17,7 @@ interface Certificate {
     createdAt: string;
     updatedAt: string;
     active: boolean;
+    certificatePublicCode?: string; // Added for public link (optional, adjust if stored differently)
 }
 
 interface ApiData {
@@ -29,6 +30,7 @@ const CertificatePage = () => {
     const [certificate, setCertificate] = useState<Certificate | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false); // State for copy confirmation
 
     useEffect(() => {
         const fetchCertificate = async () => {
@@ -57,7 +59,7 @@ const CertificatePage = () => {
 
         try {
             const response = await fetch(certificate.certificateUrl, {
-                credentials: 'omit', // Không gửi credentials
+                credentials: 'omit',
             });
             if (!response.ok) throw new Error('Network response was not ok');
 
@@ -80,15 +82,23 @@ const CertificatePage = () => {
         }
     };
 
-    const handleShareLinkedIn = () => {
+    const handleCopyPublicLink = async () => {
         if (!certificate) return;
 
-        const shareUrl = encodeURIComponent(`https://prse-fe.vercel.app/course-detail/${courseId}`);
-        const caption = encodeURIComponent(
-            `Tôi vừa hoàn thành khóa học "${certificate.courseName}" trên EasyEdu và nhận được chứng chỉ! 🎉 #HọcTập #ThànhTựu`
-        );
-        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&title=${caption}`;
-        window.open(linkedInShareUrl, '_blank');
+        try {
+            // Use publicCode if available, otherwise fallback to courseId
+            const publicCode = certificate.certificatePublicCode || 0;
+            const publicLink = `${window.location.origin}/certificate/public/${publicCode}`;
+
+            await navigator.clipboard.writeText(publicLink);
+            setCopied(true);
+
+            // Reset "Copied" state after 2 seconds
+            setTimeout(() => setCopied(false), 2000);
+        } catch (error) {
+            console.error('Failed to copy link:', error);
+            alert('Không thể sao chép liên kết. Vui lòng thử lại.');
+        }
     };
 
     const handleBackToCourse = () => {
@@ -99,7 +109,6 @@ const CertificatePage = () => {
         ? formatLocalDateTimeToVN(certificate.createdAt)
         : '';
 
-    // Chuẩn bị metadata trước khi render
     const pageTitle = `EasyEdu - Chứng Chỉ ${certificate?.courseName || 'Học Trực Tuyến'}`;
     const pageDescription = `Chứng chỉ hoàn thành khóa học ${certificate?.courseName || ''} từ EasyEdu. Uy tín, chuyên nghiệp, hỗ trợ sự nghiệp của bạn!`;
     const pageImage = certificate?.certificateUrl || 'https://scontent-ord5-3.xx.fbcdn.net/...';
@@ -113,7 +122,6 @@ const CertificatePage = () => {
                     <meta property="og:title" content={pageTitle} />
                     <meta property="og:description" content={pageDescription} />
                     <meta property="og:image" content={pageImage} />
-                    {/* Thêm các thẻ meta khác nếu cần */}
                     <meta property="og:type" content="website" />
                     <meta name="twitter:card" content="summary_large_image" />
                     <meta name="twitter:title" content={pageTitle} />
@@ -121,7 +129,6 @@ const CertificatePage = () => {
                     <meta name="twitter:image" content={pageImage} />
                 </Helmet>
 
-                {/* Back button bar */}
                 <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <button
                         onClick={handleBackToCourse}
@@ -136,7 +143,6 @@ const CertificatePage = () => {
                     </div>
                 </div>
 
-                {/* Main Content */}
                 <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
                     {loading && (
                         <div className="flex justify-center items-center h-64">
@@ -153,16 +159,13 @@ const CertificatePage = () => {
                     {certificate && certificate.active && (
                         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-blue-100">
                             <div className="flex flex-col lg:flex-row">
-                                {/* Left section - 80% */}
                                 <div className="lg:w-4/5 p-6 sm:p-10">
-                                    {/* Certificate Info */}
                                     <div className="text-center mb-8">
                                         <div className="mt-4 inline-block px-6 py-2 bg-blue-50 rounded-full text-blue-600 text-sm">
                                             Ngày cấp: {formattedDate}
                                         </div>
                                     </div>
 
-                                    {/* Certificate Image */}
                                     <div className="mt-8 relative">
                                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 to-transparent rounded-xl -m-4 blur-lg opacity-50"></div>
                                         <img
@@ -176,14 +179,12 @@ const CertificatePage = () => {
                                     </div>
                                 </div>
 
-                                {/* Right section - 20% */}
                                 <div className="lg:w-1/5 bg-gradient-to-b from-blue-50 to-blue-100 p-6 flex flex-col gap-5 justify-start">
                                     <div className="text-center mb-6">
                                         <h3 className="text-blue-700 font-bold text-xl">Tuỳ Chọn</h3>
                                         <div className="w-16 h-1 bg-blue-600 mx-auto mt-2"></div>
                                     </div>
 
-                                    {/* Actions - Stacked vertically */}
                                     <button
                                         onClick={handleDownload}
                                         className="flex items-center justify-center gap-2 px-4 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full shadow-md"
@@ -192,6 +193,16 @@ const CertificatePage = () => {
                                         <span className="font-medium">Tải chứng chỉ</span>
                                     </button>
 
+                                    <button
+                                        onClick={handleCopyPublicLink}
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm relative"
+                                    >
+                                        <Copy className="w-5 h-5" />
+                                        <span className="font-medium">{copied ? 'Đã sao chép!' : 'Share công khai'}</span>
+                                    </button>
+
+                                    {/* Hidden share buttons */}
+                                    {/*
                                     <button
                                         onClick={handleShareLinkedIn}
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm"
@@ -215,6 +226,7 @@ const CertificatePage = () => {
                                         <Facebook className="w-5 h-5" />
                                         <span>Chia sẻ Facebook</span>
                                     </button>
+                                    */}
                                 </div>
                             </div>
                         </div>
@@ -239,8 +251,7 @@ const CertificatePage = () => {
                     )}
                 </main>
 
-                {/* Footer */}
-                <Footer/>
+                <Footer />
             </div>
         </HelmetProvider>
     );

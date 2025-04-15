@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Download, Share2, Trophy } from 'lucide-react';
+import { Download, Trophy, Globe } from 'lucide-react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { request } from '../../utils/request'; // Giả sử đây là nơi bạn định nghĩa hàm request
+import { request } from '../../utils/request';
 import { Footer } from '../../components/common/Footer';
-import {ENDPOINTS} from "../../constants/endpoint";
+import { ENDPOINTS } from '../../constants/endpoint';
 
 interface PublicCertificate {
     certificate: string; // URL của chứng chỉ
@@ -67,15 +67,9 @@ const PublicCertificatePage = () => {
         }
     };
 
-    const handleShareLinkedIn = () => {
-        if (!certificate) return;
-
-        const shareUrl = encodeURIComponent(window.location.href);
-        const caption = encodeURIComponent(
-            `Tôi vừa hoàn thành một khóa học trên EasyEdu và nhận được chứng chỉ! 🎉 #HọcTập #ThànhTựu`
-        );
-        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&title=${caption}`;
-        window.open(linkedInShareUrl, '_blank');
+    const handleVisitWebsite = () => {
+        // Replace with your actual website URL
+        window.open('https://prse-fe.vercel.app/', '_blank');
     };
 
     const pageTitle = `EasyEdu - Chứng Chỉ Hoàn Thành`;
@@ -139,11 +133,11 @@ const PublicCertificatePage = () => {
                                     Tải chứng chỉ
                                 </button>
                                 <button
-                                    onClick={handleShareLinkedIn}
+                                    onClick={handleVisitWebsite}
                                     className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                                 >
-                                    <Share2 className="w-5 h-5" />
-                                    Chia sẻ LinkedIn
+                                    <Globe className="w-5 h-5" />
+                                    Website của chúng tôi
                                 </button>
                             </div>
                         </div>

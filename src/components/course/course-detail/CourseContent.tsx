@@ -37,11 +37,6 @@ export const CourseContent: React.FC<CourseContentProps> = ({
     const navigate = useNavigate();
     const [showMotivation, setShowMotivation] = useState(false);
 
-    // Extract course data for meta tags
-    const courseTitle =  'Khóa học tuyệt vời';
-    const courseDescription =  'Học và nâng cao kỹ năng của bạn với khóa học này!';
-    const courseImage =  'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D'; // Replace with actual image URL
-
     // Lấy dữ liệu trực tiếp từ curriculum
     const { courseProgress, courseStatus, totalLessons, completedLessons, remainingLessons, chapters } = curriculum;
 
@@ -101,14 +96,6 @@ export const CourseContent: React.FC<CourseContentProps> = ({
         navigate(`/certificate/${courseId}`);
     };
 
-    const handleShareLinkedIn = () => {
-        const shareUrl = encodeURIComponent(`https://prse-fe.vercel.app/course-detail/122`);
-        const caption = encodeURIComponent(
-            `Tôi vừa hoàn thành khóa học "${courseTitle}" trên EasyEDU! 🎉 Một hành trình học tập tuyệt vời! #HọcTập #ThànhTựu`
-        );
-        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&title=${caption}`;
-        window.open(linkedInShareUrl, '_blank');
-    };
 
     const CourseSummary = () => {
         return (
@@ -194,13 +181,6 @@ export const CourseContent: React.FC<CourseContentProps> = ({
                         >
                             <Award className="w-4 h-4" />
                             Lấy chứng chỉ
-                        </button>
-                        <button
-                            onClick={handleShareLinkedIn}
-                            className="flex items-center justify-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <Share2 className="w-4 h-4" />
-                            Chia sẻ LinkedIn
                         </button>
                     </div>
                 </div>
