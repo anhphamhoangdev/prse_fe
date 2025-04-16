@@ -109,7 +109,7 @@ const CertificatePage = () => {
     const handleShare = (platform: string) => {
         if (!certificate) return;
 
-        const publicLink = `https://prse-be.ddns.net:8443/sharing/certificate/${certificate.certificatePublicCode}`;
+        const publicLink = `https://prse-be.ddns.net/sharing/certificate/${certificate.certificatePublicCode}`;
         let shareUrl = '';
 
         switch (platform) {
