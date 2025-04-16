@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, ArrowLeft, Trophy, Copy } from 'lucide-react';
+import {Download, ArrowLeft, Trophy, Copy, Share2} from 'lucide-react';
 import { requestPostWithAuth } from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
 import { formatLocalDateTimeToVN } from "../../utils/formatLocalDateTimeToVN";
 import { Footer } from "../../components/common/Footer";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import {FaFacebook, FaFacebookMessenger, FaLinkedin, FaThreads, FaXTwitter} from "react-icons/fa6";
 
 interface Certificate {
     id: number;
@@ -105,6 +106,43 @@ const CertificatePage = () => {
         navigate(`/course-detail/${courseId}`);
     };
 
+    const handleShare = (platform: string) => {
+        if (!certificate) return;
+
+        const publicLink = `https://prse-be.ddns.net:8443/sharing/certificate/${certificate.certificatePublicCode}`;
+        let shareUrl = '';
+
+        switch (platform) {
+            case 'linkedin':
+                shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicLink)}`;
+                break;
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicLink)}`;
+                break;
+            case 'messenger':
+                // For mobile devices
+                if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    shareUrl = `fb-messenger://share/?link=${encodeURIComponent(publicLink)}`;
+                } else {
+                    // For desktop - opens Facebook Messenger web
+                    shareUrl = `https://www.facebook.com/dialog/send?app_id=1437887850908369&link=${encodeURIComponent(publicLink)}&redirect_uri=${encodeURIComponent(window.location.href)}`;
+                }
+                break;
+            case 'threads':
+                shareUrl = `https://www.threads.net/intent/post?url=${encodeURIComponent(publicLink)}&text=Check out my certificate! %23achievement `;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(publicLink)}`;
+                break;
+            default:
+                console.warn('Unsupported share platform');
+                return;
+        }
+
+        window.open(shareUrl, '_blank');
+    };
+
+
     const formattedDate = certificate?.createdAt
         ? formatLocalDateTimeToVN(certificate.createdAt)
         : '';
@@ -179,7 +217,8 @@ const CertificatePage = () => {
                                     </div>
                                 </div>
 
-                                <div className="lg:w-1/5 bg-gradient-to-b from-blue-50 to-blue-100 p-6 flex flex-col gap-5 justify-start">
+                                <div
+                                    className="lg:w-1/5 bg-gradient-to-b from-blue-50 to-blue-100 p-6 flex flex-col gap-5 justify-start">
                                     <div className="text-center mb-6">
                                         <h3 className="text-blue-700 font-bold text-xl">Tuỳ Chọn</h3>
                                         <div className="w-16 h-1 bg-blue-600 mx-auto mt-2"></div>
@@ -189,53 +228,82 @@ const CertificatePage = () => {
                                         onClick={handleDownload}
                                         className="flex items-center justify-center gap-2 px-4 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full shadow-md"
                                     >
-                                        <Download className="w-5 h-5" />
+                                        <Download className="w-5 h-5"/>
                                         <span className="font-medium">Tải chứng chỉ</span>
                                     </button>
 
+                                    {/* Header cho phần chia sẻ */}
+                                    <div className="text-center mb-4">
+                                        <h3 className="text-blue-700 font-bold text-lg">Chia sẻ chứng chỉ</h3>
+                                        <div className="w-16 h-1 bg-blue-600 mx-auto mt-2"></div>
+                                    </div>
+
+                                    {/* Grid layout cho các nút mạng xã hội */}
+                                    <div className="grid grid-cols-2 gap-3 mb-6">
+                                        {/* LinkedIn */}
+                                        <button
+                                            onClick={() => handleShare('linkedin')}
+                                            className="flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-sm border border-gray-200"
+                                        >
+                                            <FaLinkedin className="w-8 h-8 text-[#0077b5] mb-2" />
+                                            <span className="text-xs font-medium text-gray-700">LinkedIn</span>
+                                        </button>
+
+                                        {/* Facebook */}
+                                        <button
+                                            onClick={() => handleShare('facebook')}
+                                            className="flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-sm border border-gray-200"
+                                        >
+                                            <FaFacebook className="w-8 h-8 text-[#1877f2] mb-2" />
+                                            <span className="text-xs font-medium text-gray-700">Facebook</span>
+                                        </button>
+
+                                        {/* Messenger */}
+                                        <button
+                                            onClick={() => handleShare('messenger')}
+                                            className="flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-sm border border-gray-200"
+                                        >
+                                            <FaFacebookMessenger className="w-8 h-8 text-[#0084ff] mb-2" />
+                                            <span className="text-xs font-medium text-gray-700">Messenger</span>
+                                        </button>
+
+                                        {/* Threads */}
+                                        <button
+                                            onClick={() => handleShare('threads')}
+                                            className="flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-sm border border-gray-200"
+                                        >
+                                            <FaThreads className="w-8 h-8 text-black mb-2" />
+                                            <span className="text-xs font-medium text-gray-700">Threads</span>
+                                        </button>
+                                    </div>
+
                                     <button
                                         onClick={handleCopyPublicLink}
-                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm relative"
-                                    >
-                                        <Copy className="w-5 h-5" />
-                                        <span className="font-medium">{copied ? 'Đã sao chép!' : 'Share công khai'}</span>
-                                    </button>
-
-                                    {/* Hidden share buttons */}
-                                    {/*
-                                    <button
-                                        onClick={handleShareLinkedIn}
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm"
                                     >
-                                        <Share2 className="w-5 h-5" />
-                                        <span className="font-medium">Chia sẻ LinkedIn</span>
+                                        <Copy className="w-5 h-5"/>
+                                        <span className="font-medium">{copied ? 'Đã sao chép!' : 'Sao chép link'}</span>
                                     </button>
 
-                                    <button
-                                        onClick={() => {}}
-                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm"
-                                    >
-                                        <Mail className="w-5 h-5" />
-                                        <span>Gửi qua Email</span>
-                                    </button>
-
-                                    <button
-                                        onClick={() => {}}
-                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors w-full shadow-sm"
-                                    >
-                                        <Facebook className="w-5 h-5" />
-                                        <span>Chia sẻ Facebook</span>
-                                    </button>
-                                    */}
+                                    {/* Twitter/X Share Button with React Icons */}
+                                    {/*<button*/}
+                                    {/*    onClick={() => handleShare('twitter')}*/}
+                                    {/*    className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-black border-2 border-black rounded-lg hover:bg-gray-50 transition-colors w-full shadow-sm"*/}
+                                    {/*>*/}
+                                    {/*    <FaXTwitter className="w-5 h-5" />*/}
+                                    {/*    <span className="font-medium">Chia sẻ X/Twitter</span>*/}
+                                    {/*</button>*/}
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {certificate && !certificate.active && (
-                        <div className="bg-yellow-50 text-yellow-700 p-6 rounded-lg text-center shadow-md border border-yellow-200">
+                        <div
+                            className="bg-yellow-50 text-yellow-700 p-6 rounded-lg text-center shadow-md border border-yellow-200">
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700">
+                                <div
+                                    className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700">
                                     <span className="text-2xl font-bold">!</span>
                                 </div>
                                 <h3 className="text-xl font-bold">Chứng chỉ không hợp lệ</h3>

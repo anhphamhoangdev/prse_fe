@@ -74,6 +74,7 @@ export async function createPayment(
                 id: item.id,
                 courseId: item.courseId,
                 title: item.title,
+                imageUrl: item.imageUrl,
                 price: item.isDiscount && item.discountPrice ? item.discountPrice : item.originalPrice
             }))
         };
