@@ -183,8 +183,11 @@ const CertificatePage = () => {
 
                 <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
                     {loading && (
-                        <div className="flex justify-center items-center h-64">
+                        <div className="flex flex-col justify-center items-center h-64">
                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                            <p className="mt-4 text-lg text-blue-600 font-semibold">
+                                Chứng chỉ của bạn đang được tạo...
+                            </p>
                         </div>
                     )}
 
