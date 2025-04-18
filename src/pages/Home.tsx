@@ -168,14 +168,7 @@ export function Home() {
                             totalElements={hotTotalElements}
                             viewAllLink="/courses/hot"
                         />
-                    ) : (
-                        <EmptyCourseSection
-                            message="Không có khóa học hot nào"
-                            subMessage="Hiện tại không có khóa học hot nào được đề xuất"
-                            actionText="Xem tất cả khóa học"
-                            onAction={handleBrowseAllCourses}
-                        />
-                    )}
+                    ) : null}
 
                     {/* Hiển thị khóa học giảm giá */}
                     {discountLoading ? (
@@ -196,14 +189,7 @@ export function Home() {
                             totalElements={discountTotalElements}
                             viewAllLink="/courses/discount"
                         />
-                    ) : (
-                        <EmptyCourseSection
-                            message="Không có khóa học giảm giá nào"
-                            subMessage="Hiện tại không có khóa học nào đang được giảm giá"
-                            actionText="Xem tất cả khóa học"
-                            onAction={handleBrowseAllCourses}
-                        />
-                    )}
+                    ) : null}
                 </>
             )}
         </MainLayout>

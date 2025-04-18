@@ -20,5 +20,3 @@ export interface AIResponse {
 }
 
 export type MessageType = 'text' | 'code';
-
-

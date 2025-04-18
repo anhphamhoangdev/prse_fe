@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import {Link, useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {
     Search, Heart, ShoppingCart, User, LogOut, BookOpen,
-    ChevronDown, Wallet, Award, GraduationCap, ArrowRight, Bot
+    ChevronDown, Wallet, Award, GraduationCap, ArrowRight, Bot, History
 } from "lucide-react";
 import {ENDPOINTS} from "../../constants/endpoint";
 import {requestWithAuth} from "../../utils/request";
 import {UserData} from "../../types/users";
+import {BiMoney} from "react-icons/bi";
 
 
 
@@ -315,6 +316,18 @@ export const Header = () => {
                                                       className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
                                                     <BookOpen className="w-4 h-4 mr-2"/>
                                                     Khóa học của tôi
+                                                </Link>
+
+                                                <Link to="/my-courses"
+                                                      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                                                    <History className="w-4 h-4 mr-2"/>
+                                                    Lịch sử giao dịch
+                                                </Link>
+
+                                                <Link to="/my-courses"
+                                                      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                                                    <BiMoney className="w-4 h-4 mr-2"/>
+                                                    Nạp tiền
                                                 </Link>
 
                                                 {/* Instructor Option */}

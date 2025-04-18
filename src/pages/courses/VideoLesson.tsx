@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useOutletContext } from 'react-router-dom';
 import { requestPostWithAuth, requestWithAuth } from '../../utils/request';
 import AIChatDrawer from '../../components/course/AIChatDrawer';
-import { Message } from 'postcss';
 import { sendMessageAI } from '../../services/chatService';
 import { MessageUtils } from '../../utils/messageUtil';
 import { VideoPlayer } from '../../components/common/VideoPlayer';
@@ -11,6 +10,7 @@ import { Lesson, VideoLessonData } from '../../types/course';
 import { useCurriculum } from '../../context/CurriculumContext';
 import { motivationalMessages } from '../../types/data';
 import { motion } from 'framer-motion';
+import { AIResponse, Message } from '../../types/chat';
 
 interface VideoLessonApiResponse {
     currentLesson: VideoLessonData;
@@ -28,7 +28,7 @@ interface OutletContext {
 }
 
 const VideoLessonDetail: React.FC = () => {
-    const { courseId, chapterId, lessonId } = useParams();
+    const { courseId, chapterId, lessonId } = useParams<{ courseId: string; chapterId: string; lessonId: string }>();
     const { currentLesson: lessonInfo, handleLessonNavigation } = useOutletContext<OutletContext>();
     const { curriculum, updateLessonProgress } = useCurriculum();
     const [currentLesson, setCurrentLesson] = useState<VideoLessonData | null>(null);
@@ -38,19 +38,16 @@ const VideoLessonDetail: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>(() => MessageUtils.createInitialMessages());
     const [motivationalMessage, setMotivationalMessage] = useState('');
 
-    // Hàm tìm bài học tiếp theo, đồng bộ với logic của LessonDetailLayout
     const findNextLesson = useCallback(() => {
         if (!curriculum || !chapterId || !lessonId) return null;
 
         let nextLesson: Lesson | null = null;
 
-        // Tìm chapter hiện tại và bài học hiện tại
         for (let i = 0; i < curriculum.length; i++) {
             const chapter = curriculum[i];
             const lessonIndex = chapter.lessons.findIndex((l) => l.id === Number(lessonId));
 
             if (lessonIndex !== -1 && chapter.id === Number(chapterId)) {
-                // Tìm bài học tiếp theo trong cùng chapter
                 if (lessonIndex < chapter.lessons.length - 1) {
                     nextLesson = chapter.lessons[lessonIndex + 1];
                     return {
@@ -59,8 +56,6 @@ const VideoLessonDetail: React.FC = () => {
                     };
                 }
 
-                // Nếu không có bài học tiếp theo trong chapter hiện tại,
-                // duyệt các chapter sau để tìm bài học đầu tiên
                 for (let j = i + 1; j < curriculum.length; j++) {
                     if (curriculum[j].lessons.length > 0) {
                         nextLesson = curriculum[j].lessons[0];
@@ -71,7 +66,6 @@ const VideoLessonDetail: React.FC = () => {
                     }
                 }
 
-                // Không tìm thấy bài học tiếp theo
                 return null;
             }
         }
@@ -141,8 +135,15 @@ const VideoLessonDetail: React.FC = () => {
                 lessonTitle: lessonInfo?.title,
                 chapterId: Number(chapterId),
             });
+            // Đánh dấu tất cả tin nhắn hiện tại là đã hiển thị
+            setMessages((prev) =>
+                prev.map((msg) => ({
+                    ...msg,
+                    isAlreadyDisplayed: true,
+                }))
+            );
             setMessages((prev) => [...prev, userMessage]);
-            const response = await sendMessageAI(content);
+            const response: AIResponse = await sendMessageAI(content);
             if (response.code === 1 && response.data?.message) {
                 const aiMessage = MessageUtils.createAIMessage(response.data.message, {
                     lessonId: currentLesson?.id,
@@ -154,7 +155,9 @@ const VideoLessonDetail: React.FC = () => {
                 throw new Error('Failed to get AI response');
             }
         } catch (error) {
-            const errorMessage = MessageUtils.createErrorMessage(error instanceof Error ? error.message : undefined);
+            const errorMessage = MessageUtils.createErrorMessage(
+                error instanceof Error ? error.message : 'Unknown error'
+            );
             setMessages((prev) => [...prev, errorMessage]);
         }
     };
@@ -184,7 +187,6 @@ const VideoLessonDetail: React.FC = () => {
                         {lessonInfo?.title || (isLessonLoading ? 'Đang tải...' : 'Chưa chọn bài học')}
                     </h1>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-6 mt-6 border-t border-gray-100">
-                        {/* Bên trái: Nút "Đã hoàn thành bài học" khi hoàn thành */}
                         {currentLesson?.complete ? (
                             <div className="w-full sm:w-1/2 mb-4 sm:mb-0">
                                 <button
@@ -212,7 +214,6 @@ const VideoLessonDetail: React.FC = () => {
                             </motion.div>
                         )}
                         <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-                            {/* Nút "Xác nhận hoàn thành" hiển thị khi chưa hoàn thành */}
                             {!currentLesson?.complete && (
                                 <button
                                     onClick={() => handleSubmitLesson(courseId || 0, chapterId || 0, lessonId || 0)}
@@ -236,7 +237,6 @@ const VideoLessonDetail: React.FC = () => {
                                     )}
                                 </button>
                             )}
-                            {/* Nút "Bài tiếp theo" hiển thị khi đã hoàn thành và có bài tiếp theo */}
                             {currentLesson?.complete && nextLessonInfo && (
                                 <button
                                     onClick={handleNextLesson}
@@ -250,7 +250,7 @@ const VideoLessonDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <AIChatDrawer position="right" onSendMessage={handleAIMessage} messages={messages} />
+            <AIChatDrawer position="left" onSendMessage={handleAIMessage} messages={messages} />
         </div>
     );
 };

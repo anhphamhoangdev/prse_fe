@@ -3,8 +3,6 @@ import { MainLayout } from "../layouts/MainLayout";
 import {Bot, Loader2, PlusCircle, Send, User} from 'lucide-react';
 import { useNotification } from "../components/notification/NotificationProvider";
 import { Course } from "../models/Course";
-import { CourseHomeSection } from "../components/course/CourseHomeSection";
-import { getHomeDiscountCourse, getHomeHotCourse } from "../services/courseService";
 import {AIResponse, Message} from "../types/chat";
 import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
 import {MessageUtils} from "../utils/messageUtil";
