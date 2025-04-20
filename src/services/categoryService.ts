@@ -1,6 +1,6 @@
 import {Category} from "../models/Category";
 import {ENDPOINTS} from "../constants/endpoint";
-import {request} from "../utils/request";
+import {request, requestGetWithOptionalAuth} from "../utils/request";
 import {SubCategory} from "../models/SubCategory";
 import {Course} from "../models/Course";
 import {CourseError, CourseResponse, CourseResult} from "../types/course";
@@ -60,7 +60,7 @@ export async function getCoursesBySubCategory(subCategoryId: string | number, pa
     console.log(`[CourseService] Fetching courses for subcategory ${subCategoryId}, page ${page}...`);
 
     try {
-        const response = await request<CourseResponse>(ENDPOINTS.CATEGORY.BY_SUBCATEGORY+'/'+subCategoryId);
+        const response = await requestGetWithOptionalAuth<CourseResponse>(ENDPOINTS.CATEGORY.BY_SUBCATEGORY+'/'+subCategoryId);
 
         if (response.code === 0) {
             console.error('[CourseService] API returned error code 0:', response.error_message);

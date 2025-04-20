@@ -387,22 +387,22 @@ export function Profile() {
                                     )}
 
                                     {/* Financial stats summary in a more compact layout */}
-                                    <div className="w-full mt-6 flex flex-col space-y-3">
-                                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                            <div className="flex items-center">
-                                                <CreditCard className="w-5 h-5 text-blue-600 mr-2" />
-                                                <h4 className="font-semibold text-blue-600">Số dư</h4>
-                                            </div>
-                                            <p className="font-bold text-gray-800">{formatMoney(userData.money)}</p>
-                                        </div>
-                                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
-                                            <div className="flex items-center">
-                                                <Award className="w-5 h-5 text-purple-600 mr-2" />
-                                                <h4 className="font-semibold text-purple-600">Điểm</h4>
-                                            </div>
-                                            <p className="font-bold text-gray-800">{userData.point}</p>
-                                        </div>
-                                    </div>
+                                    {/*<div className="w-full mt-6 flex flex-col space-y-3">*/}
+                                    {/*    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">*/}
+                                    {/*        <div className="flex items-center">*/}
+                                    {/*            <CreditCard className="w-5 h-5 text-blue-600 mr-2" />*/}
+                                    {/*            <h4 className="font-semibold text-blue-600">Số dư</h4>*/}
+                                    {/*        </div>*/}
+                                    {/*        <p className="font-bold text-gray-800">{formatMoney(userData.money)}</p>*/}
+                                    {/*    </div>*/}
+                                    {/*    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">*/}
+                                    {/*        <div className="flex items-center">*/}
+                                    {/*            <Award className="w-5 h-5 text-purple-600 mr-2" />*/}
+                                    {/*            <h4 className="font-semibold text-purple-600">Điểm</h4>*/}
+                                    {/*        </div>*/}
+                                    {/*        <p className="font-bold text-gray-800">{userData.point}</p>*/}
+                                    {/*    </div>*/}
+                                    {/*</div>*/}
                                 </div>
 
                                 {/* Right column - User details */}

@@ -294,16 +294,16 @@ export const Header = () => {
                                                 <div className="px-4 py-3 border-b border-slate-100">
                                                     <p className="text-sm font-medium text-slate-900">{user?.fullName}</p>
                                                     <p className="text-sm text-slate-500">{user?.email}</p>
-                                                    <div className="mt-2 flex items-center justify-between text-xs">
-                                                        <div className="flex items-center text-blue-600">
-                                                            <Wallet className="w-4 h-4 mr-1"/>
-                                                            {user?.money.toLocaleString()} VND
-                                                        </div>
-                                                        <div className="flex items-center text-amber-600">
-                                                            <Award className="w-4 h-4 mr-1"/>
-                                                            {user?.point} điểm
-                                                        </div>
-                                                    </div>
+                                                    {/*<div className="mt-2 flex items-center justify-between text-xs">*/}
+                                                    {/*    <div className="flex items-center text-blue-600">*/}
+                                                    {/*        <Wallet className="w-4 h-4 mr-1"/>*/}
+                                                    {/*        {user?.money.toLocaleString()} VND*/}
+                                                    {/*    </div>*/}
+                                                    {/*    <div className="flex items-center text-amber-600">*/}
+                                                    {/*        <Award className="w-4 h-4 mr-1"/>*/}
+                                                    {/*        {user?.point} điểm*/}
+                                                    {/*    </div>*/}
+                                                    {/*</div>*/}
                                                 </div>
 
                                                 <Link to="/profile"
@@ -318,17 +318,17 @@ export const Header = () => {
                                                     Khóa học của tôi
                                                 </Link>
 
-                                                <Link to="/my-courses"
+                                                <Link to="/history"
                                                       className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
                                                     <History className="w-4 h-4 mr-2"/>
                                                     Lịch sử giao dịch
                                                 </Link>
 
-                                                <Link to="/my-courses"
-                                                      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                                                    <BiMoney className="w-4 h-4 mr-2"/>
-                                                    Nạp tiền
-                                                </Link>
+                                                {/*<Link to="/my-courses"*/}
+                                                {/*      className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">*/}
+                                                {/*    <BiMoney className="w-4 h-4 mr-2"/>*/}
+                                                {/*    Nạp tiền*/}
+                                                {/*</Link>*/}
 
                                                 {/* Instructor Option */}
                                                 {user?.instructor ? (

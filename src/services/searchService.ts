@@ -1,5 +1,5 @@
 import {CourseError, CourseResponse, CourseResult} from "../types/course";
-import {request} from "../utils/request";
+import {request, requestGetWithOptionalAuth} from "../utils/request";
 import {Course} from "../models/Course";
 import {ENDPOINTS} from "../constants/endpoint";
 
@@ -128,7 +128,7 @@ export async function searchCoursesBySubCategory(
             }
         }
 
-        const response = await request<CourseResponse>(
+        const response = await requestGetWithOptionalAuth<CourseResponse>(
             ENDPOINTS.CATEGORY.BY_SUBCATEGORY+`/${subCategoryId}/filters?${queryParams}`
         );
 

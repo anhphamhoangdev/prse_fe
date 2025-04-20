@@ -103,7 +103,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
                     if (onDisplayed) onDisplayed();
                     if (onStopTyping) onStopTyping();
                 }
-            }, 25);
+            }, 10);
 
             return () => {
                 if (intervalRef.current) {

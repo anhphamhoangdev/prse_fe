@@ -47,6 +47,7 @@ import LessonDetailLayout from "./layouts/LessonDetailLayout";
 import CertificatePage from "./pages/certificate/CertificatePage";
 import {Helmet, HelmetProvider} from "react-helmet-async";
 import PublicCertificatePage from "./pages/certificate/PublicCertificatePage";
+import {InvoicesPage} from "./pages/student/InvoicesPage";
 
 function App() {
     return (
@@ -69,6 +70,7 @@ function App() {
                     <Route path='activate/:email/:activateCode' element={<ActivateAccount/>}></Route>
                     <Route path='profile' element={<Profile/>}></Route>
 
+                    <Route path='history' element={<InvoicesPage/>}></Route>
 
                     {/*error*/}
                     <Route path='/forbidden' element={<Forbidden403/>}></Route>

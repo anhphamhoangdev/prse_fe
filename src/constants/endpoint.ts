@@ -66,6 +66,7 @@ export const ENDPOINTS = {
         UPDATE_STATUS: '/payment/update-status',
         UPDATE_STATUS_INSTRUCTOR: '/payment/update-status-instructor',
         CREATE_INSTRUCTOR: '/payment/create-instructor',
+        GET_ALL : '/payment/get-all-payment-log'
 
     },
 
