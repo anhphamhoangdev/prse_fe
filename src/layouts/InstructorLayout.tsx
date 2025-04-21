@@ -28,7 +28,8 @@ interface InstructorLayoutProps {
 interface CourseStats {
     totalCourses: number;
     totalStudents: number;
-    totalEarnings: number;
+    totalRevenue: number;
+    currentBalance: number;
 }
 
 export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) => {
@@ -37,7 +38,8 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
     const [stats, setStats] = useState<CourseStats>({
         totalCourses: 0,
         totalStudents: 0,
-        totalEarnings: 0
+        totalRevenue: 0,
+        currentBalance: 0
     });
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -51,7 +53,7 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
 
     useEffect(() => {
         if (instructor?.id) {
-            connect(instructor.id);
+            connect(instructor.id, 'instructor');
             return () => disconnect();
         }
     }, [instructor?.id]);
@@ -72,7 +74,8 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                 setStats({
                     totalCourses: response.instructor.totalCourse || 0,
                     totalStudents: response.instructor.totalStudent || 0,
-                    totalEarnings: response.instructor.money || 0
+                    totalRevenue: response.instructor.totalRevenue || 0,
+                    currentBalance: response.instructor.money || 0
                 });
             } catch (err) {
                 console.error('Error fetching instructor data:', err);
@@ -155,10 +158,6 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
         }
     ];
 
-    // const handleMenuClick = (path: string) => {
-    //     navigate(path, { replace: true }); // Use replace instead of push
-    // };
-
     if (loading || !instructor) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -173,7 +172,7 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
             <WebSocketProvider>
                 <InstructorHeaderAndFooterLayout>
                     <main className="flex min-h-screen bg-gray-50">
-                        <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white shadow-lg transition-all duration-300 ease-in-out`}>
+                        <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white shadow-lg`}>
                             <div className="relative p-4">
                                 {/* Toggle button */}
                                 <button
@@ -181,7 +180,7 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                                     className="absolute -right-3 top-6 bg-white rounded-full p-1.5 shadow-md hover:bg-gray-50"
                                 >
                                     <svg
-                                        className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+                                        className={`w-4 h-4 text-gray-600 ${isCollapsed ? 'rotate-180' : ''}`}
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -191,16 +190,17 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                                 </button>
 
                                 {/* Stats section */}
-                                <div className={`mb-6 p-4 bg-blue-50 rounded-lg overflow-hidden transition-all duration-300 ${
-                                    isCollapsed ? 'w-0 h-0 opacity-0 p-0 mb-0' : ''
-                                }`}>
-                                    <h3 className="font-semibold text-blue-900 mb-2">Tổng quan</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <p>Số khóa học: {stats.totalCourses}</p>
-                                        <p>Tổng học viên: {stats.totalStudents}</p>
-                                        <p>Doanh thu: {stats.totalEarnings.toLocaleString()} VND</p>
+                                {!isCollapsed && (
+                                    <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                                        <h3 className="font-semibold text-blue-900 mb-2">Tổng quan</h3>
+                                        <div className="space-y-2 text-sm">
+                                            <p>Số khóa học: {stats.totalCourses}</p>
+                                            <p>Tổng học viên: {stats.totalStudents}</p>
+                                            <p>Số tiền hiện có: {stats.currentBalance.toLocaleString()} VND</p>
+                                            <p>Tổng doanh thu: {stats.totalRevenue.toLocaleString()} VND</p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* Navigation */}
                                 <nav className="space-y-2">
@@ -210,7 +210,6 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                                             onClick={() => navigate(item.path)}
                                             className={`
                                                 flex items-center gap-3 p-3 rounded-lg cursor-pointer 
-                                                transition-all duration-200 relative group
                                                 ${location.pathname === item.path
                                                 ? 'bg-blue-100 text-blue-600'
                                                 : 'hover:bg-gray-100'
@@ -218,19 +217,19 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                                                 ${isCollapsed ? 'justify-center py-4' : ''}
                                             `}
                                         >
-                                            <div className={`transition-all duration-300 ${isCollapsed ? 'scale-100' : ''}`}>
+                                            <div>
                                                 {item.icon}
                                             </div>
-                                            <span className={`font-medium whitespace-nowrap transition-all duration-300 ${
-                                                isCollapsed ? 'w-0 opacity-0 hidden' : 'w-auto opacity-100'
-                                            }`}>
-                                                {item.name}
-                                            </span>
+                                            {!isCollapsed && (
+                                                <span className="font-medium whitespace-nowrap">
+                                                    {item.name}
+                                                </span>
+                                            )}
 
                                             {/* Tooltip when collapsed */}
                                             {isCollapsed && (
                                                 <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded-md
-                                                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200
+                                                    opacity-0 invisible group-hover:opacity-100 group-hover:visible
                                                     whitespace-nowrap z-50">
                                                     {item.name}
                                                 </div>
@@ -241,7 +240,7 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
                             </div>
                         </aside>
 
-                        <div className="flex-1 p-6 transition-all duration-300">
+                        <div className="flex-1 p-6">
                             {children}
                         </div>
                     </main>
@@ -250,4 +249,3 @@ export const InstructorLayout: React.FC<InstructorLayoutProps> = ({ children }) 
         </InstructorContext.Provider>
     );
 };
-

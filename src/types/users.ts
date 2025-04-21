@@ -3,6 +3,7 @@ export interface InstructorData {
     studentId: number;
     fullName: string;
     money: number;
+    totalRevenue: number;
     fee: number;
     avatarUrl: string | null;
     title: string;

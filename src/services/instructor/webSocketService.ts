@@ -1,4 +1,3 @@
-// services/instructor/webSocketService.ts
 import { Client, IMessage } from '@stomp/stompjs';
 import { ENDPOINTS } from "../../constants/endpoint";
 import SockJS from "sockjs-client";
@@ -7,12 +6,12 @@ import { WebSocketMessage } from "../../types/websocket";
 class WebSocketService {
     private client: Client | null = null;
     private messageHandlers: ((message: WebSocketMessage) => void)[] = [];
-    private currentInstructorId: number | null = null;
+    private currentId: number | null = null;
+    private currentRole: 'instructor' | 'student' | null = null;
 
-
-    connect(instructorId: number) {
-
-        this.currentInstructorId = instructorId;
+    connect(id: number, role: 'instructor' | 'student') {
+        this.currentId = id;
+        this.currentRole = role;
 
         if (this.client?.active) {
             console.log('WebSocket already connected');
@@ -31,13 +30,17 @@ class WebSocketService {
         });
 
         this.client.onConnect = () => {
-            console.log('Connected to WebSocket');
+            console.log(`Connected to WebSocket as ${role}`);
 
-            // Subscribe to multiple channels
-            const subscriptions = [
-                `/topic/instructor/${instructorId}/uploads`,
-                `/topic/instructor/${instructorId}/notifications`,
-                `/topic/instructor/${instructorId}/course-updates`
+            // Define subscriptions based on role
+            const subscriptions = role === 'instructor' ? [
+                `/topic/instructor/${id}/uploads`,
+                `/topic/instructor/${id}/notifications`,
+                `/topic/instructor/${id}/course-updates`
+            ] : [
+                `/topic/student/${id}/notifications`,
+                `/topic/student/${id}/course-progress`,
+                `/topic/student/${id}/purchases`
             ];
 
             subscriptions.forEach(destination => {
@@ -60,6 +63,8 @@ class WebSocketService {
             this.client.deactivate();
             this.client = null;
             this.messageHandlers = [];
+            this.currentId = null;
+            this.currentRole = null;
         }
     }
 
@@ -73,6 +78,10 @@ class WebSocketService {
 
     isConnected(): boolean {
         return this.client?.active ?? false;
+    }
+
+    getCurrentRole(): 'instructor' | 'student' | null {
+        return this.currentRole;
     }
 }
 

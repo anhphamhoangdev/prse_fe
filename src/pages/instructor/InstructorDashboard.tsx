@@ -178,18 +178,19 @@ export const InstructorDashboard: React.FC = () => {
                     color="bg-emerald-500"
                 />
                 <StatCard
+                    icon={Wallet}
+                    title="Số tiền hiện có"
+                    value={`${(instructor?.money || 0).toLocaleString()} VND`}
+                    color="bg-amber-500"
+                />
+                <StatCard
                     icon={DollarSign}
                     title="Doanh thu"
-                    value={`${(instructor?.money || 0).toLocaleString()} VND`}
+                    value={`${(instructor?.totalRevenue || 0).toLocaleString()} VND`}
                     // trend="+8.2% so với tháng trước"
                     color="bg-violet-500"
                 />
-                <StatCard
-                    icon={Percent}
-                    title="Phí platform"
-                    value={`${instructor?.fee || 0}%`}
-                    color="bg-amber-500"
-                />
+
             </div>
 
             {/* Chart and Recent Activities */}

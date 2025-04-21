@@ -1,12 +1,11 @@
-// context/WebSocketContext.tsx
 import React, { createContext, useContext, useEffect } from 'react';
 import { useNotification } from '../components/notification/NotificationProvider';
 import { useInstructor } from '../layouts/InstructorLayout';
-import { webSocketService } from "../services/instructor/webSocketService";
 import { WebSocketMessage } from "../types/websocket";
+import {webSocketService} from "../services/instructor/webSocketService";
 
 interface WebSocketContextType {
-    connect: (instructorId: number) => void;
+    connect: (id: number, role: 'instructor' | 'student') => void;
     disconnect: () => void;
     isConnected: () => boolean;
 }
@@ -33,7 +32,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                                 message.message
                             );
                             break;
-
                         case 'UPLOAD_PROGRESS':
                             showNotification(
                                 'success',
@@ -41,25 +39,20 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                                 `Đang tải lên: ${message.progress || 0}%`
                             );
                             break;
-
                         case 'UPLOAD_STARTED':
-                            const startedStatus: string = message.data;
                             showNotification(
                                 'info',
                                 message.message,
-                                startedStatus
+                                message.data
                             );
                             break;
-
                         case 'UPLOAD_COMPLETE':
-                            const successStatus: string = message.data;
                             showNotification(
                                 'success',
                                 message.message,
-                                successStatus
+                                message.data
                             );
                             break;
-
                         case 'UPLOAD_ERROR':
                             showNotification(
                                 'error',
@@ -67,7 +60,21 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                                 message.message
                             );
                             break;
-
+                        // Student-specific message types
+                        case 'COURSE_PROGRESS':
+                            showNotification(
+                                'success',
+                                'Tiến độ khóa học',
+                                `Bạn đã hoàn thành ${message.progress}% của khóa học ${message.data.courseName}`
+                            );
+                            break;
+                        case 'PURCHASE_SUCCESS':
+                            showNotification(
+                                'success',
+                                'Mua khóa học',
+                                `Bạn đã mua thành công khóa học ${message.data.courseName}`
+                            );
+                            break;
                         default:
                             console.log('Received message:', message);
                             break;
@@ -77,11 +84,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 }
             };
 
-            // Connect to WebSocket
-            webSocketService.connect(instructor.id);
+            webSocketService.connect(instructor.id, 'instructor');
             webSocketService.addMessageHandler(handleWebSocketMessage);
 
-            // Cleanup on unmount
             return () => {
                 webSocketService.removeMessageHandler(handleWebSocketMessage);
                 webSocketService.disconnect();
