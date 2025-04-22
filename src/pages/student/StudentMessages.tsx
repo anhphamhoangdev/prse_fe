@@ -494,10 +494,10 @@ const StudentMessages: React.FC = () => {
                                                             <p className="text-sm">{msg.content}</p>
                                                             <span className="text-xs opacity-75 mt-1 block">
                                                                 {new Date(msg.timestamp).toLocaleTimeString('en-US', {
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    hour12: false,
-                                                                    timeZone: 'UTC',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                        hour12: false,
+                                                                        timeZone: 'Asia/Ho_Chi_Minh',
                                                                 })}
                                                             </span>
                                                         </div>

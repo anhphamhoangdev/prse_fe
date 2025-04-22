@@ -495,7 +495,7 @@ const InstructorMessages: React.FC = () => {
                                                                 hour: '2-digit',
                                                                 minute: '2-digit',
                                                                 hour12: false,
-                                                                timeZone: 'UTC',
+                                                                timeZone: 'Asia/Ho_Chi_Minh',
                                                             })}
                                                         </span>
                                                     </div>
