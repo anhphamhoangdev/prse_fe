@@ -1,5 +1,5 @@
 export interface WebSocketMessage {
-    type: string;
+    type: string; // E.g., 'NEW_MESSAGE', 'NOTIFICATION', 'COURSE_PROGRESS', 'PURCHASE_SUCCESS'
     message: string;
     status: 'SUCCESS' | 'ERROR' | 'INFO';
     progress?: number;
@@ -7,5 +7,5 @@ export interface WebSocketMessage {
     lessonId?: number;
     instructorId?: number;
     timestamp?: string;
-    data?: any;
+    data?: any; // Can hold ChatMessageDTO for NEW_MESSAGE
 }

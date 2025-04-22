@@ -11,6 +11,7 @@ import {
     ArrowRight,
     Bot,
     History,
+    MessageCircle,
 } from 'lucide-react';
 import { ENDPOINTS } from '../../constants/endpoint';
 import { requestWithAuth } from '../../utils/request';
@@ -209,6 +210,13 @@ export const Header = () => {
                                                 >
                                                     <BookOpen className="w-4 h-4 mr-2" />
                                                     Khóa học của tôi
+                                                </Link>
+                                                <Link
+                                                    to="/messages"
+                                                    className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                                >
+                                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                                    Tin nhắn
                                                 </Link>
                                                 <Link
                                                     to="/history"

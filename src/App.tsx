@@ -71,6 +71,8 @@ import { NotificationProvider } from './components/notification/NotificationProv
 import { UserProvider } from './context/UserContext';
 import { StudentWebSocketProvider } from './context/StudentWebSocketContext';
 import {WebSocketProvider} from "./context/WebSocketContext";
+import InstructorMessages from "./pages/instructor/InstructorMessages";
+import StudentMessages from "./pages/student/StudentMessages";
 
 function App() {
     return (
@@ -109,6 +111,7 @@ function App() {
                                             <Route path="/profile" element={<Profile />} />
                                             <Route path="/history" element={<InvoicesPage />} />
                                             <Route path="/my-courses" element={<MyCoursesPage />} />
+                                            <Route path="/messages" element={<StudentMessages />} />
 
                                             {/* Cart & Payment Routes */}
                                             <Route path="/cart" element={<CartPage />} />
@@ -145,6 +148,7 @@ function App() {
                                         <InstructorLayout>
                                             <Routes>
                                                 <Route path="dashboard" element={<InstructorDashboard />} />
+                                                <Route path="messages" element={<InstructorMessages />} />
                                                 <Route path="courses" element={<InstructorCourses />} />
                                                 <Route path="upload" element={<CourseUpload />} />
                                                 <Route path="uploads" element={<UploadStatusPage />} />

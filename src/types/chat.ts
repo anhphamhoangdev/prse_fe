@@ -20,3 +20,13 @@ export interface AIResponse {
 }
 
 export type MessageType = 'text' | 'code';
+
+export interface ChatMessageDTO {
+    id?: number; // ID do backend cung cấp
+    conversationId: number;
+    senderId: number;
+    senderType: 'STUDENT' | 'INSTRUCTOR';
+    senderName: string;
+    content: string;
+    timestamp: string;
+}

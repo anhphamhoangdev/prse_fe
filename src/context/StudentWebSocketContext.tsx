@@ -1,20 +1,26 @@
-// context/StudentWebSocketContext.tsx
 import React, { createContext, useContext, useEffect } from 'react';
 import { useNotification } from '../components/notification/NotificationProvider';
 import { WebSocketMessage } from '../types/websocket';
-import {useUser} from "./UserContext";
-import {webSocketService} from "../services/instructor/webSocketService";
+import { ChatMessageDTO } from '../types/chat';
+import { useUser } from './UserContext';
+import { webSocketService } from '../services/instructor/webSocketService';
 
 interface StudentWebSocketContextType {
     connect: (id: number, role: 'student') => void;
     disconnect: () => void;
     isConnected: () => boolean;
+    subscribeToConversation: (conversationId: string) => void;
+    unsubscribeFromConversation: (conversationId: string) => void;
+    sendMessage: (destination: string, message: ChatMessageDTO | WebSocketMessage) => void;
 }
 
 const StudentWebSocketContext = createContext<StudentWebSocketContextType>({
     connect: () => {},
     disconnect: () => {},
     isConnected: () => false,
+    subscribeToConversation: () => {},
+    unsubscribeFromConversation: () => {},
+    sendMessage: () => {},
 });
 
 export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -23,31 +29,34 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
 
     const handleStudentMessage = (message: WebSocketMessage) => {
         try {
+            // Check if this is a message from the current user
+            const isOwnMessage = message.data?.senderId && message.data.senderId === user?.id;
+
             switch (message.type) {
                 case 'NOTIFICATION':
+                    if (isOwnMessage) {
+                        console.log('Skipping notification for self-sent message');
+                        return;
+                    }
                     showNotification(
-                        message.status.toLowerCase() as 'success' | 'error',
+                        message.status.toLowerCase() as 'success' | 'error' | 'info',
                         'Thông báo',
                         message.message
                     );
                     break;
-                case 'COURSE_PROGRESS':
-                    showNotification(
-                        'success',
-                        'Tiến độ khóa học',
-                        `Bạn đã hoàn thành ${message.progress}% của khóa học ${message.data.courseName}`
-                    );
+                case 'NEW_MESSAGE':
+                    // Skip notification for your own messages
+                    if (isOwnMessage) {
+                        console.log('Skipping notification for self-sent message');
+                        return;
+                    }
+                    // showNotification(
+                    //     'info',
+                    //     'Tin nhắn mới',
+                    //     `Bạn nhận được tin nhắn từ ${message.data.senderName} trong cuộc trò chuyện ${message.data.conversationId}`
+                    // );
                     break;
-                case 'PURCHASE_SUCCESS':
-                    showNotification(
-                        'success',
-                        'Mua khóa học',
-                        `Bạn đã mua thành công khóa học ${message.data.courseName}`
-                    );
-                    break;
-                default:
-                    console.log('Student message:', message);
-                    break;
+                // Other cases...
             }
         } catch (error) {
             console.error('Error handling student websocket message:', error);
@@ -55,12 +64,6 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
     };
 
     useEffect(() => {
-        console.log('StudentWebSocketProvider useEffect triggered', {
-            isLoggedIn,
-            user: user ? { id: user.id, instructor: user.instructor } : null,
-            isConnected: webSocketService.isConnected(),
-            currentRole: webSocketService.getCurrentRole(),
-        });
         if (
             isLoggedIn &&
             user &&
@@ -76,7 +79,7 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
                 webSocketService.disconnect();
             };
         }
-    }, [user, isLoggedIn, showNotification]);
+    }, [user, isLoggedIn]);
 
     return (
         <StudentWebSocketContext.Provider
@@ -84,6 +87,9 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
                 connect: (id) => webSocketService.connect(id, 'student'),
                 disconnect: webSocketService.disconnect.bind(webSocketService),
                 isConnected: webSocketService.isConnected.bind(webSocketService),
+                subscribeToConversation: webSocketService.subscribeToConversation.bind(webSocketService),
+                unsubscribeFromConversation: webSocketService.unsubscribeFromConversation.bind(webSocketService),
+                sendMessage: (destination, message) => webSocketService.sendMessage(destination, message),
             }}
         >
             {children}
