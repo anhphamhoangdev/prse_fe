@@ -4,10 +4,10 @@ import { useNotification } from '../../components/notification/NotificationProvi
 import { useUser } from '../../context/UserContext';
 import { ChatMessageDTO } from '../../types/chat';
 import { WebSocketMessage } from '../../types/websocket';
-import { webSocketService } from '../../services/instructor/webSocketService';
 import { requestWithAuth } from '../../utils/request';
 import { MessageCircle, Send, Menu, X } from 'lucide-react';
 import { SearchHeaderAndFooterLayout } from '../../layouts/UserLayout';
+import {webSocketService} from "../../services/instructor/webSocketService";
 
 interface Conversation {
     id: string;
@@ -82,7 +82,7 @@ const ConversationCard = memo(
 
 const StudentMessages: React.FC = () => {
     const { user } = useUser();
-    const { sendMessage, subscribeToConversation, unsubscribeFromConversation } = useStudentWebSocket();
+    const { sendMessage, subscribeToConversation, unsubscribeFromConversation, isConnected } = useStudentWebSocket();
     const { showNotification } = useNotification();
 
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -97,7 +97,6 @@ const StudentMessages: React.FC = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const firstLoadRef = useRef<boolean>(true);
 
-    // Parse DB timestamp
     const parseTimestamp = (timestamp: string): string => {
         if (!timestamp) return new Date().toISOString();
         try {
@@ -109,17 +108,15 @@ const StudentMessages: React.FC = () => {
         }
     };
 
-    // Subscribe to selected conversation
     useEffect(() => {
-        if (selectedConversationId) {
+        if (selectedConversationId && isConnected()) {
             subscribeToConversation(selectedConversationId);
             return () => {
                 unsubscribeFromConversation(selectedConversationId);
             };
         }
-    }, [selectedConversationId, subscribeToConversation, unsubscribeFromConversation]);
+    }, [selectedConversationId, subscribeToConversation, unsubscribeFromConversation, isConnected]);
 
-    // Fetch all conversations and auto-subscribe
     const fetchConversations = async () => {
         if (!user?.id) {
             console.warn('No user ID available for fetching conversations');
@@ -144,17 +141,10 @@ const StudentMessages: React.FC = () => {
                 latestTimestamp: parseTimestamp(conv.latestTimestamp),
                 unreadCount: 0,
             }));
-            // Sort conversations by latestTimestamp in descending order (most recent first)
             fetchedConversations.sort((a, b) =>
                 new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime()
             );
-
             setConversations(fetchedConversations);
-
-            // Auto-subscribe to all conversations
-            fetchedConversations.forEach(conv => {
-                subscribeToConversation(conv.id);
-            });
         } catch (error) {
             console.error('Error fetching conversations:', error);
             showNotification('error', 'Lỗi', 'Không thể tải danh sách cuộc trò chuyện.');
@@ -167,7 +157,6 @@ const StudentMessages: React.FC = () => {
         fetchConversations();
     }, [user?.id, showNotification]);
 
-    // Fetch messages for selected conversation
     useEffect(() => {
         const fetchMessages = async () => {
             if (!selectedConversationId) return;
@@ -194,14 +183,12 @@ const StudentMessages: React.FC = () => {
         fetchMessages();
     }, [selectedConversationId, showNotification]);
 
-    // Improved scrolling to bottom of messages
     const scrollToBottom = (behavior: ScrollBehavior = 'auto') => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     };
 
-    // Auto-scroll to latest message when messages change or on first load
     useEffect(() => {
         if (messages.length === 0) return;
 
@@ -221,17 +208,14 @@ const StudentMessages: React.FC = () => {
         }
     }, [messages, isLoadingMessages]);
 
-    // Handle incoming WebSocket messages
     useEffect(() => {
         const handleMessage = (wsMessage: WebSocketMessage) => {
             console.log('Received WebSocket message:', wsMessage);
 
-            // Handle new chat messages
             if (wsMessage.type === 'NEW_MESSAGE' && wsMessage.data) {
                 const message = wsMessage.data as ChatMessageDTO & { avatarUrl?: string | null };
                 const conversationId = message.conversationId.toString();
 
-                // Only show notification for non-active conversations and non-self messages
                 if (message.senderId !== user?.id && conversationId !== selectedConversationId) {
                     showNotification(
                         'info',
@@ -240,7 +224,6 @@ const StudentMessages: React.FC = () => {
                     );
                 }
 
-                // Update messages if it's the selected conversation
                 if (conversationId === selectedConversationId) {
                     setMessages(prevMessages => {
                         const isDuplicate = prevMessages.some(m => m.id && message.id && m.id === message.id);
@@ -251,7 +234,6 @@ const StudentMessages: React.FC = () => {
                     });
                 }
 
-                // Update conversations for all messages
                 setConversations(prevConversations => {
                     const conversationIndex = prevConversations.findIndex(conv => conv.id === conversationId);
                     let updatedConversations = [...prevConversations];
@@ -294,7 +276,6 @@ const StudentMessages: React.FC = () => {
                 });
             }
 
-            // Handle conversation list updates
             if (wsMessage.type === 'MESSAGE_UPDATE' && wsMessage.data) {
                 const update = wsMessage.data as {
                     conversationId: number;
@@ -305,7 +286,6 @@ const StudentMessages: React.FC = () => {
                 };
                 const conversationId = update.conversationId.toString();
 
-                // Only show notification for non-active conversations and non-self messages
                 if (update.senderName !== user?.fullName && conversationId !== selectedConversationId) {
                     showNotification(
                         'info',
@@ -314,7 +294,6 @@ const StudentMessages: React.FC = () => {
                     );
                 }
 
-                // Update conversations for all MESSAGE_UPDATE events
                 setConversations(prevConversations => {
                     const conversationIndex = prevConversations.findIndex(conv => conv.id === conversationId);
                     let updatedConversations = [...prevConversations];
@@ -364,7 +343,6 @@ const StudentMessages: React.FC = () => {
         };
     }, [selectedConversationId, fetchConversations, user?.id, user?.fullName, showNotification]);
 
-    // Send message
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !selectedConversationId || !user || isSendingMessage) {
             console.warn('Cannot send message: ', {
@@ -408,7 +386,6 @@ const StudentMessages: React.FC = () => {
     return (
         <SearchHeaderAndFooterLayout>
             <div className="space-y-6 p-6 bg-gray-50 min-h-[calc(100vh-64px)]">
-                {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Tin nhắn</h1>
@@ -425,9 +402,7 @@ const StudentMessages: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Main Content */}
                 <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)]">
-                    {/* Conversation List */}
                     <div
                         className={`${
                             isConversationListOpen ? 'block' : 'hidden'
@@ -465,7 +440,6 @@ const StudentMessages: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Chat Window */}
                     <div className="flex-1 bg-white rounded-xl shadow-sm overflow-hidden">
                         {selectedConversationId ? (
                             isLoadingMessages ? (
@@ -474,7 +448,6 @@ const StudentMessages: React.FC = () => {
                                 </div>
                             ) : (
                                 <div className="flex flex-col h-full">
-                                    {/* Chat Header */}
                                     <div className="p-6 border-b border-gray-200">
                                         <h2 className="text-lg font-semibold text-slate-900">
                                             {conversations.find(conv => conv.id === selectedConversationId)?.participantName}
@@ -482,7 +455,6 @@ const StudentMessages: React.FC = () => {
                                         <p className="text-sm text-slate-500">Giảng viên</p>
                                     </div>
 
-                                    {/* Chat Area */}
                                     <div
                                         ref={chatContainerRef}
                                         className="flex-1 p-6 overflow-y-auto bg-gray-50 space-y-4"
@@ -536,7 +508,6 @@ const StudentMessages: React.FC = () => {
                                         <div ref={messagesEndRef} />
                                     </div>
 
-                                    {/* Message Input */}
                                     <div className="p-6 border-t border-gray-200 bg-white">
                                         <div className="flex items-center space-x-3">
                                             <input

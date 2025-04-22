@@ -3,7 +3,6 @@ import { ENDPOINTS } from '../../constants/endpoint';
 import SockJS from 'sockjs-client';
 import { WebSocketMessage } from '../../types/websocket';
 import { ChatMessageDTO } from '../../types/chat';
-import { requestWithAuth } from '../../utils/request';
 
 class WebSocketService {
     private client: Client | null = null;
@@ -12,15 +11,18 @@ class WebSocketService {
     private currentRole: 'instructor' | 'student' | null = null;
     private conversationSubscriptions: Map<string, () => void> = new Map();
     private processedMessageIds: Set<string> = new Set();
+    private connected: boolean = false;
+    private retryCount: number = 0;
+    private maxRetries: number = 5;
 
-    async connect(id: number, role: 'instructor' | 'student') {
-        this.currentId = id;
-        this.currentRole = role;
-
-        if (this.client?.active) {
+    async connect(id: number, role: 'instructor' | 'student'): Promise<void> {
+        if (this.client?.active && this.connected) {
             console.log('WebSocket already connected');
             return;
         }
+
+        this.currentId = id;
+        this.currentRole = role;
 
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) {
@@ -34,27 +36,27 @@ class WebSocketService {
             webSocketFactory: () => socket,
             connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             debug: (str) => console.log('STOMP: ' + str),
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
+            reconnectDelay: 10000, // Tăng thời gian reconnect
+            heartbeatIncoming: 0, // Tắt heart-beat do server trả về 0,0
+            heartbeatOutgoing: 0,
         });
 
-        this.client.onConnect = async () => {
+        this.client.onConnect = () => {
+            this.connected = true;
+            this.retryCount = 0; // Reset retry count
             console.log(`Connected to WebSocket as ${role}`);
 
-            // Subscribe to notifications
+            // Subscribe to role-specific topics
             const notificationTopic = `/topic/${role}/${id}/notifications`;
             this.client?.subscribe(notificationTopic, (message: IMessage) => {
                 this.handleMessage(message);
             });
 
-            // Subscribe to message updates
             const messageUpdateTopic = `/topic/${role}/${id}/messages`;
             this.client?.subscribe(messageUpdateTopic, (message: IMessage) => {
                 this.handleMessage(message);
             });
 
-            // Subscribe to role-specific topics
             const subscriptions = role === 'instructor' ? [
                 `/topic/instructor/${id}/uploads`,
                 `/topic/instructor/${id}/course-updates`
@@ -72,19 +74,32 @@ class WebSocketService {
 
         this.client.onStompError = (frame) => {
             console.error('STOMP error:', frame);
+            this.connected = false;
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                console.log(`Retrying connection (${this.retryCount}/${this.maxRetries})...`);
+            } else {
+                console.error('Max retries reached. Giving up.');
+                // Thông báo lỗi cho người dùng (được xử lý trong StudentWebSocketContext)
+            }
         };
 
         this.client.onWebSocketError = (error) => {
             console.error('WebSocket error:', error);
+            this.connected = false;
         };
 
-        this.client.activate();
+        this.client.onWebSocketClose = () => {
+            console.log('WebSocket closed');
+            this.connected = false;
+        };
+
+        await this.client.activate();
     }
 
     private handleMessage(message: IMessage) {
         try {
             const parsedMessage: WebSocketMessage = JSON.parse(message.body);
-            // Deduplicate based on message ID (for NEW_MESSAGE)
             if (parsedMessage.type === 'NEW_MESSAGE' && parsedMessage.data?.id && this.processedMessageIds.has(parsedMessage.data.id)) {
                 console.log(`Skipping duplicate NEW_MESSAGE ID: ${parsedMessage.data.id}`);
                 return;
@@ -102,7 +117,7 @@ class WebSocketService {
     }
 
     subscribeToConversation(conversationId: string) {
-        if (!this.client?.active) {
+        if (!this.client?.active || !this.connected) {
             console.warn('WebSocket is not connected');
             return;
         }
@@ -132,13 +147,12 @@ class WebSocketService {
     }
 
     sendMessage(destination: string, message: ChatMessageDTO | WebSocketMessage) {
-        if (!this.client?.active) {
+        if (!this.client?.active || !this.connected) {
             console.warn('WebSocket is not connected');
             throw new Error('WebSocket is not connected');
         }
 
         console.log(`Sending to ${destination}:`, message);
-
         this.client.publish({
             destination,
             body: JSON.stringify(message),
@@ -153,12 +167,13 @@ class WebSocketService {
             });
             this.conversationSubscriptions.clear();
             this.processedMessageIds.clear();
-
             this.client.deactivate();
             this.client = null;
             this.messageHandlers = [];
             this.currentId = null;
             this.currentRole = null;
+            this.connected = false;
+            this.retryCount = 0;
         }
     }
 
@@ -171,7 +186,7 @@ class WebSocketService {
     }
 
     isConnected(): boolean {
-        return this.client?.active ?? false;
+        return <boolean>this.client?.active && this.connected;
     }
 
     getCurrentRole(): 'instructor' | 'student' | null {

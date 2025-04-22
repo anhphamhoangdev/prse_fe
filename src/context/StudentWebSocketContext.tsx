@@ -29,7 +29,6 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
 
     const handleStudentMessage = (message: WebSocketMessage) => {
         try {
-            // Check if this is a message from the current user
             const isOwnMessage = message.data?.senderId && message.data.senderId === user?.id;
 
             switch (message.type) {
@@ -45,18 +44,13 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
                     );
                     break;
                 case 'NEW_MESSAGE':
-                    // Skip notification for your own messages
                     if (isOwnMessage) {
                         console.log('Skipping notification for self-sent message');
                         return;
                     }
-                    // showNotification(
-                    //     'info',
-                    //     'Tin nhắn mới',
-                    //     `Bạn nhận được tin nhắn từ ${message.data.senderName} trong cuộc trò chuyện ${message.data.conversationId}`
-                    // );
                     break;
-                // Other cases...
+                default:
+                    console.log('Unhandled message type:', message.type);
             }
         } catch (error) {
             console.error('Error handling student websocket message:', error);
@@ -66,30 +60,33 @@ export const StudentWebSocketProvider: React.FC<{ children: React.ReactNode }> =
     useEffect(() => {
         if (
             isLoggedIn &&
-            user &&
-            user.id &&
+            user?.id &&
             (!webSocketService.isConnected() || webSocketService.getCurrentRole() !== 'student')
         ) {
             console.log('Connecting WebSocket for student:', user.id);
-            webSocketService.connect(user.id, 'student');
+            webSocketService.connect(user.id, 'student').catch((error) => {
+                console.error('WebSocket connection failed:', error);
+                showNotification('error', 'Lỗi kết nối', 'Không thể kết nối đến WebSocket. Vui lòng thử lại sau.');
+            });
             webSocketService.addMessageHandler(handleStudentMessage);
-            return () => {
-                console.log('Disconnecting WebSocket for student');
-                webSocketService.removeMessageHandler(handleStudentMessage);
-                webSocketService.disconnect();
-            };
         }
-    }, [user, isLoggedIn]);
+
+        return () => {
+            console.log('Disconnecting WebSocket for student');
+            webSocketService.removeMessageHandler(handleStudentMessage);
+            webSocketService.disconnect();
+        };
+    }, [user?.id, isLoggedIn]);
 
     return (
         <StudentWebSocketContext.Provider
             value={{
-                connect: (id) => webSocketService.connect(id, 'student'),
+                connect: webSocketService.connect.bind(webSocketService),
                 disconnect: webSocketService.disconnect.bind(webSocketService),
                 isConnected: webSocketService.isConnected.bind(webSocketService),
                 subscribeToConversation: webSocketService.subscribeToConversation.bind(webSocketService),
                 unsubscribeFromConversation: webSocketService.unsubscribeFromConversation.bind(webSocketService),
-                sendMessage: (destination, message) => webSocketService.sendMessage(destination, message),
+                sendMessage: webSocketService.sendMessage.bind(webSocketService),
             }}
         >
             {children}
