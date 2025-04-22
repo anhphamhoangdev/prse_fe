@@ -6,6 +6,7 @@ import { ChatMessageDTO } from '../../types/chat';
 import { requestWithAuth } from '../../utils/request';
 import { WebSocketMessage } from '../../types/websocket';
 import { MessageCircle, Send, Menu, X } from 'lucide-react';
+import {webSocketService} from "../../services/instructor/webSocketService";
 
 interface Conversation {
     id: string;
