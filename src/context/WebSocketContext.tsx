@@ -36,7 +36,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (instructor?.id) {
             const handleWebSocketMessage = (message: WebSocketMessage) => {
                 try {
-                    // Suppress all notifications on /instructor/messages
                     if (location.pathname.includes('/instructor/messages')) {
                         console.log(`Skipping notification for ${message.type} on messages page`);
                         return;
@@ -87,10 +86,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 }
             };
 
-            webSocketService.connect(instructor.id, 'instructor');
+            console.log('Connecting WebSocket for instructor:', instructor.id);
+            webSocketService.connect(instructor.id, 'instructor').catch((error) => {
+                console.error('WebSocket connection failed:', error);
+                showNotification('error', 'Lỗi kết nối', 'Không thể kết nối đến WebSocket. Vui lòng thử lại sau.');
+            });
             webSocketService.addMessageHandler(handleWebSocketMessage);
 
             return () => {
+                console.log('Disconnecting WebSocket for instructor');
                 webSocketService.removeMessageHandler(handleWebSocketMessage);
                 webSocketService.disconnect();
             };
