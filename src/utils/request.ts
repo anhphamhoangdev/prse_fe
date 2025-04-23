@@ -516,3 +516,101 @@ export async function getWithAuth<T>(endpoint: string): Promise<T> {
 
     return json.data;
 }
+
+// PATCH
+export async function patchWithAuth<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem("token");
+    if (!token) {
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem("token");
+        window.location.href = '/login';
+        return Promise.reject();
+    }
+
+    if (response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if (response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to patch ${url}: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // Check response code từ API
+    if (jsonResponse.code === 0) {
+        throw new Error(jsonResponse.error_message);
+    }
+    return jsonResponse.data;
+}
+
+// PATCH FOR ADMIN
+export async function patchAdminWithAuth<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = localStorage.getItem('adminToken') || sessionStorage.getItem("adminToken");
+    if (!token) {
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem("adminToken");
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    if (response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if (response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to patch ${url}: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // Check response code từ API
+    if (jsonResponse.code === 0) {
+        throw new Error(jsonResponse.error_message);
+    }
+    return jsonResponse.data;
+}

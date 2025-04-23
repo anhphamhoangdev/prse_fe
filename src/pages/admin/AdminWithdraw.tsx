@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {requestAdminWithAuth, requestWithAuth} from '../../utils/request';
+import { patchAdminWithAuth, requestAdminWithAuth, requestWithAuth } from '../../utils/request';
 import { ENDPOINTS } from '../../constants/endpoint';
 import {
     Check,
@@ -11,10 +11,9 @@ import {
     RefreshCcw,
     FileCheck
 } from 'lucide-react';
-import {Withdrawal} from "../../types/withdraw";
-import {useNotification} from "../../components/notification/NotificationProvider";
-import {HiArrowTrendingUp} from "react-icons/hi2";
-
+import { Withdrawal } from "../../types/withdraw";
+import { useNotification } from "../../components/notification/NotificationProvider";
+import { HiArrowTrendingUp } from "react-icons/hi2";
 
 export default function AdminWithdraw() {
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -45,19 +44,10 @@ export default function AdminWithdraw() {
 
     const fetchPendingWithdrawals = async () => {
         try {
-            // Sử dụng mock data thay vì gọi API
-            const fetchPendingWithdrawals = async () => {
-                try {
-                    const response = await requestAdminWithAuth<{withdraws: Withdrawal[]}>(
-                        `${ENDPOINTS.ADMIN.WITHDRAWS}`
-                    );
-                    setWithdrawals(response.withdraws);
-                } catch (error) {
-                    console.error('Error fetching category distribution data:', error);
-                }
-            };
-
-            fetchPendingWithdrawals();
+            const response = await requestAdminWithAuth<{ withdraws: Withdrawal[] }>(
+                `${ENDPOINTS.ADMIN.WITHDRAWS}`
+            );
+            setWithdrawals(response.withdraws);
         } catch (error) {
             console.error('Error fetching withdrawals:', error);
         } finally {
@@ -65,18 +55,24 @@ export default function AdminWithdraw() {
         }
     };
 
-
     const handleApprove = async (withdrawId: number) => {
         setIsProcessing(true);
         try {
-            // Mô phỏng API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Update local state
+            const withdraw = withdrawals.find(w => w.id === withdrawId);
+            await patchAdminWithAuth(
+                `${ENDPOINTS.ADMIN.WITHDRAWS}/${withdrawId}`,
+                {
+                    status: 'COMPLETED',
+                    instructor: {
+                        id: withdraw?.instructor?.id,
+                        name: withdraw?.instructor?.name,
+                        email: withdraw?.instructor?.email
+                    }
+                }
+            );
             setWithdrawals(prevWithdrawals =>
                 prevWithdrawals.filter(w => w.id !== withdrawId)
             );
-
             showNotification('success', 'Thành công', 'Đã duyệt yêu cầu rút tiền');
         } catch (error) {
             showNotification('error', 'Thất bại', 'Có lỗi xảy ra khi duyệt yêu cầu');
@@ -90,19 +86,23 @@ export default function AdminWithdraw() {
             showNotification('error', 'Lỗi', 'Vui lòng nhập lý do từ chối');
             return;
         }
-
         setIsProcessing(true);
         try {
-            // Mô phỏng API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Update local state
-            if (selectedWithdraw) {
-                setWithdrawals(prevWithdrawals =>
-                    prevWithdrawals.filter(w => w.id !== selectedWithdraw.id)
-                );
-            }
-
+            await patchAdminWithAuth(
+                `${ENDPOINTS.ADMIN.WITHDRAWS}/${selectedWithdraw?.id}`,
+                {
+                    status: 'REJECTED',
+                    rejectionReason,
+                    instructor: {
+                        id: selectedWithdraw?.instructor?.id,
+                        name: selectedWithdraw?.instructor?.name,
+                        email: selectedWithdraw?.instructor?.email
+                    }
+                }
+            );
+            setWithdrawals(prevWithdrawals =>
+                prevWithdrawals.filter(w => w.id !== selectedWithdraw?.id)
+            );
             setShowRejectModal(false);
             setRejectionReason('');
             showNotification('success', 'Thành công', 'Đã từ chối yêu cầu rút tiền');
@@ -120,7 +120,6 @@ export default function AdminWithdraw() {
             </div>
         );
     }
-
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
@@ -154,40 +153,44 @@ export default function AdminWithdraw() {
                         </div>
 
                         <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-3xl font-bold text-gray-900 tabular-nums animate-in slide-in-from-left-4">
-                {withdrawals.length}
-            </span>
+                            <span className="text-3xl font-bold text-gray-900 tabular-nums animate-in slide-in-from-left-4">
+                                {withdrawals.length}
+                            </span>
                             <div className="h-2 w-2 rounded-full bg-blue-500 animate-ping"/>
                         </div>
 
                         {/* Thêm thông tin chi tiết */}
                         <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
                             <div>
-                                <p className="text-gray-500">Yêu cầu mới nhất</p>
+                                <p className="text-gray-500">Yêu cầu cũ nhất</p>
                                 <p className="font-medium text-gray-700">
-                                    {new Date(withdrawals[0]?.createdAt).toLocaleString('vi-VN', {
+                                    {withdrawals[0]?.createdAt ? new Date(withdrawals[0].createdAt).toLocaleString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit',
-                                    })}
+                                    }) : 'N/A'}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-gray-500">Đang chờ từ</p>
+                                <p className="text-gray-500">Yêu cầu mới nhất</p>
                                 <p className="font-medium text-gray-700">
-                                    {new Date(withdrawals[withdrawals.length - 1]?.createdAt).toLocaleString('vi-VN', {
+                                    {withdrawals[withdrawals.length - 1]?.createdAt ? new Date(withdrawals[withdrawals.length - 1].createdAt).toLocaleString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit',
-                                    })}
+                                    }) : 'N/A'}
                                 </p>
                             </div>
-
                         </div>
 
                         <div
                             className="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-blue-50/50 to-transparent -z-10"/>
                     </div>
                 </div>
-
 
                 <div
                     className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
