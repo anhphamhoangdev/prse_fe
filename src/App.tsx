@@ -73,6 +73,7 @@ import { StudentWebSocketProvider } from './context/StudentWebSocketContext';
 import {WebSocketProvider} from "./context/WebSocketContext";
 import InstructorMessages from "./pages/instructor/InstructorMessages";
 import StudentMessages from "./pages/student/StudentMessages";
+import {InstructorProfile} from "./pages/instructor/InstructorProfile";
 
 function App() {
     return (
@@ -148,6 +149,7 @@ function App() {
                                         <InstructorLayout>
                                             <Routes>
                                                 <Route path="dashboard" element={<InstructorDashboard />} />
+                                                <Route path="profile" element={<InstructorProfile />} />
                                                 <Route path="messages" element={<InstructorMessages />} />
                                                 <Route path="courses" element={<InstructorCourses />} />
                                                 <Route path="upload" element={<CourseUpload />} />

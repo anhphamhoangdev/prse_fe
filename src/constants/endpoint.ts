@@ -34,11 +34,11 @@ export const ENDPOINTS = {
         RECENT_ENROLLMENT : '/instructor/recent-enrollments',
         UPLOAD_COURSE : '/instructor/upload-course',
         UPLOAD_PREVIEW_VIDEO: '/instructor/upload-preview-video',
-
+        UPDATE_PROFILE: '/instructor/update-profile',
         WITHDRAW_BANK: '/instructor/withdraw-bank',
         WITHDRAW_STUDENT_ACCOUNT: '/instructor/withdraw-student-account',
         COMMON_TITLES: "/instructor/common-titles",
-
+        UPDATE_AVATAR: '/instructor/update-avatar',
         WITHDRAW_GET_ALL: '/instructor/withdraw/get-all',
     },
 
