@@ -1,129 +1,132 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MainLayout } from "../layouts/MainLayout";
-import {Bot, Loader2, PlusCircle, Send, User} from 'lucide-react';
-import { useNotification } from "../components/notification/NotificationProvider";
-import { Course } from "../models/Course";
-import {AIResponse, Message} from "../types/chat";
-import {SearchHeaderAndFooterLayout} from "../layouts/UserLayout";
-import {MessageUtils} from "../utils/messageUtil";
-import {sendMessageAI, sendMessageAIRecommendation} from "../services/chatService";
-import {LoadingMessage} from "../components/LoadingMessage";
+import { Bot, Loader2, Send, User } from 'lucide-react';
+import { SearchHeaderAndFooterLayout } from '../layouts/UserLayout';
+import { useNotification } from '../components/notification/NotificationProvider';
+import { MessageUtils } from '../utils/messageUtil';
+import { sendMessageAIRecommendation } from '../services/chatService';
+import { Message } from '../types/chat';
 
+// Danh sách loading messages
 const LOADING_MESSAGES = [
-    "Đang tìm kiếm những khóa học hoàn hảo dành riêng cho bạn...",
-    "Chúng tôi đang lựa chọn những khóa học tuyệt vời nhất cho nhu cầu của bạn...",
-    "Đang phân tích yêu cầu của bạn để tìm ra những điều tốt nhất...",
-    "Hãy chờ một chút, những khóa học đỉnh cao đang trên đường đến với bạn!",
-    "Đang tìm kiếm những gợi ý học tập thú vị nhất cho bạn...",
-    "Chúng tôi đang khám phá các tùy chọn học tập đẳng cấp cho bạn!",
-    "Hãy thư giãn, những nguồn học liệu chất lượng đang được kết nối...",
-    "Một chút thời gian nữa thôi, những khóa học hấp dẫn đang sắp xuất hiện!",
-    "Đang thu thập thông tin từ những khóa học mới nhất để phục vụ bạn...",
-    "Những gợi ý tuyệt vời đang được chuẩn bị, hãy sẵn sàng nhé!",
-    "Chúng tôi đang nấu nướng những ý tưởng học thú vị cho bạn!",
-    "Hãy đợi một chút, những kho báu kiến thức đang được khai thác!",
-    "Đang sắp xếp những điều thú vị mà bạn sẽ khám phá ngay!",
-    "Chúng tôi đang thổi hồn vào những khóa học độc đáo chỉ dành cho bạn!",
-    "Hãy cùng chờ xem, những điều bất ngờ đang chờ đón bạn phía trước!",
-    "Chúng tôi đang lắng nghe trái tim của bạn để mang đến trải nghiệm học tập tuyệt vời nhất...",
-    "Đang tìm kiếm những ngôi sao học tập sẽ tỏa sáng trong hành trình của bạn!",
-    "Chúng tôi đang làm việc chăm chỉ để mang đến cho bạn những lựa chọn học tập tuyệt vời nhất!",
-    "Đang kết nối những ý tưởng sáng tạo với mong muốn của bạn...",
-    "Hãy chuẩn bị cho một hành trình học tập đầy thú vị và bất ngờ!",
-    "Chúng tôi đang chăm sóc từng chi tiết để mang đến cho bạn trải nghiệm hoàn hảo!",
-    "Đang mở ra cánh cửa dẫn đến những kiến thức mới mẻ và hấp dẫn cho bạn!"
+    'Đang tìm kiếm khóa học phù hợp...',
+    'Gợi ý tuyệt vời đang được chuẩn bị...',
+    'Đang phân tích yêu cầu của bạn...',
+    'Khóa học đỉnh cao sắp xuất hiện...',
 ];
 
+// Component hiển thị tin nhắn đang loading
+const LoadingIndicator = () => {
+    const [loadingText, setLoadingText] = useState(LOADING_MESSAGES[0]);
+    const [dots, setDots] = useState('');
+
+    useEffect(() => {
+        const randomIndex = Math.floor(Math.random() * LOADING_MESSAGES.length);
+        setLoadingText(LOADING_MESSAGES[randomIndex]);
+        const dotsInterval = setInterval(() => {
+            setDots(prev => (prev.length < 3 ? prev + '.' : ''));
+        }, 500);
+        return () => clearInterval(dotsInterval);
+    }, []);
+
+    return (
+        <div className="flex items-center space-x-3 p-4 rounded-xl bg-blue-50 max-w-md animate-pulse">
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                <Bot className="h-4 w-4 text-white" />
+            </div>
+            <div>
+                <p className="text-blue-800 font-medium">
+                    {loadingText}
+                    <span>{dots}</span>
+                </p>
+            </div>
+        </div>
+    );
+};
+
 export function AdvisorChat() {
+    // State và Refs
     const { showNotification } = useNotification();
+    const chatContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    // Thêm các state và functions mới
-    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [isInitialRender, setIsInitialRender] = useState(true);
 
-
-    // Chat states
-    const [messages, setMessages] = useState<Message[]>([{
-        id: 1,
-        content: 'Xin chào! Mình là trợ lý AI của EasyEdu. Mình có thể giúp gì cho bạn về việc chọn khóa học phù hợp không?',
-        sender: 'ai',
-        timestamp: new Date().toISOString(),
-        type: 'text'
-    }]);
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            id: 1,
+            content: 'Xin chào! Mình là trợ lý AI của EasyEdu. Mình có thể giúp gì cho bạn về việc chọn khóa học phù hợp không?',
+            sender: 'ai',
+            timestamp: new Date().toISOString(),
+            type: 'text',
+        },
+    ]);
     const [inputMessage, setInputMessage] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    // Course recommendation states
-    const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [loadingMessage, setLoadingMessage] = useState<string>("");
-
-
-
-    const messagesContainerRef = useRef<HTMLDivElement>(null);
-
+    // Xử lý scroll khi có tin nhắn mới
     useEffect(() => {
-        // Chỉ scroll xuống khi có tin nhắn mới hoặc đang loading
-        if (messages[messages.length - 1]?.sender === 'user' || isLoading) {
-            // Scroll container tin nhắn xuống cuối
-            if (messagesContainerRef.current) {
-                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        if (isInitialRender) {
+            setIsInitialRender(false);
+            return; // Bỏ qua cuộn trong lần render đầu tiên
+        }
+
+        if (chatContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            const isUserSentMessage = messages.length > 0 && messages[messages.length - 1].sender === 'user';
+            const isAIMessageReceived = messages.length > 0 && messages[messages.length - 1].sender === 'ai';
+
+            if ((isUserSentMessage || isAIMessageReceived) && isNearBottom) {
+                chatContainerRef.current.scrollTo({
+                    top: chatContainerRef.current.scrollHeight,
+                    behavior: 'smooth',
+                });
             }
         }
-    }, [messages, isLoading]);
+    }, [messages]);
 
-    const scrollToMessage = (messageId: number) => {
-        setSelectedMessageId(messageId);
-        const messageElement = document.getElementById(`message-${messageId}`);
-        if (messageElement) {
-            messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Highlight message
-            messageElement.classList.add('bg-blue-50');
-            setTimeout(() => {
-                messageElement.classList.remove('bg-blue-50');
-            }, 2000);
+    // Điều chỉnh chiều cao input khi gõ nhiều dòng
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.style.height = '56px'; // Reset height
+            inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
         }
-    };
+    }, [inputMessage]);
 
-    const formatMessage = (message: string) => {
-        return message.split('\n').map((line, i) => {
+    // Format tin nhắn với markdown
+    const formatMessage = (content: string) => {
+        return content.split('\n').map((line, index) => {
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const boldRegex = /\*\*(.*?)\*\*/g;
             const italicRegex = /_(.*?)_/g;
-            const strikethroughRegex = /~~(.*?)~~/g;
 
-            const formattedLine = line
-                .replace(urlRegex, '[[URL:$1]]') // Tạm thay URL
-                .replace(boldRegex, '[[BOLD:$1]]') // Tạm thay in đậm
-                .replace(italicRegex, '[[ITALIC:$1]]') // Tạm thay in nghiêng
-                .replace(strikethroughRegex, '[[STRIKETHROUGH:$1]]'); // Tạm thay gạch ngang
+            let formattedLine = line
+                .replace(urlRegex, '[[URL:$1]]')
+                .replace(boldRegex, '[[BOLD:$1]]')
+                .replace(italicRegex, '[[ITALIC:$1]]');
 
             const parts = formattedLine.split(/\[\[(.*?)\]\]/);
 
             return (
-                <React.Fragment key={i}>
+                <React.Fragment key={index}>
                     {parts.map((part, j) => {
                         if (part.startsWith('URL:')) {
+                            const url = part.substring(4);
                             return (
                                 <a
                                     key={j}
-                                    href={part.substring(4)}
+                                    href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 underline hover:text-blue-800 transition-colors"
+                                    className="text-blue-600 hover:underline"
                                 >
-                                    {part.substring(4)}
+                                    {url}
                                 </a>
                             );
-                        } else if (part.startsWith('BOLD:')) {
-                            return <strong key={j}>{part.substring(5)}</strong>;
-                        } else if (part.startsWith('ITALIC:')) {
-                            return <em key={j}>{part.substring(7)}</em>;
-                        } else if (part.startsWith('STRIKETHROUGH:')) {
-                            return <del key={j}>{part.substring(14)}</del>;
-                        } else {
-                            return part; // Văn bản thông thường
                         }
+                        if (part.startsWith('BOLD:')) return <strong key={j}>{part.substring(5)}</strong>;
+                        if (part.startsWith('ITALIC:')) return <em key={j}>{part.substring(7)}</em>;
+                        return part;
                     })}
                     <br />
                 </React.Fragment>
@@ -131,208 +134,156 @@ export function AdvisorChat() {
         });
     };
 
-    const startNewChat = () => {
-        setMessages([{
-            id: Date.now(),
-            content: 'Xin chào! Mình là trợ lý AI của EasyEdu. Mình có thể giúp gì cho bạn về việc chọn khóa học phù hợp không?',
-            sender: 'ai',
-            timestamp: new Date().toISOString(),
-            type: 'text'
-        }]);
-        setInputMessage('');
-        setSelectedMessageId(null);
-    };
-
-
+    // Xử lý gửi tin nhắn
     const handleSendMessage = async () => {
         if (!inputMessage.trim() || isLoading) return;
 
+        const userMessage = MessageUtils.createUserMessage(inputMessage);
+        setMessages(prev => [...prev, userMessage]);
+
+        setInputMessage('');
+        setIsLoading(true);
+
+        // Cuộn xuống ngay sau khi gửi tin nhắn
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
+
         try {
-            setIsLoading(true);
-            setLoadingMessage(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
-
-            // Add user message
-            const userMessage = MessageUtils.createUserMessage(inputMessage);
-            setMessages(prev => [...prev, userMessage]);
-            setInputMessage('');
-
-            // Get AI response using sendMessageAI
             const response = await sendMessageAIRecommendation(inputMessage);
-
             if (response.code === 1 && response.data?.message) {
-                // Add AI response
-                const aiMessage = MessageUtils.createAIMessage(response.data.message);
-                setMessages(prev => [...prev, aiMessage]);
-
+                setMessages(prev => [...prev, MessageUtils.createAIMessage(response.data.message)]);
             } else {
-                throw new Error('Failed to get AI response');
+                throw new Error('Invalid AI response');
             }
-
         } catch (error) {
-            // Add system error message
-            const errorMessage = MessageUtils.createErrorMessage(
-                'Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.'
-            );
+            const errorMessage: Message = {
+                id: Date.now(),
+                content: 'Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.',
+                sender: 'system',
+                timestamp: new Date().toISOString(),
+                type: 'system',
+            };
             setMessages(prev => [...prev, errorMessage]);
-
-            showNotification(
-                'error',
-                'Lỗi',
-                'Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.'
-            );
+            showNotification('error', 'Lỗi kết nối', 'Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.');
         } finally {
             setIsLoading(false);
-            setLoadingMessage("");
+        }
+    };
+
+    // Xử lý khi nhấn Enter (gửi tin nhắn)
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
     };
 
     return (
         <SearchHeaderAndFooterLayout>
-            <div className="h-[calc(100vh-64px)] flex">
-                {/* Left Sidebar - Message List */}
-                <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
-                    {/* Sidebar Header */}
-                    <div className="h-[76px] p-4 border-b border-slate-200"> {/* Thêm height đồng bộ */}
-                        <div className="h-full flex flex-col justify-center"> {/* Thêm container để căn giữa */}
-                            <h2 className="text-lg font-semibold text-slate-800">Tin nhắn</h2>
-                            <p className="text-sm text-slate-500">Trò chuyện với AI EasyEdu</p>
+            <div className="flex h-[calc(100vh-128px)] bg-gray-100">
+                {/* Khu vực chat chính */}
+                <div className="flex flex-1 flex-col bg-white rounded-lg shadow-sm overflow-hidden mx-2 my-2 md:mx-4 md:my-4">
+                    {/* Header của khu vực chat */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-600 p-2 rounded-full">
+                                <Bot className="h-5 w-5 text-white" />
+                            </div>
+                            <h1 className="font-medium text-lg">Trợ lý AI EasyEdu</h1>
                         </div>
                     </div>
 
-                    {/* Message List */}
-                    <div className="flex-1 overflow-y-auto">
-                        {messages.map((msg, index) => (
-                            msg.sender === 'user' && (
-                                <div
-                                    key={msg.id}
-                                    onClick={() => scrollToMessage(msg.id)}
-                                    className={`p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors
-                           ${selectedMessageId === msg.id ? 'bg-blue-50' : ''}`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <User className="w-5 h-5 text-blue-600"/>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-slate-800">Bạn</p>
-                                            <p className="text-sm text-slate-500 truncate">
-                                                {msg.content}
-                                            </p>
-                                            <p className="text-xs text-slate-400 mt-1">
-                                                {new Date(msg.timestamp).toLocaleTimeString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        ))}
-                    </div>
-
-                    {/* New Chat Button */}
+                    {/* Khu vực tin nhắn */}
                     <div
-                        className="p-3 border-t border-slate-200 h-[72px] flex items-center"> {/* Thêm height cố định và flex */}
-                        <button
-                            onClick={startNewChat}
-                            className="w-full flex items-center justify-center gap-2 py-3 px-4
-                 bg-blue-600 text-white rounded-xl hover:bg-blue-700
-                 transition-colors"
-                        >
-                            <PlusCircle className="w-5 h-5"/>
-                            <span>Cuộc trò chuyện mới</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Right Side - Main Chat Area */}
-                <div className="flex-1 flex flex-col">
-                    {/* Chat Header */}
-                    <div
-                        className="h-[76px] p-4 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400"> {/* Thêm height cố định */}
-                        <div className="flex items-center justify-between max-w-7xl mx-auto h-full"> {/* Thêm h-full */}
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <div
-                                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                                        <Bot className="w-6 h-6 text-white"/>
-                                    </div>
-                                    <span
-                                        className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></span>
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-bold text-white">Trợ lý AI EasyEdu</h1>
-                                </div>
-                            </div>
-                            <div className="hidden sm:block">
-                                <p className="text-sm text-blue-100 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                                    Hỏi AI về bất kỳ khóa học nào bạn quan tâm
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {/* Chat Messages */}
-                    <div
-                        ref={messagesContainerRef}
-                        className="flex-1 overflow-y-auto bg-gradient-to-b from-blue-50 to-white"
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto p-4 bg-gray-50"
+                        style={{ scrollBehavior: 'smooth', maxHeight: '100%' }}
                     >
-                        <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+                        <div className="max-w-3xl mx-auto space-y-6">
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
-                                    id={`message-${message.id}`}
-                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}
-                          transition-colors duration-300`}
+                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {message.sender === 'ai' && (
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-100 to-blue-200
-                                                flex items-center justify-center mr-3 shadow-sm">
-                                            <Bot className="w-6 h-6 text-blue-600" />
+                                        <div className="flex-shrink-0 mr-3">
+                                            <div className="bg-blue-600 rounded-full p-2 flex items-center justify-center">
+                                                <Bot className="h-5 w-5 text-white" />
+                                            </div>
                                         </div>
                                     )}
-                                    <div className={`max-w-[80%] p-4 ${
-                                        message.sender === 'user'
-                                            ? 'bg-blue-600 text-white rounded-2xl rounded-br-none shadow-md'
-                                            : message.sender === 'system'
-                                                ? 'bg-red-50 text-red-600 border border-red-100 rounded-2xl'
-                                                : 'bg-white text-slate-800 rounded-2xl rounded-bl-none shadow-md'
-                                    }`}>
-                                        <p className="leading-relaxed">{formatMessage(message.content)}</p>
+
+                                    <div
+                                        className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${
+                                            message.sender === 'user'
+                                                ? 'bg-blue-600 text-white'
+                                                : message.sender === 'system'
+                                                    ? 'bg-red-50 border border-red-100 text-red-600'
+                                                    : 'bg-white border border-gray-100'
+                                        }`}
+                                    >
+                                        <div className="text-base mb-1">{formatMessage(message.content)}</div>
+                                        <div
+                                            className={`text-xs ${
+                                                message.sender === 'user' ? 'text-blue-200' : 'text-gray-400'
+                                            }`}
+                                        >
+                                            {new Date(message.timestamp).toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </div>
                                     </div>
+
+                                    {message.sender === 'user' && (
+                                        <div className="flex-shrink-0 ml-3">
+                                            <div className="bg-gray-200 rounded-full p-2 flex items-center justify-center">
+                                                <User className="h-5 w-5 text-gray-600" />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
-                            {isLoading && <LoadingMessage/>}
+
+                            {isLoading && <LoadingIndicator />}
                             <div ref={messagesEndRef} />
                         </div>
                     </div>
 
-                    {/* Input Area */}
-                    <div className="border-t border-slate-200 bg-white h-[72px] flex items-center p-3"> {/* Thêm height đồng bộ */}
-                        <div className="max-w-4xl mx-auto flex items-center gap-3 w-full">
-                            <input
-                                type="text"
+                    {/* Input area */}
+                    <div className="border-t border-gray-100 bg-white p-4">
+                        <div className="max-w-3xl mx-auto relative">
+                            <textarea
+                                ref={inputRef}
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                placeholder="Hỏi AI về khóa học bạn quan tâm..."
-                                className="flex-1 py-3 px-4 bg-slate-100 border-0 rounded-xl focus:outline-none focus:ring-2
-                     focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                                onKeyDown={handleKeyDown}
+                                placeholder="Hỏi về khóa học phù hợp với bạn..."
+                                className="w-full px-4 py-3 pr-12 bg-gray-50 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white border border-gray-200 shadow-sm transition-all"
+                                style={{ minHeight: '56px', maxHeight: '120px' }}
                             />
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputMessage.trim() || isLoading}
-                                className="py-3 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700
-                     disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors
-                     flex items-center gap-2 min-w-[100px] justify-center"
+                                className={`absolute right-3 bottom-3 p-2 rounded-full ${
+                                    !inputMessage.trim() || isLoading
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                } transition-colors`}
                             >
                                 {isLoading ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
-                                    <>
-                                        <span>Gửi</span>
-                                        <Send className="w-5 h-5" />
-                                    </>
+                                    <Send className="h-5 w-5" />
                                 )}
                             </button>
+                        </div>
+                        <div className="text-xs text-center mt-2 text-gray-400">
+                            Nhấn Enter để gửi, Shift+Enter để xuống dòng
                         </div>
                     </div>
                 </div>
