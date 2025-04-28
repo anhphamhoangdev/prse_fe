@@ -86,7 +86,8 @@ export const ENDPOINTS = {
         STUDENTS: '/admin/students',
         REVENUE: '/admin/revenue',
         CATEGORY_DISTRIBUTION: '/admin/category-distribution',
-        WITHDRAWS: '/admin/withdraws',
+        WITHDRAWS: '/admin/withdraws', INSTRUCTORS: '/admin/instructors',
+
     },
 
     BANK: {
@@ -108,7 +109,17 @@ export const ENDPOINTS = {
 
     ENROLLMENT : {
         STATS : '/enrollment/stats',
+    },
+
+    TICKET : {
+
+        CREATE: '/ticket/create',
+        GET_ALL: '/ticket/get-all',
+        GET_BY_ID: '/ticket/get-by-id',
+        UPDATE_STATUS: '/ticket/update-status',
+        REPLY: '/ticket/reply',
     }
+
 
 
 

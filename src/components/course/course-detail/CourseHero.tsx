@@ -1,13 +1,13 @@
-import React, {useState} from "react";
-import {InstructorInfo} from "./InstructorInfo";
-import {CourseStats} from "./CourseStats";
-import {EnrollButton} from "./EnrollButton";
-import {Play} from "lucide-react";
-import {VideoPlayer} from "../../common/VideoPlayer";
-import {CourseBasicDTO} from "../../../types/course";
-import {Link} from "react-router-dom";
-import {formatDuration} from "../../../utils/formatSecondToHour";
-import {formatLocalDateTimeToVN} from "../../../utils/formatLocalDateTimeToVN";
+import React, { useState } from "react";
+import { InstructorInfo } from "./InstructorInfo";
+import { CourseStats } from "./CourseStats";
+import { EnrollButton } from "./EnrollButton";
+import { Play } from "lucide-react";
+import { VideoPlayer } from "../../common/VideoPlayer";
+import { CourseBasicDTO } from "../../../types/course";
+import { Link } from "react-router-dom";
+import { formatDuration } from "../../../utils/formatSecondToHour";
+import { formatLocalDateTimeToVN } from "../../../utils/formatLocalDateTimeToVN";
 
 interface CourseHeroProps {
     courseData: CourseBasicDTO;
@@ -29,13 +29,10 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
     };
 
     const renderVideo = () => {
-        // Nếu có video preview và đang phát
         if (courseData.previewVideoUrl && isPlaying) {
             return <VideoPlayer url={courseData.previewVideoUrl} />;
         }
 
-        // Hiển thị image với play button nếu có video preview
-        // Hiển thị chỉ image nếu không có video preview
         return (
             <div className={`relative group ${courseData.previewVideoUrl ? 'cursor-pointer' : ''}`}
                  onClick={courseData.previewVideoUrl ? handlePlayVideo : undefined}>
@@ -45,7 +42,6 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                     className="rounded-lg shadow-lg border-2 border-gray-800 w-full aspect-video object-cover"
                 />
 
-                {/* Chỉ hiển thị overlay và play button nếu có video preview */}
                 {courseData.previewVideoUrl && (
                     <>
                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 group-hover:bg-opacity-50 transition-all">
@@ -60,7 +56,6 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                                         <div className="text-white font-medium">Xem video giới thiệu {courseData.previewVideoDuration? <>
                                             - {formatDuration(courseData.previewVideoDuration)}
                                         </> : null}</div>
-                                        {/*<div className="text-gray-300 text-sm">Watch introduction video</div>*/}
                                     </div>
                                 </div>
                             </div>
@@ -70,6 +65,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
             </div>
         );
     };
+
     return (
         <div className="bg-gray-900 text-white">
             <div className="container mx-auto px-4 py-12">
@@ -102,6 +98,8 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                                 onAddToCart={onAddToCart}
                                 onBuyNow={onBuyNow}
                                 onStartLearning={onStartLearning}
+                                courseId={courseData.id}
+                                courseName={courseData.title}
                             />
                             <p className="text-sm text-gray-400 text-center">Lần cuối cập nhật: {formatLocalDateTimeToVN(courseData.lastUpdated)}</p>
                         </div>

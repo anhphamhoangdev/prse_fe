@@ -74,6 +74,10 @@ import {WebSocketProvider} from "./context/WebSocketContext";
 import InstructorMessages from "./pages/instructor/InstructorMessages";
 import StudentMessages from "./pages/student/StudentMessages";
 import {InstructorProfile} from "./pages/instructor/InstructorProfile";
+import {CreateTicketPage} from "./pages/student/CreateTicketPage";
+import StudentDetailsPage from "./pages/admin/StudentDetailsPage";
+import InstructorManagement from "./pages/admin/InstructorManagement";
+import InstructorDetailsPage from "./pages/admin/InstructorDetailsPage";
 
 function App() {
     return (
@@ -119,6 +123,7 @@ function App() {
                                             <Route path="/checkout" element={<CheckoutPage />} />
                                             <Route path="/payment/success" element={<PaymentSuccessPage />} />
                                             <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
+                                            <Route path="/create-ticket" element={<CreateTicketPage />} />
 
                                             {/* Learning Routes */}
                                             <Route path="/course-detail/:courseId/:chapterId/:lessonId" element={<LessonDetailLayout />}>
@@ -175,8 +180,11 @@ function App() {
                                     <AdminLayout>
                                         <Routes>
                                             <Route path="dashboard" element={<AdminDashboard />} />
-                                            <Route path="users" element={<StudentManagement />} />
-                                            <Route path="withdraw" element={<AdminWithdraw />} />
+                                            <Route path="students" element={<StudentManagement />} />
+                                            <Route path="student/:id" element={<StudentDetailsPage />} />
+                                            <Route path="instructors" element={<InstructorManagement />} />
+                                            <Route path="instructor/:id" element={<InstructorDetailsPage />} />
+                                            <Route path="withdrawals" element={<AdminWithdraw />} />
                                         </Routes>
                                     </AdminLayout>
                                 }

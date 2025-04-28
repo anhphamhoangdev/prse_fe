@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SearchHeaderAndFooterLayout } from "../../layouts/UserLayout";
 import { getWithAuth } from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
+import { Grid, CheckCircle, Loader, XCircle, Headphones, ChevronDown, ChevronUp } from "lucide-react";
 
 interface PaymentItem {
     id: number;
@@ -46,6 +47,7 @@ export function InvoicesPage() {
         cancelled: 0
     });
     const [expandedInvoice, setExpandedInvoice] = useState<number | null>(null);
+    const navigate = useNavigate();
 
     const itemsPerPage = 10;
 
@@ -56,7 +58,6 @@ export function InvoicesPage() {
 
             const data = response.paymentRequestLogEntities || [];
             setInvoices(data);
-            // Calculate stats
             setStats({
                 all: data.length,
                 paid: data.filter(inv => inv.status === "PAID").length,
@@ -64,7 +65,6 @@ export function InvoicesPage() {
                 cancelled: data.filter(inv => inv.status === "CANCELLED").length
             });
 
-            // Initialize filtered invoices (all invoices by default)
             setFilteredInvoices(data);
             setTotalPages(Math.ceil(data.length / itemsPerPage) || 1);
             setCurrentPage(1);
@@ -84,7 +84,6 @@ export function InvoicesPage() {
     }, []);
 
     useEffect(() => {
-        // Filter invoices by active tab
         const filtered = invoices.filter(inv => {
             if (activeTab === "all") return true;
             if (activeTab === "paid") return inv.status === "PAID";
@@ -111,32 +110,44 @@ export function InvoicesPage() {
         setExpandedInvoice(expandedInvoice === invoiceId ? null : invoiceId);
     };
 
+    const handleSupportRequest = (invoice: PaymentRequest) => {
+        navigate("/create-ticket", {
+            state: {
+                transactionId: invoice.transactionId,
+                paymentLogId: invoice.id,
+                amount: invoice.amount,
+                createdAt: invoice.createdAt,
+                requestData: invoice.requestData
+            }
+        });
+    };
+
     const tabsConfig = [
         {
             id: "all",
             label: "Tất cả",
-            icon: "fa-th-large",
+            icon: <Grid className="w-4 h-4" />,
             color: "from-blue-500 to-blue-700",
             description: "Tất cả các hóa đơn"
         },
         {
             id: "paid",
             label: "Đã thanh toán",
-            icon: "fa-check-circle",
+            icon: <CheckCircle className="w-4 h-4" />,
             color: "from-green-500 to-emerald-600",
             description: "Các hóa đơn đã thanh toán thành công"
         },
         {
             id: "processing",
             label: "Đang xử lý",
-            icon: "fa-spinner",
+            icon: <Loader className="w-4 h-4" />,
             color: "from-cyan-500 to-cyan-600",
             description: "Các hóa đơn đang chờ xử lý"
         },
         {
             id: "cancelled",
             label: "Đã hủy",
-            icon: "fa-times-circle",
+            icon: <XCircle className="w-4 h-4" />,
             color: "from-red-500 to-red-600",
             description: "Các hóa đơn đã bị hủy"
         }
@@ -177,7 +188,6 @@ export function InvoicesPage() {
         }
     };
 
-    // Paginate filtered invoices
     const paginatedInvoices = filteredInvoices.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -187,7 +197,6 @@ export function InvoicesPage() {
         <SearchHeaderAndFooterLayout>
             <div className="min-h-screen bg-gray-50 py-4">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Header */}
                     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
                         <h1 className="text-3xl font-bold text-gray-900">Hóa đơn của tôi</h1>
                         <Link
@@ -198,7 +207,6 @@ export function InvoicesPage() {
                         </Link>
                     </div>
 
-                    {/* Tabs */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         {tabsConfig.map((tab) => {
                             const isActive = activeTab === tab.id;
@@ -218,7 +226,7 @@ export function InvoicesPage() {
                                                 isActive ? "bg-white/20" : `bg-gradient-to-r ${tab.color} bg-opacity-10 text-white`
                                             }`}
                                         >
-                                            <i className={`fas ${tab.icon} ${isActive ? "text-white" : ""}`}></i>
+                                            {tab.icon}
                                         </div>
                                         <span className="font-medium ml-3">{tab.label}</span>
                                     </div>
@@ -239,7 +247,6 @@ export function InvoicesPage() {
                         })}
                     </div>
 
-                    {/* Loading State */}
                     {loading && (
                         <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl shadow-sm border border-gray-100">
                             <div className="relative h-16 w-16 mb-4">
@@ -250,11 +257,10 @@ export function InvoicesPage() {
                         </div>
                     )}
 
-                    {/* Error State */}
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl text-center shadow-sm">
                             <div className="mb-3">
-                                <i className="fas fa-exclamation-circle text-3xl text-red-500"></i>
+                                <XCircle className="text-3xl text-red-500" />
                             </div>
                             <h3 className="text-lg font-medium mb-2">Đã xảy ra lỗi</h3>
                             <p>{error}</p>
@@ -262,26 +268,15 @@ export function InvoicesPage() {
                                 onClick={fetchInvoices}
                                 className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
                             >
-                                <i className="fas fa-redo mr-2"></i> Thử lại
+                                <Loader className="w-4 h-4 mr-2 inline" /> Thử lại
                             </button>
                         </div>
                     )}
 
-                    {/* Empty State */}
                     {!loading && !error && filteredInvoices.length === 0 && (
                         <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
                             <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-blue-50 mb-6">
-                                <i
-                                    className={`fas ${currentTab.icon} text-4xl ${
-                                        activeTab === "paid"
-                                            ? "text-green-500"
-                                            : activeTab === "processing"
-                                                ? "text-blue-500"
-                                                : activeTab === "cancelled"
-                                                    ? "text-red-500"
-                                                    : "text-indigo-500"
-                                    }`}
-                                ></i>
+                                {currentTab.icon}
                             </div>
                             <h3 className="text-xl font-medium text-gray-900 mb-3">
                                 {activeTab === "all"
@@ -305,12 +300,11 @@ export function InvoicesPage() {
                                 to="/courses"
                                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300"
                             >
-                                <i className="fas fa-search mr-2"></i> Khám phá khóa học ngay
+                                <Grid className="w-4 h-4 mr-2" /> Khám phá khóa học ngay
                             </Link>
                         </div>
                     )}
 
-                    {/* Invoices List */}
                     {!loading && !error && filteredInvoices.length > 0 && (
                         <>
                             <div className="flex flex-col gap-6">
@@ -351,20 +345,29 @@ export function InvoicesPage() {
                                                 </span>
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={() => toggleInvoiceDetails(invoice.id)}
-                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                                        >
-                                            {expandedInvoice === invoice.id ? (
-                                                <>
-                                                    <i className="fas fa-chevron-up mr-2"></i> Ẩn chi tiết
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-chevron-down mr-2"></i> Xem chi tiết
-                                                </>
-                                            )}
-                                        </button>
+                                        <div className="flex justify-between items-center">
+                                            <button
+                                                onClick={() => toggleInvoiceDetails(invoice.id)}
+                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                                            >
+                                                {expandedInvoice === invoice.id ? (
+                                                    <>
+                                                        <ChevronUp className="w-4 h-4 mr-2" /> Ẩn chi tiết
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ChevronDown className="w-4 h-4 mr-2" /> Xem chi tiết
+                                                    </>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => handleSupportRequest(invoice)}
+                                                className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                                            >
+                                                <Headphones className="w-4 h-4" />
+                                                Yêu cầu hỗ trợ
+                                            </button>
+                                        </div>
                                         {expandedInvoice === invoice.id && (
                                             <div className="mt-4">
                                                 <h4 className="text-sm font-medium text-gray-700 mb-2">Khóa học:</h4>
@@ -375,7 +378,6 @@ export function InvoicesPage() {
                                 ))}
                             </div>
 
-                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="mt-8 flex justify-center">
                                     <div className="inline-flex rounded-md shadow-sm">
@@ -388,7 +390,7 @@ export function InvoicesPage() {
                                                     : "bg-white text-blue-600 hover:bg-blue-50 border-gray-200"
                                             }`}
                                         >
-                                            <i className="fas fa-angle-double-left"></i>
+                                            <ChevronDown className="w-4 h-4 rotate-90" />
                                         </button>
                                         <button
                                             onClick={() => handlePageChange(currentPage - 1)}
@@ -399,7 +401,7 @@ export function InvoicesPage() {
                                                     : "bg-white text-blue-600 hover:bg-blue-50 border-gray-200"
                                             }`}
                                         >
-                                            <i className="fas fa-angle-left"></i>
+                                            <ChevronDown className="w-4 h-4 rotate-90" />
                                         </button>
 
                                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -441,7 +443,7 @@ export function InvoicesPage() {
                                                     : "bg-white text-blue-600 hover:bg-blue-50 border-gray-200"
                                             }`}
                                         >
-                                            <i className="fas fa-angle-right"></i>
+                                            <ChevronDown className="w-4 h-4 -rotate-90" />
                                         </button>
                                         <button
                                             onClick={() => handlePageChange(totalPages)}
@@ -452,7 +454,7 @@ export function InvoicesPage() {
                                                     : "bg-white text-blue-600 hover:bg-blue-50 border-gray-200"
                                             }`}
                                         >
-                                            <i className="fas fa-angle-double-right"></i>
+                                            <ChevronDown className="w-4 h-4 -rotate-90" />
                                         </button>
                                     </div>
                                 </div>

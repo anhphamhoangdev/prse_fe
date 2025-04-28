@@ -1,6 +1,7 @@
 import React from "react";
-import {Play, ShoppingCart} from "lucide-react";
-import {formatCurrency} from "../../../utils/formatCurrency";
+import { Play, ShoppingCart, Headphones } from "lucide-react";
+import { formatCurrency } from "../../../utils/formatCurrency";
+import { useNavigate } from "react-router-dom";
 
 interface EnrollButtonProps {
     isEnrolled: boolean;
@@ -10,6 +11,8 @@ interface EnrollButtonProps {
     onBuyNow?: () => void;
     onStartLearning?: () => void;
     isAside?: boolean;
+    courseId?: number;
+    courseName?: string;
 }
 
 export const EnrollButton: React.FC<EnrollButtonProps> = ({
@@ -19,8 +22,11 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
                                                               onAddToCart = () => {},
                                                               onBuyNow = () => {},
                                                               onStartLearning = () => {},
-                                                              isAside = false
+                                                              isAside = false,
+                                                              courseId,
+                                                              courseName,
                                                           }) => {
+    const navigate = useNavigate();
     const hasDiscount = discountPrice != null && discountPrice < originalPrice && originalPrice !== 0;
     const isFree = originalPrice === 0;
 
@@ -45,16 +51,35 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
         return <span className="font-medium">{formatCurrency(originalPrice)}</span>;
     };
 
+    const handleSupportRequest = () => {
+        navigate("/create-ticket", {
+            state: {
+                courseId,
+                courseName,
+            },
+        });
+    };
+
     if (isEnrolled) {
         return (
-            <button
-                onClick={onStartLearning}
-                className={`w-full bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 
-                    ${isAside ? 'px-4 py-2 text-sm' : 'px-8 py-3'}`}
-            >
-                <Play className="w-4 h-4" />
-                Vào học
-            </button>
+            <div className={`flex gap-3 w-full ${isAside ? 'flex-col' : 'flex-row'}`}>
+                <button
+                    onClick={onStartLearning}
+                    className={`flex-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 
+                        ${isAside ? 'px-4 py-2 text-sm' : 'px-8 py-3'}`}
+                >
+                    <Play className="w-4 h-4" />
+                    Vào học
+                </button>
+                <button
+                    onClick={handleSupportRequest}
+                    className={`flex-1 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 
+                        ${isAside ? 'px-4 py-2 text-sm' : 'px-8 py-3'}`}
+                >
+                    <Headphones className="w-4 h-4" />
+                    Hỗ trợ
+                </button>
+            </div>
         );
     }
 
@@ -89,17 +114,18 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
                     </div>
                 )}
                 <button
-                    onClick={onBuyNow}
-                    className="w-full bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                    Mua ngay - {renderPrice()}
-                </button>
-                <button
                     onClick={onAddToCart}
                     className="w-full bg-white text-blue-600 px-4 py-2 text-sm rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
                 >
                     <ShoppingCart className="w-4 h-4" />
-                    Thêm vào giỏ
+                    Thêm vào giỏ - {renderPrice()}
+                </button>
+                <button
+                    onClick={handleSupportRequest}
+                    className="w-full bg-white text-blue-600 px-4 py-2 text-sm rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                >
+                    <Headphones className="w-4 h-4" />
+                    Yêu cầu hỗ trợ
                 </button>
             </div>
         );
@@ -108,24 +134,25 @@ export const EnrollButton: React.FC<EnrollButtonProps> = ({
     return (
         <div className="flex gap-3 w-full relative">
             {hasDiscount && (
-                <div className="absolute -top-3 left-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                <div
+                    className="absolute -top-3 left-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
                     -{calculateDiscount()}% GIẢM
                 </div>
             )}
             <button
-                onClick={onBuyNow}
+                onClick={onAddToCart}
                 className="flex-[3] bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
             >
-                Mua ngay - {renderPrice()}
+                <ShoppingCart className="w-4 h-4"/>
+                <span>Thêm vào giỏ - {renderPrice()}</span>
             </button>
             <button
-                onClick={onAddToCart}
-                className="flex-1 bg-white text-blue-600 px-4 py-3 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                onClick={handleSupportRequest}
+                className="flex-1 bg-white text-blue-600 px-4 py-3 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
             >
-                <ShoppingCart className="w-4 h-4" />
-                <span>Thêm vào giỏ</span>
+                <Headphones className="w-4 h-4"/>
+                <span>Hỗ trợ</span>
             </button>
         </div>
     );
 };
-

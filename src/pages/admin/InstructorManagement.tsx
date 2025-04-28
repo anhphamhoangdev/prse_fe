@@ -4,12 +4,12 @@ import { putAdminWithAuth, requestAdminWithAuth } from '../../utils/request';
 import { ENDPOINTS } from '../../constants/endpoint';
 import { useNavigate } from 'react-router-dom';
 
-interface StudentData {
+interface InstructorData {
     id: number;
-    username: string; // Added username field
     fullName: string;
-    email: string;
-    phoneNumber: string;
+    title: string;
+    totalStudent: number;
+    totalCourse: number;
     isActive: boolean;
 }
 
@@ -21,9 +21,9 @@ interface PageResponse<T> {
     number: number;
 }
 
-const StudentManagement = () => {
+const InstructorManagement = () => {
     // State management
-    const [students, setStudents] = useState<StudentData[]>([]);
+    const [instructors, setInstructors] = useState<InstructorData[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +40,7 @@ const StudentManagement = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchStudents = async () => {
+        const fetchInstructors = async () => {
             setLoading(true);
             try {
                 const queryParams = new URLSearchParams({
@@ -50,37 +50,37 @@ const StudentManagement = () => {
                     status: statusFilter,
                 });
 
-                const response = await requestAdminWithAuth<PageResponse<StudentData>>(
-                    `${ENDPOINTS.ADMIN.STUDENTS}?${queryParams}`
+                const response = await requestAdminWithAuth<PageResponse<InstructorData>>(
+                    `${ENDPOINTS.ADMIN.INSTRUCTORS}?${queryParams}`
                 );
 
-                setStudents(response.content);
+                setInstructors(response.content);
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred');
+                setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi lấy danh sách giảng viên');
             } finally {
                 setLoading(false);
             }
         };
 
-        const timeoutId = setTimeout(fetchStudents, 300); // Debounce 300ms
+        const timeoutId = setTimeout(fetchInstructors, 300); // Debounce 300ms
         return () => clearTimeout(timeoutId);
     }, [currentPage, pageSize, searchTerm, statusFilter]);
 
-    const toggleStudentActive = async (studentId: number) => {
+    const toggleInstructorActive = async (instructorId: number) => {
         try {
-            await putAdminWithAuth(`${ENDPOINTS.ADMIN.STUDENTS}/${studentId}/toggle-status`, {});
-            setStudents(students.map((student) =>
-                student.id === studentId ? { ...student, isActive: !student.isActive } : student
+            await putAdminWithAuth(`${ENDPOINTS.ADMIN.INSTRUCTORS}/${instructorId}/toggle-status`, {});
+            setInstructors(instructors.map((instructor) =>
+                instructor.id === instructorId ? { ...instructor, isActive: !instructor.isActive } : instructor
             ));
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to update user status');
+            setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái giảng viên');
         }
     };
 
-    const viewStudentDetails = (studentId: number) => {
-        navigate(`/admin/student/${studentId}`);
+    const viewInstructorDetails = (instructorId: number) => {
+        navigate(`/admin/instructor/${instructorId}`);
     };
 
     return (
@@ -89,12 +89,12 @@ const StudentManagement = () => {
                 <div className="p-6 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Quản lý người dùng</h1>
-                            <p className="text-gray-500 mt-1">Tổng số: {totalElements} người dùng</p>
+                            <h1 className="text-3xl font-bold text-gray-900">Quản lý giảng viên</h1>
+                            <p className="text-gray-500 mt-1">Tổng số: {totalElements} giảng viên</p>
                         </div>
                         <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
                             <span className="text-lg">+</span>
-                            Thêm người dùng
+                            Thêm giảng viên
                         </button>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ const StudentManagement = () => {
                         <div className="relative flex-1">
                             <input
                                 type="text"
-                                placeholder="Tìm kiếm theo tên, username, email..."
+                                placeholder="Tìm kiếm theo tên, chức danh..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
@@ -135,10 +135,10 @@ const StudentManagement = () => {
                             <thead className="bg-gray-50 text-xs uppercase">
                             <tr>
                                 <th className="px-6 py-3 text-gray-600">ID</th>
-                                <th className="px-6 py-3 text-gray-600">Username</th>
                                 <th className="px-6 py-3 text-gray-600">Họ và tên</th>
-                                <th className="px-6 py-3 text-gray-600">Email</th>
-                                <th className="px-6 py-3 text-gray-600">Số điện thoại</th>
+                                <th className="px-6 py-3 text-gray-600">Chức danh</th>
+                                <th className="px-6 py-3 text-gray-600">Số học viên</th>
+                                <th className="px-6 py-3 text-gray-600">Số khóa học</th>
                                 <th className="px-6 py-3 text-gray-600">Trạng thái</th>
                                 <th className="px-6 py-3 text-gray-600">Hành động</th>
                             </tr>
@@ -150,46 +150,46 @@ const StudentManagement = () => {
                                         <RefreshCw className="h-6 w-6 animate-spin mx-auto text-gray-400" />
                                     </td>
                                 </tr>
-                            ) : students.length === 0 ? (
+                            ) : instructors.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                                        Không tìm thấy người dùng nào
+                                        Không tìm thấy giảng viên nào
                                     </td>
                                 </tr>
                             ) : (
-                                students.map((student) => (
-                                    <tr key={student.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 font-medium">{student.id}</td>
-                                        <td className="px-6 py-4 font-medium">@{student.username}</td>
-                                        <td className="px-6 py-4">{student.fullName}</td>
-                                        <td className="px-6 py-4">{student.email}</td>
-                                        <td className="px-6 py-4">{student.phoneNumber}</td>
+                                instructors.map((instructor) => (
+                                    <tr key={instructor.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 font-medium">{instructor.id}</td>
+                                        <td className="px-6 py-4">{instructor.fullName}</td>
+                                        <td className="px-6 py-4">{instructor.title}</td>
+                                        <td className="px-6 py-4">{instructor.totalStudent}</td>
+                                        <td className="px-6 py-4">{instructor.totalCourse}</td>
                                         <td className="px-6 py-4">
                                             <span
                                                 className={`px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap ${
-                                                    student.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                    instructor.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                                 }`}
                                             >
-                                                {student.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                                                {instructor.isActive ? 'Hoạt động' : 'Không hoạt động'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => viewStudentDetails(student.id)}
+                                                    onClick={() => viewInstructorDetails(instructor.id)}
                                                     className="px-3 py-1 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
                                                 >
                                                     Xem chi tiết
                                                 </button>
                                                 <button
-                                                    onClick={() => toggleStudentActive(student.id)}
+                                                    onClick={() => toggleInstructorActive(instructor.id)}
                                                     className={`px-3 py-1 rounded-lg border transition-colors ${
-                                                        student.isActive
+                                                        instructor.isActive
                                                             ? 'border-red-200 text-red-600 hover:bg-red-50'
                                                             : 'border-green-200 text-green-600 hover:bg-green-50'
                                                     }`}
                                                 >
-                                                    {student.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                                                    {instructor.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
                                                 </button>
                                             </div>
                                         </td>
@@ -202,7 +202,7 @@ const StudentManagement = () => {
 
                     <div className="mt-4 flex items-center justify-between">
                         <div className="text-sm text-gray-500">
-                            Hiển thị {students.length} trên tổng số {totalElements} người dùng
+                            Hiển thị {instructors.length} trên tổng số {totalElements} giảng viên
                         </div>
                         <div className="flex items-center gap-4">
                             <select
@@ -239,4 +239,4 @@ const StudentManagement = () => {
     );
 };
 
-export default StudentManagement;
+export default InstructorManagement;

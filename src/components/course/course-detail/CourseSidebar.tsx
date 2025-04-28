@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BookOpen, Clock, FileText, Notebook, Copy, Check } from "lucide-react";
 import { EnrollButton } from "./EnrollButton";
 import { CourseBasicDTO } from "../../../types/course";
+import { useNavigate } from "react-router-dom";
 
 interface CourseSidebarProps {
     courseData: CourseBasicDTO;
@@ -17,11 +18,21 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
                                                                 onStartLearning
                                                             }) => {
     const [copied, setCopied] = useState(false);
+    const navigate = useNavigate();
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
         setCopied(true);
         setTimeout(() => setCopied(false), 1000);
+    };
+
+    const handleSupportRequest = () => {
+        navigate("/create-ticket", {
+            state: {
+                courseId: courseData.id,
+                courseName: courseData.title,
+            },
+        });
     };
 
     return (

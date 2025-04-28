@@ -12,6 +12,7 @@ import {
     Bot,
     History,
     MessageCircle,
+    Headphones,
 } from 'lucide-react';
 import { ENDPOINTS } from '../../constants/endpoint';
 import { requestWithAuth } from '../../utils/request';
@@ -130,9 +131,9 @@ export const Header = () => {
                     <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                         <img src="/logo.png" alt="HCMUTE Logo" className="w-10 h-10 object-contain" />
                         <span className="text-2xl sm:text-3xl font-bold">
-              <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Easy</span>
-              <span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
-            </span>
+                            <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Easy</span>
+                            <span className="bg-gradient-to-r from-slate-600 to-slate-900 bg-clip-text text-transparent">Edu</span>
+                        </span>
                     </Link>
 
                     <div className="hidden sm:block flex-1 max-w-xl mx-8">
@@ -167,8 +168,8 @@ export const Header = () => {
                                         <ShoppingCart className="w-6 h-6 text-slate-600 hover:text-blue-500 transition-colors" />
                                         {cartCount > 0 && (
                                             <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                        {cartCount}
-                      </span>
+                                                {cartCount}
+                                            </span>
                                         )}
                                     </Link>
 
@@ -224,6 +225,13 @@ export const Header = () => {
                                                 >
                                                     <History className="w-4 h-4 mr-2" />
                                                     Lịch sử giao dịch
+                                                </Link>
+                                                <Link
+                                                    to="/create-ticket"
+                                                    className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                                >
+                                                    <Headphones className="w-4 h-4 mr-2" />
+                                                    Hỗ trợ
                                                 </Link>
                                                 {user?.instructor ? (
                                                     <button
