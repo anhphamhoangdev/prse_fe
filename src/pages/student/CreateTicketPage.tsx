@@ -293,7 +293,7 @@ return (
                         to="/tickets"
                         className="flex items-center text-sm text-blue-600 hover:text-blue-700 transition-colors"
                     >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        {/*<ChevronLeft className="w-4 h-4 mr-1" />*/}
                         Lịch sử Yêu cầu hỗ trợ
                     </Link>
                 </div>

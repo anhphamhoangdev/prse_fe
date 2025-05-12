@@ -24,8 +24,9 @@ interface PageResponse<T> {
 const InstructorManagement = () => {
     // State management
     const [instructors, setInstructors] = useState<InstructorData[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Đặt loading thành true ngay từ đầu
     const [error, setError] = useState<string | null>(null);
+    const [initialLoad, setInitialLoad] = useState(true); // Thêm state để theo dõi lần tải đầu tiên
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(0);
@@ -57,8 +58,10 @@ const InstructorManagement = () => {
                 setInstructors(response.content);
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
+                setInitialLoad(false); // Đánh dấu đã tải xong lần đầu
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi lấy danh sách giảng viên');
+                setInitialLoad(false); // Đánh dấu đã tải xong lần đầu ngay cả khi có lỗi
             } finally {
                 setLoading(false);
             }
@@ -144,7 +147,7 @@ const InstructorManagement = () => {
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                            {loading ? (
+                            {loading || initialLoad ? (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-8 text-center">
                                         <RefreshCw className="h-6 w-6 animate-spin mx-auto text-gray-400" />

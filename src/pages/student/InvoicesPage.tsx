@@ -200,7 +200,7 @@ export function InvoicesPage() {
                     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
                         <h1 className="text-3xl font-bold text-gray-900">Hóa đơn của tôi</h1>
                         <Link
-                            to="/courses"
+                            to="/"
                             className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-300 shadow-sm"
                         >
                             Xem các khóa học

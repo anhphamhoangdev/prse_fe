@@ -78,6 +78,7 @@ import {CreateTicketPage} from "./pages/student/CreateTicketPage";
 import StudentDetailsPage from "./pages/admin/StudentDetailsPage";
 import InstructorManagement from "./pages/admin/InstructorManagement";
 import InstructorDetailsPage from "./pages/admin/InstructorDetailsPage";
+import TicketManagement from "./pages/admin/TicketManagement";
 
 function App() {
     return (
@@ -184,6 +185,8 @@ function App() {
                                             <Route path="student/:id" element={<StudentDetailsPage />} />
                                             <Route path="instructors" element={<InstructorManagement />} />
                                             <Route path="instructor/:id" element={<InstructorDetailsPage />} />
+                                            <Route path="tickets" element={<TicketManagement />} />
+
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
                                         </Routes>
                                     </AdminLayout>
