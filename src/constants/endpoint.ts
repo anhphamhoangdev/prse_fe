@@ -87,7 +87,8 @@ export const ENDPOINTS = {
         REVENUE: '/admin/revenue',
         CATEGORY_DISTRIBUTION: '/admin/category-distribution',
         WITHDRAWS: '/admin/withdraws', INSTRUCTORS: '/admin/instructors',
-        TICKETS: '/admin/tickets'
+        TICKETS: '/admin/tickets',
+        INVOICE: '/admin/invoices',
 
     },
 

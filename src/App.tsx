@@ -79,6 +79,7 @@ import StudentDetailsPage from "./pages/admin/StudentDetailsPage";
 import InstructorManagement from "./pages/admin/InstructorManagement";
 import InstructorDetailsPage from "./pages/admin/InstructorDetailsPage";
 import TicketManagement from "./pages/admin/TicketManagement";
+import InvoiceManagement from "./pages/admin/InvoiceManagement";
 
 function App() {
     return (
@@ -186,7 +187,7 @@ function App() {
                                             <Route path="instructors" element={<InstructorManagement />} />
                                             <Route path="instructor/:id" element={<InstructorDetailsPage />} />
                                             <Route path="tickets" element={<TicketManagement />} />
-
+                                            <Route path="invoices" element={<InvoiceManagement />} />
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
                                         </Routes>
                                     </AdminLayout>
