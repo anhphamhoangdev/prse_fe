@@ -89,6 +89,7 @@ export const ENDPOINTS = {
         WITHDRAWS: '/admin/withdraws', INSTRUCTORS: '/admin/instructors',
         TICKETS: '/admin/tickets',
         INVOICE: '/admin/invoices',
+        COURSES: '/admin/courses',
 
     },
 

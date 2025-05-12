@@ -714,7 +714,7 @@ const StudentDetailsPage = () => {
                                             <div
                                                 key={course.courseId}
                                                 className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer flex flex-col md:flex-row"
-                                                onClick={() => window.open(`https://prse-fe.vercel.app/course-detail/${course.courseId}`)}
+                                                onClick={() => navigate("/admin/courses/" + course.courseId)}
                                             >
                                                 <div className="w-full md:w-64 flex-shrink-0 overflow-hidden relative">
                                                     <div className="aspect-[16/9]">

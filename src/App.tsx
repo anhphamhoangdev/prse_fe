@@ -80,6 +80,9 @@ import InstructorManagement from "./pages/admin/InstructorManagement";
 import InstructorDetailsPage from "./pages/admin/InstructorDetailsPage";
 import TicketManagement from "./pages/admin/TicketManagement";
 import InvoiceManagement from "./pages/admin/InvoiceManagement";
+import CourseManagement from "./pages/admin/CourseManagement";
+import AdminCourseEdit from "./pages/admin/AdminCourseDetail";
+import AdminCourseDetail from "./pages/admin/AdminCourseDetail";
 
 function App() {
     return (
@@ -188,6 +191,8 @@ function App() {
                                             <Route path="instructor/:id" element={<InstructorDetailsPage />} />
                                             <Route path="tickets" element={<TicketManagement />} />
                                             <Route path="invoices" element={<InvoiceManagement />} />
+                                            <Route path="courses" element={<CourseManagement />} />
+                                            <Route path="courses/:id" element={<AdminCourseDetail />} />
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
                                         </Routes>
                                     </AdminLayout>
