@@ -88,6 +88,45 @@ export const AdminDashboard = () => {
         totalNewTickets: 0
     });
 
+    const quickActions = [
+        {
+            title: "Quản lý học viên",
+            description: "Danh sách học viên",
+            path: "/admin/students",
+            bgColor: "bg-blue-50",
+            hoverColor: "hover:bg-blue-100",
+            textColor: "text-blue-900",
+            descColor: "text-blue-600"
+        },
+        {
+            title: "Quản lý giảng viên",
+            description: "Danh sách giảng viên",
+            path: "/admin/instructors",
+            bgColor: "bg-purple-50",
+            hoverColor: "hover:bg-purple-100",
+            textColor: "text-purple-900",
+            descColor: "text-purple-600"
+        },
+        {
+            title: "Quản lý khóa học",
+            description: "Danh sách khóa học",
+            path: "/admin/courses",
+            bgColor: "bg-green-50",
+            hoverColor: "hover:bg-green-100",
+            textColor: "text-green-900",
+            descColor: "text-green-600"
+        },
+        {
+            title: "Quản lý thanh toán",
+            description: "Danh sách hóa đơn",
+            path: "/admin/invoices",
+            bgColor: "bg-orange-50",
+            hoverColor: "hover:bg-orange-100",
+            textColor: "text-orange-900",
+            descColor: "text-orange-600"
+        }
+    ];
+
     const navigate = useNavigate();
 
     function formatCurrency(amount: number): string {
@@ -329,70 +368,84 @@ export const AdminDashboard = () => {
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Vấn đề cần xử lý</h2>
                     <div className="space-y-4">
                         {/* Yêu cầu rút tiền */}
-                        {processStatistics.totalNewWithdraws > 0 ? (
-                            <button
-                                onClick={() => navigate('/admin/withdrawals')}
-                                className="w-full flex items-start p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200 group"
-                            >
-                                <AlertCircle
-                                    className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
-                                <div className="text-left">
-                                    <h3 className="text-sm font-medium text-yellow-900">{processStatistics.totalNewWithdraws} yêu cầu rút tiền</h3>
-                                    <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
-                                </div>
-                                <div className="ml-auto flex items-center">
-                                    <ArrowRight className="w-5 h-5 text-yellow-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
-                                </div>
-                            </button>
-                        ) : (
-                            <div className="flex items-start p-4 bg-green-50 rounded-lg">
-                                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3"/>
-                                <div>
-                                    <h3 className="text-sm font-medium text-green-900">Không có yêu cầu rút tiền mới</h3>
-                                    <p className="text-sm text-green-600">Tất cả yêu cầu đã được xử lý</p>
-                                </div>
+                        <button
+                            onClick={() => navigate('/admin/withdrawals')}
+                            className={`w-full flex items-start p-4 rounded-lg hover:bg-opacity-80 transition-colors duration-200 group ${
+                                processStatistics.totalNewWithdraws > 0 ? 'bg-yellow-50 hover:bg-yellow-100' : 'bg-green-50 hover:bg-green-100'
+                            }`}
+                        >
+                            {processStatistics.totalNewWithdraws > 0 ? (
+                                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                            ) : (
+                                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                            )}
+                            <div className="text-left">
+                                {processStatistics.totalNewWithdraws > 0 ? (
+                                    <>
+                                        <h3 className="text-sm font-medium text-yellow-900">{processStatistics.totalNewWithdraws} yêu cầu rút tiền</h3>
+                                        <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h3 className="text-sm font-medium text-green-900">Không có yêu cầu rút tiền mới</h3>
+                                        <p className="text-sm text-green-600">Tất cả yêu cầu đã được xử lý</p>
+                                    </>
+                                )}
                             </div>
-                        )}
+                            <div className="ml-auto flex items-center">
+                                <ArrowRight className={`w-5 h-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ${
+                                    processStatistics.totalNewWithdraws > 0 ? 'text-yellow-600' : 'text-green-600'
+                                }`}/>
+                            </div>
+                        </button>
 
-                        {/* Tickets hỗ trợ - nếu có */}
-                        {processStatistics.totalNewTickets > 0 && (
-                            <button
-                                onClick={() => navigate('/admin/tickets')}
-                                className="w-full flex items-start p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200 group"
-                            >
-                                <AlertCircle
-                                    className="w-5 h-5 text-blue-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
-                                <div className="text-left">
-                                    <h3 className="text-sm font-medium text-blue-900">{processStatistics.totalNewTickets} ticket hỗ trợ</h3>
-                                    <p className="text-sm text-blue-600">Đang chờ phản hồi</p>
-                                </div>
-                                <div className="ml-auto flex items-center">
-                                    <ArrowRight className="w-5 h-5 text-blue-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
-                                </div>
-                            </button>
-                        )}
+                        {/* Tickets hỗ trợ - luôn hiển thị */}
+                        <button
+                            onClick={() => navigate('/admin/tickets')}
+                            className={`w-full flex items-start p-4 rounded-lg hover:bg-opacity-80 transition-colors duration-200 group ${
+                                processStatistics.totalNewTickets > 0 ? 'bg-blue-50 hover:bg-blue-100' : 'bg-green-50 hover:bg-green-100'
+                            }`}
+                        >
+                            {processStatistics.totalNewTickets > 0 ? (
+                                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                            ) : (
+                                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                            )}
+                            <div className="text-left">
+                                {processStatistics.totalNewTickets > 0 ? (
+                                    <>
+                                        <h3 className="text-sm font-medium text-blue-900">{processStatistics.totalNewTickets} ticket hỗ trợ</h3>
+                                        <p className="text-sm text-blue-600">Đang chờ phản hồi</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h3 className="text-sm font-medium text-green-900">Không có ticket hỗ trợ mới</h3>
+                                        <p className="text-sm text-green-600">Tất cả ticket đã được xử lý</p>
+                                    </>
+                                )}
+                            </div>
+                            <div className="ml-auto flex items-center">
+                                <ArrowRight className={`w-5 h-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ${
+                                    processStatistics.totalNewTickets > 0 ? 'text-blue-600' : 'text-green-600'
+                                }`}/>
+                            </div>
+                        </button>
                     </div>
                 </div>
                 {/* Quick Actions */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Thao tác nhanh</h2>
                     <div className="grid grid-cols-2 gap-4">
-                        <button className="p-4 bg-blue-50 rounded-lg text-left hover:bg-blue-100 transition-colors">
-                            <h3 className="text-sm font-medium text-blue-900">Duyệt khóa học</h3>
-                            <p className="text-sm text-blue-600">8 khóa học mới</p>
-                        </button>
-                        <button className="p-4 bg-purple-50 rounded-lg text-left hover:bg-purple-100 transition-colors">
-                            <h3 className="text-sm font-medium text-purple-900">Xét duyệt giảng viên</h3>
-                            <p className="text-sm text-purple-600">3 yêu cầu mới</p>
-                        </button>
-                        <button className="p-4 bg-green-50 rounded-lg text-left hover:bg-green-100 transition-colors">
-                            <h3 className="text-sm font-medium text-green-900">Quản lý thanh toán</h3>
-                            <p className="text-sm text-green-600">12 giao dịch</p>
-                        </button>
-                        <button className="p-4 bg-orange-50 rounded-lg text-left hover:bg-orange-100 transition-colors">
-                            <h3 className="text-sm font-medium text-orange-900">Báo cáo hệ thống</h3>
-                            <p className="text-sm text-orange-600">Xem chi tiết</p>
-                        </button>
+                        {quickActions.map((action, index) => (
+                            <button
+                                key={index}
+                                onClick={() => navigate(action.path)}
+                                className={`p-4 ${action.bgColor} rounded-lg text-left ${action.hoverColor} transition-colors`}
+                            >
+                                <h3 className={`text-sm font-medium ${action.textColor}`}>{action.title}</h3>
+                                <p className={`text-sm ${action.descColor}`}>{action.description}</p>
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
