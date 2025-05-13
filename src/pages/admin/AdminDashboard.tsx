@@ -60,6 +60,11 @@ interface CategoryDistributionData{
     category_distribution: CategoryDistribution[];
 }
 
+interface ProcessStatistics {
+    totalNewWithdraws : number;
+    totalNewTickets : number;
+}
+
 export const AdminDashboard = () => {
 
     const [overviewData, setOverviewData] = useState<OverviewResponse>({
@@ -77,6 +82,11 @@ export const AdminDashboard = () => {
     const [monthsCount, setMonthsCount] = useState(6);
     const [revenueData, setRevenueData] = useState<RevenueStatistic[]>([]);
     const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistribution[]>([]);
+
+    const [processStatistics, setProcessStatistics] = useState<ProcessStatistics>({
+        totalNewWithdraws: 0,
+        totalNewTickets: 0
+    });
 
     const navigate = useNavigate();
 
@@ -104,6 +114,20 @@ export const AdminDashboard = () => {
         };
 
         loadOverview();
+    }, []);
+
+    useEffect(() => {
+        const fetchProcessStatistics = async () => {
+            try {
+                const response = await requestAdminWithAuth<ProcessStatistics>(
+                    `${ENDPOINTS.ADMIN.PROCESS_STATISTIC}`
+                );
+                setProcessStatistics(response);
+            } catch (error) {
+                console.error('Error fetching revenue data:', error);
+            }
+        };
+        fetchProcessStatistics();
     }, []);
 
     useEffect(() => {
@@ -304,28 +328,49 @@ export const AdminDashboard = () => {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Vấn đề cần xử lý</h2>
                     <div className="space-y-4">
-                        <div className="flex items-start p-4 bg-red-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3"/>
-                            <div>
-                                <h3 className="text-sm font-medium text-red-900">3 báo cáo vi phạm mới</h3>
-                                <p className="text-sm text-red-600">Cần kiểm tra và xử lý</p>
+                        {/* Yêu cầu rút tiền */}
+                        {processStatistics.totalNewWithdraws > 0 ? (
+                            <button
+                                onClick={() => navigate('/admin/withdrawals')}
+                                className="w-full flex items-start p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200 group"
+                            >
+                                <AlertCircle
+                                    className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                                <div className="text-left">
+                                    <h3 className="text-sm font-medium text-yellow-900">{processStatistics.totalNewWithdraws} yêu cầu rút tiền</h3>
+                                    <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
+                                </div>
+                                <div className="ml-auto flex items-center">
+                                    <ArrowRight className="w-5 h-5 text-yellow-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
+                                </div>
+                            </button>
+                        ) : (
+                            <div className="flex items-start p-4 bg-green-50 rounded-lg">
+                                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3"/>
+                                <div>
+                                    <h3 className="text-sm font-medium text-green-900">Không có yêu cầu rút tiền mới</h3>
+                                    <p className="text-sm text-green-600">Tất cả yêu cầu đã được xử lý</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        <button
-                            onClick={() => navigate('/admin/withdraw')}
-                            className="w-full flex items-start p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200 group"
-                        >
-                            <AlertCircle
-                                className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
-                            <div className="text-left">
-                                <h3 className="text-sm font-medium text-yellow-900">2 yêu cầu rút tiền</h3>
-                                <p className="text-sm text-yellow-600">Đang chờ xác nhận</p>
-                            </div>
-                            <div className="ml-auto flex items-center">
-                                <ArrowRight className="w-5 h-5 text-yellow-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
-                            </div>
-                        </button>
+                        {/* Tickets hỗ trợ - nếu có */}
+                        {processStatistics.totalNewTickets > 0 && (
+                            <button
+                                onClick={() => navigate('/admin/tickets')}
+                                className="w-full flex items-start p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200 group"
+                            >
+                                <AlertCircle
+                                    className="w-5 h-5 text-blue-600 mt-0.5 mr-3 group-hover:scale-110 transition-transform duration-200"/>
+                                <div className="text-left">
+                                    <h3 className="text-sm font-medium text-blue-900">{processStatistics.totalNewTickets} ticket hỗ trợ</h3>
+                                    <p className="text-sm text-blue-600">Đang chờ phản hồi</p>
+                                </div>
+                                <div className="ml-auto flex items-center">
+                                    <ArrowRight className="w-5 h-5 text-blue-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"/>
+                                </div>
+                            </button>
+                        )}
                     </div>
                 </div>
                 {/* Quick Actions */}

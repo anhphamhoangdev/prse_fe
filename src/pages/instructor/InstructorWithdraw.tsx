@@ -24,7 +24,7 @@ interface WithdrawalRequest {
     bankName: string | null;
     accountNumber: string | null;
     accountHolder: string | null;
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    status: 'PENDING' | 'COMPLETED' | 'REJECTED';
     rejectionReason: string | null;
     createdAt: string;
     updatedAt: string;
@@ -216,16 +216,16 @@ export const InstructorWithdraw: React.FC = () => {
     };
 
     // Get status badge class and text
-    const getStatusBadge = (status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
+    const getStatusBadge = (status: 'PENDING' | 'COMPLETED' | 'REJECTED') => {
         const classes = {
             PENDING: 'bg-yellow-100 text-yellow-800',
-            APPROVED: 'bg-green-100 text-green-800',
+            COMPLETED: 'bg-green-100 text-green-800',
             REJECTED: 'bg-red-100 text-red-800',
         };
 
         const labels = {
             PENDING: 'Đang xử lý',
-            APPROVED: 'Đã duyệt',
+            COMPLETED: 'Đã duyệt',
             REJECTED: 'Bị từ chối',
         };
 

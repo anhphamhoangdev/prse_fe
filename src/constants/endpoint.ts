@@ -90,6 +90,7 @@ export const ENDPOINTS = {
         TICKETS: '/admin/tickets',
         INVOICE: '/admin/invoices',
         COURSES: '/admin/courses',
+        PROCESS_STATISTIC: '/admin/dashboard/process_statistics',
 
     },
 
