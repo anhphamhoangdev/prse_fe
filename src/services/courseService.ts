@@ -428,6 +428,45 @@ export async function getCourseFeedbacks(
     }
 }
 
+// Thêm vào courseService.ts
+export async function getRecommendationCourses(): Promise<Course[]> {
+    console.log('[CourseService] Fetching recommended courses');
+    try {
+        const response = await requestGetWithOptionalAuth<ApiResponse<{ courses: Course[] }>>(
+            ENDPOINTS.HOME.RECOMMENDED_COURSES
+        );
+
+        if (response.code === 1) {
+            const recommendedCourses = response.data.courses.map((course: Course) => new Course(
+                course.id,
+                course.instructorId,
+                course.title,
+                course.shortDescription,
+                course.description,
+                course.imageUrl,
+                course.language,
+                course.originalPrice,
+                course.averageRating,
+                course.totalStudents,
+                course.totalViews,
+                course.isPublish,
+                course.isHot,
+                course.isDiscount,
+                course.createdAt,
+                course.updatedAt,
+                course.discountPrice
+            ));
+            console.log(`[CourseService] Successfully fetched ${recommendedCourses.length} recommended courses`);
+            return recommendedCourses;
+        }
+        console.warn('[CourseService] Received unexpected response code:', response.code);
+        return [];
+    } catch (error) {
+        console.error('[CourseService] Error fetching recommended courses:', error);
+        return [];
+    }
+}
+
 
 
 

@@ -5,6 +5,7 @@ export const ENDPOINTS = {
         FREE_COURSES: '/home/free-courses',
         DISCOUNT_COURSES: '/home/discount-courses',
         HOT_COURSES: '/home/hot-courses',
+        RECOMMENDED_COURSES: '/home/recommendation-courses',
     },
     CATEGORY: {
         BY_SUBCATEGORY: '/category'
