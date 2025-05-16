@@ -6,7 +6,7 @@ import { ChapterInstructorEdit, LessonInstructorEdit } from "../../types/course"
 import ChapterLessons from "../../components/instructor/ChapterLessonDetail";
 
 const ChapterEditPage: React.FC = () => {
-    const { courseId, chapterId } = useParams();
+    const { courseId, chapterId } = useParams<{ courseId: string, chapterId: string }>();
     const [chapter, setChapter] = useState<ChapterInstructorEdit | null>(null);
     const [lessons, setLessons] = useState<LessonInstructorEdit[]>([]);
     const [errorMessage, setErrorMessage] = useState('');
@@ -18,6 +18,7 @@ const ChapterEditPage: React.FC = () => {
                 `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}`
             );
             setChapter(response.chapter);
+            setLessons(response.chapter.lessons);
             return response.chapter;
         } catch (error) {
             console.error('Error fetching chapter data:', error);
@@ -26,7 +27,7 @@ const ChapterEditPage: React.FC = () => {
     };
 
     useEffect(() => {
-
+        // Scroll to the top when the page loads
         window.scrollTo(0, 0);
 
         const fetchData = async () => {
@@ -34,33 +35,8 @@ const ChapterEditPage: React.FC = () => {
 
             setPageLoading(true);
             try {
-                const chapter = await fetchChapterData(courseId, chapterId);
-                setChapter(chapter);
-                setLessons(chapter.lessons);
+                await fetchChapterData(courseId, chapterId);
             } catch (error) {
-                setErrorMessage('Không thể tải thông tin chương học. Vui lòng thử lại sau.');
-            } finally {
-                setPageLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [courseId, chapterId]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!courseId || !chapterId) return;
-
-            try {
-                const [chapterResponse] = await Promise.all([
-                    requestWithAuth<{ chapter: ChapterInstructorEdit }>(
-                        `${ENDPOINTS.INSTRUCTOR.COURSES}/${courseId}/chapter/${chapterId}`
-                    )
-                ]);
-                setChapter(chapterResponse.chapter);
-                setLessons(chapterResponse.chapter.lessons);
-            } catch (error) {
-                console.error('Error fetching chapter data:', error);
                 setErrorMessage('Không thể tải thông tin chương học. Vui lòng thử lại sau.');
             } finally {
                 setPageLoading(false);
@@ -72,6 +48,14 @@ const ChapterEditPage: React.FC = () => {
 
     const handleLessonsChange = (updatedLessons: LessonInstructorEdit[]) => {
         setLessons(updatedLessons);
+
+        // If chapter is available, update its lessons property too
+        if (chapter) {
+            setChapter({
+                ...chapter,
+                lessons: updatedLessons
+            });
+        }
     };
 
     if (pageLoading) {
@@ -97,8 +81,8 @@ const ChapterEditPage: React.FC = () => {
                 lessons={lessons}
                 errorMessage={errorMessage}
                 onLessonsChange={handleLessonsChange}
-                courseId={courseId!}
-                onChapterUpdate={fetchChapterData} // Thêm prop onChapterUpdate
+                courseId={courseId || ''}
+                onChapterUpdate={fetchChapterData}
             />
         </div>
     );
