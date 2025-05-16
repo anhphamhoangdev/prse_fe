@@ -84,6 +84,7 @@ import CourseManagement from "./pages/admin/CourseManagement";
 import AdminCourseEdit from "./pages/admin/AdminCourseDetail";
 import AdminCourseDetail from "./pages/admin/AdminCourseDetail";
 import CategoryManagement from "./pages/admin/CategoryManagement";
+import SubCategoryManagement from "./pages/admin/SubCategoryManagement";
 
 function App() {
     return (
@@ -197,6 +198,7 @@ function App() {
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
 
                                             <Route path="categories" element={<CategoryManagement />} />
+                                            <Route path="/category/:categoryId" element={<SubCategoryManagement />} />
                                         </Routes>
                                     </AdminLayout>
                                 }
