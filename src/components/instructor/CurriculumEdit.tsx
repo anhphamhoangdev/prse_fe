@@ -12,12 +12,13 @@ import {
     Settings,
     RefreshCw,
     Check,
-    X
+    X,
+    AlertTriangle
 } from 'lucide-react';
 import {ChapterInstructorEdit, CourseInstructorEdit, LessonInstructorEdit} from "../../types/course";
 import {Link} from "react-router-dom";
 import {DragDropContext, Draggable, Droppable, DropResult} from 'react-beautiful-dnd';
-import {requestPostWithAuth} from "../../utils/request";
+import {requestDeleteWithAuth, requestPostWithAuth} from "../../utils/request";
 import {ENDPOINTS} from "../../constants/endpoint";
 
 
@@ -31,6 +32,11 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
     const [expandedChapters, setExpandedChapters] = useState<Record<number, boolean>>({});
     const [shouldScroll, setShouldScroll] = useState(false);
     const lastChapterRef = useRef<HTMLDivElement | null>(null);
+
+    // State cho modal xác nhận xóa
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [chapterToDelete, setChapterToDelete] = useState<ChapterInstructorEdit | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Function to set the last chapter ref
     const setLastChapterRef = useCallback((node: HTMLDivElement | null) => {
@@ -155,16 +161,50 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
         }
     };
 
-    const handleDeleteChapter = (chapterId: number): void => {
-        const updatedChapters = chapters.filter(chapter => chapter.id !== chapterId)
-            .map((chapter, index) => ({
-                ...chapter,
-                orderIndex: index
-            }));
-        onChaptersChange(updatedChapters);
+    // Hiển thị modal xác nhận trước khi xóa
+    const confirmDeleteChapter = (chapter: ChapterInstructorEdit): void => {
+        setChapterToDelete(chapter);
+        setIsDeleteModalOpen(true);
+    };
 
-        if (isDragModeEnabled) {
-            setHasOrderChanged(true);
+    // Hàm xóa chương thực sự sau khi đã xác nhận
+    const handleDeleteChapter = async (): Promise<void> => {
+        if (!chapterToDelete || !course?.id) return;
+
+        setIsDeleting(true);
+        try {
+            // Gọi API xóa chương
+            await requestDeleteWithAuth(
+                `${ENDPOINTS.INSTRUCTOR.COURSES}/${course.id}/curriculum/chapters/${chapterToDelete.id}`
+            );
+
+            // Cập nhật state và thứ tự các chương còn lại
+            const updatedChapters = chapters.filter(chapter => chapter.id !== chapterToDelete.id)
+                .map((chapter, index) => ({
+                    ...chapter,
+                    orderIndex: index
+                }));
+
+            onChaptersChange(updatedChapters);
+            setOriginalChapters(updatedChapters);
+
+            setStatusMessage({
+                type: 'success',
+                message: 'Đã xóa chương thành công'
+            });
+
+            setTimeout(() => {
+                setStatusMessage(null);
+            }, 3000);
+        } catch (error) {
+            setStatusMessage({
+                type: 'error',
+                message: 'Có lỗi xảy ra khi xóa chương'
+            });
+        } finally {
+            setIsDeleting(false);
+            setIsDeleteModalOpen(false);
+            setChapterToDelete(null);
         }
     };
 
@@ -370,7 +410,7 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
                                                                     <Settings className="w-4 h-4"/>
                                                                 </Link>
                                                                 <button
-                                                                    onClick={() => handleDeleteChapter(chapter.id)}
+                                                                    onClick={() => confirmDeleteChapter(chapter)}
                                                                     className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                                     title="Xóa chương"
                                                                 >
@@ -467,6 +507,76 @@ const CurriculumEdit: React.FC<CurriculumEditProps> = ({chapters, onChaptersChan
                     )}
                 </Droppable>
             </div>
+
+            {/* Modal xác nhận xóa chương */}
+            {isDeleteModalOpen && chapterToDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 overflow-hidden">
+                        <div className="p-6">
+                            <div className="flex items-center justify-center mb-4 text-red-500">
+                                <AlertTriangle className="w-12 h-12" />
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-4">Xác nhận xóa chương</h3>
+                            <div className="mb-6">
+                                <p className="text-gray-600 mb-4">
+                                    Bạn có chắc chắn muốn xóa chương sau đây? Hành động này không thể hoàn tác và tất cả bài học trong chương sẽ bị xóa vĩnh viễn.
+                                </p>
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                                    <h4 className="font-semibold text-gray-900 mb-2">{chapterToDelete.title}</h4>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        Số lượng bài học: <span className="font-medium">{chapterToDelete.lessons.length}</span>
+                                    </p>
+
+                                    {chapterToDelete.lessons.length > 0 && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-700 mb-1">Các bài học sẽ bị xóa:</p>
+                                            <ul className="text-sm text-gray-600 list-disc pl-5 max-h-40 overflow-y-auto">
+                                                {chapterToDelete.lessons.map(lesson => (
+                                                    <li key={lesson.id} className="mb-1">
+                                                        {lesson.title}
+                                                        <span className={`ml-2 text-xs ${lesson.publish ? 'text-green-500' : 'text-gray-500'}`}>
+                                                            ({lesson.publish ? 'Đã xuất bản' : 'Nháp'})
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => {
+                                        setIsDeleteModalOpen(false);
+                                        setChapterToDelete(null);
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                    disabled={isDeleting}
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleDeleteChapter}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4 animate-spin"/>
+                                            Đang xóa...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash className="w-4 h-4"/>
+                                            Xác nhận xóa
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DragDropContext>
     );
 };
