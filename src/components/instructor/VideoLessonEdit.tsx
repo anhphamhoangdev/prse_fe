@@ -149,6 +149,9 @@ const VideoLessonEdit: React.FC<VideoLessonEditProps> = ({ lesson }) => {
 
         try {
             const formData = new FormData();
+            console.log("Selected file:", selectedVideo.file);
+            console.log("File size:", selectedVideo.file.size);
+            console.log("File type:", selectedVideo.file.type);
             formData.append('video', selectedVideo.file);
 
             const uploadInterval = setInterval(() => {
