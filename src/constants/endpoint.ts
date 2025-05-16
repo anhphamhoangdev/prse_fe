@@ -91,6 +91,7 @@ export const ENDPOINTS = {
         INVOICE: '/admin/invoices',
         COURSES: '/admin/courses',
         PROCESS_STATISTIC: '/admin/dashboard/process_statistics',
+        CATEGORIES: '/admin/categories',
 
     },
 

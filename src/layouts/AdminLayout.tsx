@@ -57,21 +57,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         fetchAdminData();
     }, []);
 
-    // Check if any item in a group is active
     useEffect(() => {
-        const findActiveGroup = () => {
-            for (const group of menuGroups) {
-                if (group.items && group.items.some(item => location.pathname === item.path)) {
-                    setExpandedGroups(prev =>
-                        prev.includes(group.id) ? prev : [...prev, group.id]
-                    );
-                    break;
-                }
-            }
-        };
-
-        findActiveGroup();
-    }, [location.pathname]);
+        const initialExpandedGroups = menuGroups
+            .filter(group => group.items)
+            .map(group => group.id);
+        setExpandedGroups(initialExpandedGroups);
+    }, []);
 
     const toggleGroup = (groupId: string) => {
         setExpandedGroups(prev =>
@@ -86,7 +77,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {
             id: 'dashboard',
             path: '/admin/dashboard',
-            name: 'Dashboard',
+            name: 'Bảng điều khiển',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -96,7 +87,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         },
         {
             id: 'management',
-            name: 'Quản lý',
+            name: 'Quan trọng',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -174,15 +165,38 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         },
         {
             id: 'settings',
-            path: '/admin/settings',
-            name: 'Cài đặt hệ thống',
+            name: 'Khác',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                           d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-            )
+            ),
+            items: [
+                {
+                    id: 'banners',
+                    path: '/admin/banners',
+                    name: 'Banner',
+                    icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    )
+                },
+                {
+                    id: 'categories',
+                    path: '/admin/categories',
+                    name: 'Thể loại',
+                    icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    )
+                }
+            ]
         }
     ];
 

@@ -83,6 +83,7 @@ import InvoiceManagement from "./pages/admin/InvoiceManagement";
 import CourseManagement from "./pages/admin/CourseManagement";
 import AdminCourseEdit from "./pages/admin/AdminCourseDetail";
 import AdminCourseDetail from "./pages/admin/AdminCourseDetail";
+import CategoryManagement from "./pages/admin/CategoryManagement";
 
 function App() {
     return (
@@ -194,6 +195,8 @@ function App() {
                                             <Route path="courses" element={<CourseManagement />} />
                                             <Route path="courses/:id" element={<AdminCourseDetail />} />
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
+
+                                            <Route path="categories" element={<CategoryManagement />} />
                                         </Routes>
                                     </AdminLayout>
                                 }

@@ -20,16 +20,6 @@ import CourseDistribution from "../../components/admin/CourseDistribution";
 import {useNavigate} from "react-router-dom";
 
 
-const courseDistributionData = [
-    { name: 'Công nghệ thông tin', value: 35 },
-    { name: 'Kinh doanh', value: 25 },
-    { name: 'Ngoại ngữ', value: 20 },
-    { name: 'Marketing', value: 15 },
-    { name: 'Khác', value: 5 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
 
 interface OverviewResponse {
     totalUsers: number;

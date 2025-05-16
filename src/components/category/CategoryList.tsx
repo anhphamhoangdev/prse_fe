@@ -9,7 +9,7 @@ interface CategoryListProps {
 
 export const CategoryList: React.FC<CategoryListProps> = (props) => {
     const { category, onSelectSubCategory, selectedCategory } = props;
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
 
     useEffect(() => {
         if (selectedCategory) {

@@ -374,6 +374,55 @@ export async function requestAdminWithAuth<T>(endpoint: string): Promise<T> {
     return jsonResponse.data; // Trả về data
 }
 
+export async function requestPostAdminWithAuth<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const token = localStorage.getItem('adminToken') || sessionStorage.getItem("adminToken");
+    if (!token) {
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem("adminToken");
+        window.location.href = '/admin/login';
+        return Promise.reject();
+    }
+
+    if(response.status === 403) {
+        window.location.href = '/forbidden';
+        return Promise.reject();
+    }
+
+    if(response.status === 404) {
+        window.location.href = '/not-found';
+        return Promise.reject();
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to post to ${url}: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    // Check response code từ API
+    if (jsonResponse.code === 0) {
+        throw new Error(jsonResponse.error_message);
+    }
+
+    return jsonResponse.data;
+}
+
 
 // PUT
 export async function putWithAuth<T>(endpoint: string, data: any): Promise<T> {
