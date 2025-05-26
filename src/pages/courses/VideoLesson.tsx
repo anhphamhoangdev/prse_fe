@@ -250,7 +250,7 @@ const VideoLessonDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <AIChatDrawer position="left" onSendMessage={handleAIMessage} messages={messages} />
+            {/*<AIChatDrawer position="left" onSendMessage={handleAIMessage} messages={messages} />*/}
         </div>
     );
 };
