@@ -34,7 +34,7 @@ export const Footer = () => (
                                 Số 1, Võ Văn Ngân, Thủ Đức, TP.HCM
                             </p>
                         </div>
-                        <a href="mailto:anhphamhoang033@gmail.com" className="flex items-center gap-2 group">
+                        <a href="mailto:danghieuanh0401@gmai.com" className="flex items-center gap-2 group">
                             <div className="p-1.5 rounded-md bg-slate-800/80 group-hover:bg-blue-500/10 transition-colors duration-300">
                                 <Mail className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
                             </div>
@@ -42,7 +42,7 @@ export const Footer = () => (
                                 danghieuanh0401@gmai.com
                             </span>
                         </a>
-                        <a href="tel:0914311299" className="flex items-center gap-2 group">
+                        <a href="tel:0961784023" className="flex items-center gap-2 group">
                             <div className="p-1.5 rounded-md bg-slate-800/80 group-hover:bg-blue-500/10 transition-colors duration-300">
                                 <Phone className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
                             </div>
