@@ -39,7 +39,7 @@ export const Footer = () => (
                                 <Mail className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
                             </div>
                             <span className="text-sm text-slate-300 group-hover:text-slate-100 transition-colors duration-300">
-                                anhphamhoang033@gmail.com
+                                danghieuanh0401@gmai.com
                             </span>
                         </a>
                         <a href="tel:0914311299" className="flex items-center gap-2 group">
@@ -47,7 +47,7 @@ export const Footer = () => (
                                 <Phone className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
                             </div>
                             <span className="text-sm text-slate-300 group-hover:text-slate-100 transition-colors duration-300">
-                                0914 311 299
+                                096 1784023
                             </span>
                         </a>
                     </div>
