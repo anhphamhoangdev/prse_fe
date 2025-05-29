@@ -85,6 +85,8 @@ import AdminCourseEdit from "./pages/admin/AdminCourseDetail";
 import AdminCourseDetail from "./pages/admin/AdminCourseDetail";
 import CategoryManagement from "./pages/admin/CategoryManagement";
 import SubCategoryManagement from "./pages/admin/SubCategoryManagement";
+import LessonCreate from "./pages/instructor/LessonCreate";
+import AdminLessonApproval from "./pages/admin/AdminLessonApproval";
 
 function App() {
     return (
@@ -169,6 +171,7 @@ function App() {
                                                 <Route path="withdraw" element={<InstructorWithdraw />} />
                                                 <Route path="course/:courseId/edit" element={<CourseEdit />} />
                                                 <Route path="course/:courseId/chapter/:chapterId" element={<ChapterEditPage />} />
+                                                <Route path="course/:courseId/chapter/:chapterId/add" element={<LessonCreate/>} />
                                                 <Route
                                                     path="course/:courseId/chapter/:chapterId/lesson/:lessonId"
                                                     element={<LessonEdit />}
@@ -196,6 +199,9 @@ function App() {
                                             <Route path="courses" element={<CourseManagement />} />
                                             <Route path="courses/:id" element={<AdminCourseDetail />} />
                                             <Route path="withdrawals" element={<AdminWithdraw />} />
+
+                                            <Route path="/lesson-approval" element={<AdminLessonApproval />} />
+
 
                                             <Route path="categories" element={<CategoryManagement />} />
                                             <Route path="/category/:categoryId" element={<SubCategoryManagement />} />

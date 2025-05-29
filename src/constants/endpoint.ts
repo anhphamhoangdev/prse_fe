@@ -93,6 +93,8 @@ export const ENDPOINTS = {
         COURSES: '/admin/courses',
         PROCESS_STATISTIC: '/admin/dashboard/process_statistics',
         CATEGORIES: '/admin/categories',
+        LESSONS_DRAFT: '/admin/lessons-draft',
+        VIDEO_LESSONS_DRAFT: '/admin/video-lessons-draft',
 
     },
 
