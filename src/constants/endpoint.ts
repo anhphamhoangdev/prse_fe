@@ -95,6 +95,7 @@ export const ENDPOINTS = {
         CATEGORIES: '/admin/categories',
         LESSONS_DRAFT: '/admin/lessons-draft',
         VIDEO_LESSONS_DRAFT: '/admin/video-lessons-draft',
+        CODE_LESSONS_DRAFT: '/admin/code-lessons-draft',
 
     },
 

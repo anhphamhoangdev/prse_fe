@@ -11,6 +11,7 @@ import {
     Star,
     TrendingUp,
     AlertTriangle,
+    AlertCircle,
 } from 'lucide-react';
 
 interface CodeLessonEditorProps {
@@ -27,16 +28,25 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                                                                loading,
                                                            }) => {
     // Code lesson states
-    const [codeLanguage, setCodeLanguage] = useState('python');
+    const [codeLanguage, setCodeLanguage] = useState('');
     const [codeContent, setCodeContent] = useState('');
     const [initialCode, setInitialCode] = useState('');
     const [solutionCode, setSolutionCode] = useState('');
     const [expectedOutput, setExpectedOutput] = useState('');
     const [hint, setHint] = useState('');
-    const [difficulty, setDifficulty] = useState('EASY');
+    const [difficulty, setDifficulty] = useState('');
     const [testCaseInput, setTestCaseInput] = useState('');
     const [testCaseOutput, setTestCaseOutput] = useState('');
     const [testCaseDescription, setTestCaseDescription] = useState('');
+
+    // Validation states
+    const [errors, setErrors] = useState({
+        codeLanguage: false,
+        difficulty: false,
+        codeContent: false,
+        solutionCode: false,
+        testCase: false,
+    });
 
     const submitCodeContent = async (lessonId: number) => {
         if (codeContent.trim() && solutionCode.trim()) {
@@ -62,7 +72,24 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {
+            codeLanguage: !codeLanguage,
+            difficulty: !difficulty,
+            codeContent: !codeContent.trim(),
+            solutionCode: !solutionCode.trim(),
+            testCase: !testCaseInput.trim() || !testCaseOutput.trim(),
+        };
+
+        setErrors(newErrors);
+        return !Object.values(newErrors).some(error => error);
+    };
+
     const handleSubmit = async () => {
+        if (!validateForm()) {
+            return;
+        }
+
         const lessonData = {
             submitContent: submitCodeContent,
         };
@@ -70,7 +97,12 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
     };
 
     const isFormValid = () => {
-        return codeContent.trim() && solutionCode.trim();
+        return codeLanguage &&
+            difficulty &&
+            codeContent.trim() &&
+            solutionCode.trim() &&
+            testCaseInput.trim() &&
+            testCaseOutput.trim();
     };
 
     const languageOptions = [
@@ -87,6 +119,13 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
             icon: Settings,
             color: 'bg-blue-50 border-blue-200 text-blue-700',
             activeColor: 'bg-blue-100 border-blue-400 text-blue-800',
+        },
+        {
+            value: 'java',
+            name: 'Java',
+            icon: Code,
+            color: 'bg-orange-50 border-orange-200 text-orange-700',
+            activeColor: 'bg-orange-100 border-orange-400 text-orange-800',
         },
     ];
 
@@ -124,52 +163,95 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
 
             {/* Basic Settings */}
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg shadow-sm">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Ngôn ngữ lập trình</label>
-                        <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Language Selection */}
+                    <div className={`bg-gray-50 p-6 rounded-lg shadow-sm ${errors.codeLanguage ? 'border-2 border-red-300' : ''}`}>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Ngôn ngữ lập trình <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-3">
                             {languageOptions.map((lang) => {
                                 const IconComponent = lang.icon;
                                 return (
-                                    <button
+                                    <label
                                         key={lang.value}
-                                        type="button"
-                                        onClick={() => setCodeLanguage(lang.value)}
                                         className={`
-                      p-4 rounded-lg border transition-all duration-200 flex flex-col items-center gap-2
-                      ${codeLanguage === lang.value ? lang.activeColor : lang.color}
-                      hover:shadow-md hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    `}
+                                            flex items-center p-4 rounded-lg border cursor-pointer transition-all duration-200
+                                            ${codeLanguage === lang.value ? lang.activeColor : lang.color}
+                                            hover:shadow-md hover:scale-[1.02]
+                                        `}
                                     >
-                                        <IconComponent className="w-6 h-6" />
+                                        <input
+                                            type="radio"
+                                            name="codeLanguage"
+                                            value={lang.value}
+                                            checked={codeLanguage === lang.value}
+                                            onChange={(e) => {
+                                                setCodeLanguage(e.target.value);
+                                                setErrors(prev => ({ ...prev, codeLanguage: false }));
+                                            }}
+                                            className="sr-only"
+                                        />
+                                        <IconComponent className="w-6 h-6 mr-3" />
                                         <span className="text-sm font-medium">{lang.name}</span>
-                                    </button>
+                                        {codeLanguage === lang.value && (
+                                            <div className="ml-auto w-2 h-2 bg-current rounded-full"></div>
+                                        )}
+                                    </label>
                                 );
                             })}
                         </div>
+                        {errors.codeLanguage && (
+                            <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                Vui lòng chọn ngôn ngữ lập trình
+                            </p>
+                        )}
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Độ khó</label>
-                        <div className="grid grid-cols-3 gap-3">
+
+                    {/* Difficulty Selection */}
+                    <div className={`bg-gray-50 p-6 rounded-lg shadow-sm ${errors.difficulty ? 'border-2 border-red-300' : ''}`}>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Độ khó <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-3">
                             {difficultyOptions.map((diff) => {
                                 const IconComponent = diff.icon;
                                 return (
-                                    <button
+                                    <label
                                         key={diff.value}
-                                        type="button"
-                                        onClick={() => setDifficulty(diff.value)}
                                         className={`
-                      p-4 rounded-lg border transition-all duration-200 flex flex-col items-center gap-2
-                      ${difficulty === diff.value ? diff.activeColor : diff.color}
-                      hover:shadow-md hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    `}
+                                            flex items-center p-4 rounded-lg border cursor-pointer transition-all duration-200
+                                            ${difficulty === diff.value ? diff.activeColor : diff.color}
+                                            hover:shadow-md hover:scale-[1.02]
+                                        `}
                                     >
-                                        <IconComponent className="w-6 h-6" />
+                                        <input
+                                            type="radio"
+                                            name="difficulty"
+                                            value={diff.value}
+                                            checked={difficulty === diff.value}
+                                            onChange={(e) => {
+                                                setDifficulty(e.target.value);
+                                                setErrors(prev => ({ ...prev, difficulty: false }));
+                                            }}
+                                            className="sr-only"
+                                        />
+                                        <IconComponent className="w-6 h-6 mr-3" />
                                         <span className="text-sm font-medium">{diff.name}</span>
-                                    </button>
+                                        {difficulty === diff.value && (
+                                            <div className="ml-auto w-2 h-2 bg-current rounded-full"></div>
+                                        )}
+                                    </label>
                                 );
                             })}
                         </div>
+                        {errors.difficulty && (
+                            <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                Vui lòng chọn độ khó
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -180,11 +262,22 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                     </label>
                     <textarea
                         value={codeContent}
-                        onChange={(e) => setCodeContent(e.target.value)}
+                        onChange={(e) => {
+                            setCodeContent(e.target.value);
+                            setErrors(prev => ({ ...prev, codeContent: false }));
+                        }}
                         placeholder="Mô tả chi tiết bài tập, yêu cầu, ví dụ input/output..."
                         rows={6}
-                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-y"
+                        className={`w-full p-4 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-y ${
+                            errors.codeContent ? 'border-red-300' : 'border-gray-200'
+                        }`}
                     />
+                    {errors.codeContent && (
+                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            Vui lòng nhập mô tả bài tập
+                        </p>
+                    )}
                 </div>
 
                 {/* Initial Code Template */}
@@ -196,7 +289,11 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                         placeholder={
                             codeLanguage === 'python'
                                 ? "def solve_problem():\n    # Viết code ở đây\n    pass"
-                                : "// Viết code ở đây"
+                                : codeLanguage === 'cpp'
+                                    ? "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Viết code ở đây\n    return 0;\n}"
+                                    : codeLanguage === 'java'
+                                        ? "public class Solution {\n    public static void main(String[] args) {\n        // Viết code ở đây\n    }\n}"
+                                        : "// Viết code ở đây"
                         }
                         rows={8}
                         className="w-full p-4 border border-gray-200 rounded-lg font-mono text-sm bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
@@ -211,11 +308,22 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                     </label>
                     <textarea
                         value={solutionCode}
-                        onChange={(e) => setSolutionCode(e.target.value)}
+                        onChange={(e) => {
+                            setSolutionCode(e.target.value);
+                            setErrors(prev => ({ ...prev, solutionCode: false }));
+                        }}
                         placeholder="Nhập code giải mẫu đầy đủ..."
                         rows={12}
-                        className="w-full p-4 border border-gray-200 rounded-lg font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        className={`w-full p-4 border rounded-lg font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                            errors.solutionCode ? 'border-red-300' : 'border-gray-200'
+                        }`}
                     />
+                    {errors.solutionCode && (
+                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            Vui lòng nhập code giải mẫu
+                        </p>
+                    )}
                 </div>
 
                 {/* Expected Output */}
@@ -230,29 +338,45 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                     />
                 </div>
 
-                {/* Test Case */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Test Case (tùy chọn)</label>
+                {/* Test Case - Required */}
+                <div className={`${errors.testCase ? 'border-2 border-red-300 rounded-lg p-1' : ''}`}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Test Case <span className="text-red-500">*</span>
+                    </label>
                     <div className="p-5 bg-gray-50 rounded-lg shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Input</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                    Input <span className="text-red-500">*</span>
+                                </label>
                                 <textarea
                                     value={testCaseInput}
-                                    onChange={(e) => setTestCaseInput(e.target.value)}
+                                    onChange={(e) => {
+                                        setTestCaseInput(e.target.value);
+                                        setErrors(prev => ({ ...prev, testCase: false }));
+                                    }}
                                     placeholder="Input data..."
                                     rows={3}
-                                    className="w-full p-3 text-sm border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className={`w-full p-3 text-sm border rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.testCase ? 'border-red-300' : 'border-gray-200'
+                                    }`}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Expected Output</label>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                    Expected Output <span className="text-red-500">*</span>
+                                </label>
                                 <textarea
                                     value={testCaseOutput}
-                                    onChange={(e) => setTestCaseOutput(e.target.value)}
+                                    onChange={(e) => {
+                                        setTestCaseOutput(e.target.value);
+                                        setErrors(prev => ({ ...prev, testCase: false }));
+                                    }}
                                     placeholder="Expected output..."
                                     rows={3}
-                                    className="w-full p-3 text-sm border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className={`w-full p-3 text-sm border rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.testCase ? 'border-red-300' : 'border-gray-200'
+                                    }`}
                                 />
                             </div>
                             <div>
@@ -266,6 +390,12 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                                 />
                             </div>
                         </div>
+                        {errors.testCase && (
+                            <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                Vui lòng nhập Input và Expected Output cho test case
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -287,15 +417,15 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                         <div>
                             <span className="text-indigo-700 font-medium">Ngôn ngữ:</span>
-                            <p className="text-indigo-900">{codeLanguage.toUpperCase()}</p>
+                            <p className="text-indigo-900">{codeLanguage ? codeLanguage.toUpperCase() : 'Chưa chọn'}</p>
                         </div>
                         <div>
                             <span className="text-indigo-700 font-medium">Độ khó:</span>
-                            <p className="text-indigo-900">{difficulty}</p>
+                            <p className="text-indigo-900">{difficulty || 'Chưa chọn'}</p>
                         </div>
                         <div>
                             <span className="text-indigo-700 font-medium">Test case:</span>
-                            <p className="text-indigo-900">{testCaseInput || testCaseOutput ? 'Có' : 'Không'}</p>
+                            <p className="text-indigo-900">{testCaseInput && testCaseOutput ? 'Có' : 'Chưa có'}</p>
                         </div>
                     </div>
                 </div>

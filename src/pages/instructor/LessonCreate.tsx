@@ -57,7 +57,7 @@ const LessonCreate = () => {
                 id: 0,
                 title: title.trim(),
                 type,
-                publish: false, // Auto set to false
+                publish: true, // Auto set to false
                 orderIndex: 0, // Auto set to 0
             };
 

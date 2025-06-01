@@ -87,6 +87,7 @@ import CategoryManagement from "./pages/admin/CategoryManagement";
 import SubCategoryManagement from "./pages/admin/SubCategoryManagement";
 import LessonCreate from "./pages/instructor/LessonCreate";
 import AdminLessonApproval from "./pages/admin/AdminLessonApproval";
+import CodeLessonDetail from "./pages/courses/CodeLessonDetail";
 
 function App() {
     return (
@@ -138,6 +139,8 @@ function App() {
                                             <Route path="/course-detail/:courseId/:chapterId/:lessonId" element={<LessonDetailLayout />}>
                                                 <Route path="video" element={<VideoLesson />} />
                                                 <Route path="quiz" element={<QuizLessonDetail />} />
+                                                <Route path="practice" element={<CodeLessonDetail />} />
+
                                             </Route>
                                             <Route path="/quiz/:courseId/:chapterId/:lessonId" element={<QuizPage />} />
 
