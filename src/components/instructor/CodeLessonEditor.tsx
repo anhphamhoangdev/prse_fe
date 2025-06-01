@@ -402,13 +402,28 @@ const CodeLessonEditor: React.FC<CodeLessonEditorProps> = ({
                 {/* Hint */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Gợi ý cho học sinh</label>
-                    <input
-                        type="text"
+                    <textarea
                         value={hint}
                         onChange={(e) => setHint(e.target.value)}
-                        placeholder="Nhập gợi ý cho học sinh..."
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        placeholder={`🎯 Hiểu bài toán:
+- Đọc và phân tích đề bài kỹ
+- Xác định input và output
+- Tìm pattern hoặc quy luật
+
+💡 Gợi ý thuật toán:
+1. Bước 1: Xử lý input
+2. Bước 2: Áp dụng logic
+3. Bước 3: Xuất kết quả
+
+🔧 Lưu ý khi code:
+- Kiểm tra edge cases
+- Sử dụng đúng kiểu dữ liệu
+- Test với ví dụ mẫu`}
+                        rows={6}
+                        className="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-y"
+                        style={{ whiteSpace: 'pre-wrap' }}
                     />
+                    <p className="text-xs text-gray-500 mt-1">Nhập gợi ý chi tiết để hướng dẫn học sinh làm bài</p>
                 </div>
 
                 {/* Preview Summary */}
