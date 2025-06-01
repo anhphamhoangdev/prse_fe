@@ -12,9 +12,6 @@ import {
 import { Lesson } from '../../types/course';
 
 // Import components
-
-
-// Import types
 import LoadingScreen from "../../components/code/LoadingScreen";
 import EmptyState from '../../components/code/EmptyState';
 import LessonHeader from "../../components/code/LessonHeader";
@@ -24,6 +21,7 @@ import {TestCases} from "../../components/code/TestCases";
 import {CodeEditorSection} from "../../components/code/CodeEditorSection";
 import HintsSection from "../../components/code/HintsSection";
 import SolutionSection from "../../components/code/SolutionSection";
+import {useNotification} from "../../components/notification/NotificationProvider";
 
 interface OutletContext {
     currentLesson: Lesson | null;
@@ -40,6 +38,7 @@ interface CodeExecutionResult {
     isCorrect: boolean | null;
     actualOutput: string | null;
     expectedOutput: string | null;
+    input?: string;
 }
 
 interface CodeExecutionResponse {
@@ -53,6 +52,7 @@ const CodeLessonDetail: React.FC = () => {
     // States
     const [currentLesson, setCurrentLesson] = useState<CodeLessonData | null>(null);
     const [userSubmission, setUserSubmission] = useState<UserSubmission | null>(null);
+    const [lastSubmission, setLastSubmission] = useState<UserSubmission | null>(null);
     const [isCompleted, setIsCompleted] = useState<boolean>(false);
     const [isLessonLoading, setIsLessonLoading] = useState(false);
     const [userCode, setUserCode] = useState<string>('');
@@ -64,7 +64,10 @@ const CodeLessonDetail: React.FC = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [outputData, setOutputData] = useState<any>(null);
+    const { showNotification } = useNotification();
 
+    const [outputResult, setOutputResult] = useState<CodeExecutionResult | null>(null);
+    const [isSubmission, setIsSubmission] = useState(false);
 
     const fetchLessonData = useCallback(
         async (courseId: string, chapterId: string, lessonId: string) => {
@@ -72,6 +75,7 @@ const CodeLessonDetail: React.FC = () => {
                 setIsLessonLoading(true);
                 setCurrentLesson(null);
                 setUserSubmission(null);
+                setLastSubmission(null); // Reset lastSubmission
                 setIsCompleted(false);
 
                 const endpoint = `/course/${courseId}/${chapterId}/${lessonId}/code`;
@@ -80,11 +84,28 @@ const CodeLessonDetail: React.FC = () => {
                 if (responseData.currentLesson) {
                     setCurrentLesson(responseData.currentLesson);
                     setIsCompleted(responseData.isCompleted);
-                    setUserCode(responseData.currentLesson.initialCode || '');
 
-                    if (responseData.userSubmission) {
+                    // Logic hiển thị code:
+                    // 1. Nếu có lastSubmission -> dùng code từ lastSubmission
+                    // 2. Nếu không có lastSubmission nhưng có userSubmission -> dùng userSubmission
+                    // 3. Nếu không có gì -> dùng initialCode
+
+                    if (responseData.lastSubmission) {
+                        setLastSubmission(responseData.lastSubmission);
+                        setUserCode(responseData.lastSubmission.submittedCode);
+                        console.log('📝 Loaded code from lastSubmission:', {
+                            id: responseData.lastSubmission.id,
+                            status: responseData.lastSubmission.status,
+                            isCorrect: responseData.lastSubmission.isCorrect,
+                            submittedAt: responseData.lastSubmission.submittedAt
+                        });
+                    } else if (responseData.userSubmission) {
                         setUserSubmission(responseData.userSubmission);
                         setUserCode(responseData.userSubmission.submittedCode);
+                        console.log('📝 Loaded code from userSubmission');
+                    } else {
+                        setUserCode(responseData.currentLesson.initialCode || '');
+                        console.log('📝 Loaded initial code');
                     }
                 }
             } catch (error) {
@@ -236,19 +257,44 @@ const CodeLessonDetail: React.FC = () => {
         });
     };
 
+    const setLoadingOutput = (message: string) => {
+        setOutputResult({
+            success: false,
+            output: message,
+            error: '',
+            executionTime: 0,
+            memoryUsed: 0,
+            status: 'loading',
+            isCorrect: null,
+            actualOutput: null,
+            expectedOutput: null
+        });
+    };
+
     const handleRunCode = async () => {
         if (!currentLesson || !userCode.trim()) {
-            setOutput('❌ Lỗi: Code không được để trống');
+            setOutputResult({
+                success: false,
+                output: '',
+                error: 'Code không được để trống',
+                executionTime: 0,
+                memoryUsed: 0,
+                status: 'error',
+                isCorrect: null,
+                actualOutput: null,
+                expectedOutput: null,
+                input: ''
+            });
             setIsSuccess(false);
             return;
         }
 
         setIsRunning(true);
         setIsSuccess(null);
+        setIsSubmission(false);
 
-        // Hiển thị loading state
-        setOutput(`🔄 Đang thực thi code ${currentLesson.language}...
-⏳ Vui lòng chờ trong giây lát...`);
+        // Show loading state
+        setLoadingOutput(`Đang thực thi code ${currentLesson.language}...\nVui lòng chờ trong giây lát...`);
 
         try {
             const requestData = {
@@ -267,7 +313,7 @@ const CodeLessonDetail: React.FC = () => {
 
             const startTime = Date.now();
 
-            // Gọi API
+            // Call API
             const responseData = await requestPostWithAuth<CodeExecutionResponse>(
                 '/code/execute',
                 requestData
@@ -278,98 +324,33 @@ const CodeLessonDetail: React.FC = () => {
 
             const result = responseData.result;
 
-            // Format output dựa trên kết quả
-            let outputText = '';
+            // Set result with input field
+            setOutputResult({
+                ...result,
+                input: requestData.input, // Thêm input vào result
+                output: result.output + (networkTime > 1000 ? `\n\n[Network: ${networkTime}ms]` : '')
+            });
 
-            if (result.success) {
-                // Success case
-                outputText = `=== ✅ Code Execution Successful ===
-Language: ${currentLesson.language.toUpperCase()}
-Status: ${result.status}
-
-📥 Input:
-${requestData.input || '(no input)'}
-
-📤 Output:
-${result.output || '(no output)'}`;
-
-                // Thêm expected output nếu có
-                if (result.expectedOutput) {
-                    outputText += `\n\n🎯 Expected Output:
-${result.expectedOutput}`;
-                }
-
-                // Performance metrics
-                outputText += `\n\n⚡ Performance:
-Execution time: ${result.executionTime}ms
-Network time: ${networkTime}ms`;
-
-                if (result.memoryUsed && result.memoryUsed > 0) {
-                    outputText += `\nMemory used: ${result.memoryUsed}KB`;
-                }
-
-                // Correctness check
-                if (result.isCorrect !== null) {
-                    if (result.isCorrect) {
-                        outputText += `\n\n🎉 Result: CORRECT ✅`;
-                    } else {
-                        outputText += `\n\n❌ Result: INCORRECT`;
-
-                        if (result.actualOutput && result.expectedOutput) {
-                            outputText += `\n\n🔍 Comparison:
-Your output:     "${result.actualOutput}"
-Expected output: "${result.expectedOutput}"`;
-                        }
-                    }
-                }
-
-            } else {
-                // Error case
-                outputText = `=== ❌ Code Execution Failed ===
-Language: ${currentLesson.language.toUpperCase()}
-Status: ${result.status}
-
-🚨 Error Details:
-${result.error || 'Unknown error occurred'}`;
-
-                if (result.executionTime) {
-                    outputText += `\n\n⏱️ Failed after: ${result.executionTime}ms`;
-                }
-
-                // Hiển thị partial output nếu có
-                if (result.output && result.output.trim()) {
-                    outputText += `\n\n📝 Partial Output (before error):
-${result.output}`;
-                }
-
-                // Gợi ý debug
-                outputText += `\n\n💡 Debug Tips:
-• Check your syntax
-• Verify input/output format
-• Look for runtime errors`;
-            }
-
-            setOutput(outputText);
             setIsSuccess(result.success);
 
         } catch (error) {
             console.error('❌ Code execution failed:', error);
 
-            let errorMessage = 'Unknown error occurred';
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
+            setOutputResult({
+                success: false,
+                output: '',
+                error: `Lỗi mạng/API: ${errorMessage}\n\nNguyên nhân có thể:\n• Mất kết nối internet\n• Server tạm thời không khả dụng\n• Định dạng request không hợp lệ\n\nVui lòng thử lại hoặc liên hệ hỗ trợ.`,
+                executionTime: 0,
+                memoryUsed: 0,
+                status: 'network_error',
+                isCorrect: null,
+                actualOutput: null,
+                expectedOutput: null,
+                input: currentLesson.testCaseInput || ""
+            });
 
-            setOutput(`=== ❌ Network/API Error ===
-Failed to execute code: ${errorMessage}
-
-💡 Possible causes:
-• Network connection issues
-• Server temporarily unavailable
-• Invalid request format
-
-🔧 Try again or contact support if the problem persists.`);
             setIsSuccess(false);
         } finally {
             setIsRunning(false);
@@ -377,20 +358,135 @@ Failed to execute code: ${errorMessage}
     };
 
     const handleSubmitCode = async () => {
-        console.log('Submitting code:', userCode);
+        if (!currentLesson || !userCode.trim()) {
+            setOutputResult({
+                success: false,
+                output: '',
+                error: 'Code không được để trống',
+                executionTime: 0,
+                memoryUsed: 0,
+                status: 'error',
+                isCorrect: null,
+                actualOutput: null,
+                expectedOutput: null,
+                input: ''
+            });
+            setIsSuccess(false);
+            return;
+        }
+
+        setIsRunning(true);
+        setIsSuccess(null);
+        setIsSubmission(true);
+
+        // Show loading state for submission
+        setLoadingOutput(`Đang nộp bài ${currentLesson.language}...\nĐang thực thi và chấm điểm...\nVui lòng chờ trong giây lát...`);
+
+        try {
+            const requestData = {
+                courseId: courseId,
+                chapterId: chapterId,
+                lessonId: lessonId,
+                code: userCode,
+                language: currentLesson.language.toLowerCase(),
+                input: currentLesson.testCaseInput || "",
+                expectedOutput: currentLesson.testCaseOutput || null
+            };
+
+            console.log('🚀 Sending submission request:', {
+                courseId,
+                chapterId,
+                lessonId,
+                language: requestData.language,
+                codeLength: requestData.code.length,
+                hasInput: !!requestData.input,
+                hasExpectedOutput: !!requestData.expectedOutput
+            });
+
+            const startTime = Date.now();
+
+            // Call submit API
+            const responseData = await requestPostWithAuth<CodeExecutionResponse>(
+                `/course/submit-code`,
+                requestData
+            );
+
+            const networkTime = Date.now() - startTime;
+            console.log(`✅ Submission response received in ${networkTime}ms:`, responseData);
+
+            const result = responseData.result;
+
+            // Set result with input field
+            setOutputResult({
+                ...result,
+                input: requestData.input, // Thêm input vào result
+                output: result.output + (networkTime > 1000 ? `\n\n[Network: ${networkTime}ms]` : '')
+            });
+
+            setIsSuccess(result.success && result.isCorrect);
+
+            // Handle completion status and notifications
+            if (result.success && result.isCorrect) {
+                setIsCompleted(true);
+                showNotification('success',
+                    'Nộp bài thành công!',
+                    'Chúc mừng! Bạn đã hoàn thành bài học này.'
+                );
+            } else if (result.success && result.isCorrect === false) {
+                showNotification('info',
+                    'Chưa đúng, thử lại nhé!',
+                    'Hãy kiểm tra output format và thử lại.'
+                );
+            } else {
+                showNotification('error',
+                    'Lỗi khi chạy code',
+                    'Có lỗi xảy ra khi thực thi code.'
+                );
+            }
+
+        } catch (error) {
+            console.error('❌ Code submission failed:', error);
+
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
+            setOutputResult({
+                success: false,
+                output: '',
+                error: `Lỗi mạng khi nộp bài: ${errorMessage}\n\nNguyên nhân có thể:\n• Mất kết nối internet\n• Server tạm thời không khả dụng\n• Định dạng request không hợp lệ\n\nVui lòng thử lại hoặc liên hệ hỗ trợ.\n\n⚠️ Bài của bạn CHƯA được lưu. Vui lòng nộp lại khi đã có kết nối.`,
+                executionTime: 0,
+                memoryUsed: 0,
+                status: 'network_error',
+                isCorrect: null,
+                actualOutput: null,
+                expectedOutput: null,
+                input: currentLesson.testCaseInput || ""
+            });
+
+            setIsSuccess(false);
+
+            showNotification('error',
+                'Lỗi mạng',
+                'Không thể kết nối đến server. Vui lòng thử lại.'
+            );
+        } finally {
+            setIsRunning(false);
+        }
     };
 
     const resetCode = () => {
         setUserCode(currentLesson?.initialCode || '');
         setOutput('');
         setIsSuccess(null);
+        setOutputResult(null);
     };
 
     const copyCode = async () => {
         try {
             await navigator.clipboard.writeText(userCode);
+            showNotification('success', 'Đã copy!', 'Code đã được copy vào clipboard.');
         } catch (err) {
             console.error('Failed to copy code:', err);
+            showNotification('error', 'Lỗi copy', 'Không thể copy code.');
         }
     };
 
@@ -436,9 +532,10 @@ Failed to execute code: ${errorMessage}
                     copyCode={copyCode}
                     isRunning={isRunning}
                     userSubmission={userSubmission}
+                    lastSubmission={lastSubmission} // Added this prop
                     handleEditorDidMount={handleEditorDidMount}
-                    output={output}
-                    isSuccess={isSuccess}
+                    outputResult={outputResult}
+                    isSubmission={isSubmission}
                 />
 
                 <div className="space-y-6">

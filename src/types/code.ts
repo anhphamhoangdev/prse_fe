@@ -17,16 +17,25 @@ export interface CodeLessonData {
 
 export interface UserSubmission {
     id: number;
-    userId: number;
-    codeLessonId: number;
+    studentId: number;
+    courseId: number;
+    chapterId: number;
+    lessonId: number;
     submittedCode: string;
+    language: string;
+    score: number;
+    status: string; // "PASSED", "FAILED", "PENDING"
     isCorrect: boolean;
     executionTime: number;
+    memoryUsed: number;
     submittedAt: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CodeLessonApiResponse {
     currentLesson: CodeLessonData;
     isCompleted: boolean;
     userSubmission?: UserSubmission;
+    lastSubmission?: UserSubmission;
 }
