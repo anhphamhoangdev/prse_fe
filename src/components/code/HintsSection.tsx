@@ -15,7 +15,7 @@ const HintsSection: React.FC<HintsSectionProps> = ({
     if (!hints) return null;
 
     return (
-        <div>
+        <>
             <button
                 onClick={() => setShowHints(!showHints)}
                 className="w-full px-6 py-4 text-left hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-200"
@@ -40,18 +40,12 @@ const HintsSection: React.FC<HintsSectionProps> = ({
 
             {showHints && (
                 <div className="px-6 pb-4">
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4">
-                        <div className="text-gray-700">
-                            {hints.split('\n').map((line, index) => (
-                                <div key={index}>
-                                    {line || <br />}
-                                </div>
-                            ))}
-                        </div>
+                    <div className="text-gray-700 whitespace-pre-wrap">
+                        {hints}
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 
