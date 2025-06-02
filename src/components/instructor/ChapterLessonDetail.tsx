@@ -47,6 +47,10 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
     const [savingOrder, setSavingOrder] = useState(false);
     const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
     // Initialize original lessons when component mounts or lessons change
     useEffect(() => {
         setOriginalLessons(JSON.parse(JSON.stringify(lessons)));
@@ -316,7 +320,7 @@ const ChapterLessons: React.FC<ChapterLessonsProps> = ({
                                 Thay đổi thứ tự
                             </button>
                             <button
-                                onClick={() => setIsAddLessonModalOpen(true)}
+                                onClick={() => navigate(`${location.pathname}/add`)}
                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
                                 <Plus className="w-4 h-4"/>
