@@ -14,7 +14,7 @@ import {
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { putWithAuth, requestWithAuth } from "../../utils/request";
 import { ENDPOINTS } from "../../constants/endpoint";
-import { Link } from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import AddLessonModal from "./AddLessonModal";
 import { ChapterInstructorEdit, LessonInstructorEdit } from "../../types/course";
 
