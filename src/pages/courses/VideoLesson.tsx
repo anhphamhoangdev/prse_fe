@@ -143,7 +143,7 @@ const VideoLessonDetail: React.FC = () => {
                 }))
             );
             setMessages((prev) => [...prev, userMessage]);
-            const response: AIResponse = await sendMessageAI(content);
+            const response: AIResponse = await sendMessageAI(currentLesson?.videoUrl, content);
             if (response.code === 1 && response.data?.message) {
                 const aiMessage = MessageUtils.createAIMessage(response.data.message, {
                     lessonId: currentLesson?.id,
@@ -250,7 +250,7 @@ const VideoLessonDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
-            {/*<AIChatDrawer position="left" onSendMessage={handleAIMessage} messages={messages} />*/}
+            <AIChatDrawer position="left" onSendMessage={handleAIMessage} messages={messages} />
         </div>
     );
 };
